@@ -96,17 +96,7 @@ textarea.input-field{resize:none;height:70px}
 .score-delta{font-size:9px;font-weight:700;margin-top:2px}
 .delta-up{color:var(--green)}.delta-down{color:var(--red)}.delta-neu{color:var(--muted)}
 /* STATS OVERVIEW */
-.stat-overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.stat-big-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px}
-.stat-big-card .sbc-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:600}
-.stat-big-card .sbc-delta{font-family:'Montserrat',sans-serif;font-size:22px;font-weight:900;line-height:1}
-.stat-big-card .sbc-sub{font-size:11px;color:var(--muted);margin-top:5px}
 .delta-pos{color:var(--green)}.delta-neg{color:var(--red)}
-.progress-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
-.progress-row:last-child{border-bottom:none}
-.pr-label{font-size:12px;color:var(--muted);font-weight:600}
-.pr-delta{font-size:13px;font-weight:800}
-.pr-vals{font-size:10px;color:var(--muted);margin-top:1px}
 </style>
 </head>
 <body>
@@ -1140,100 +1130,105 @@ async function loadStatsOverview() {
 
     const avg = (k) => {
       const vals = daily.filter(r => r[k] != null).map(r => r[k]);
-      return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10 : null;
+      return vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10 : null;
     };
     const trainCount = daily.filter(r => r.training_done).length;
-    const protoDone = daily.filter(r => r.protocol_done).length;
-    const protoRate = daily.length ? Math.round(protoDone / daily.length * 100) : null;
+    const protoDone  = daily.filter(r => r.protocol_done).length;
+    const protoRate  = daily.length ? Math.round(protoDone / daily.length * 100) : 0;
+    const trainRate  = daily.length ? Math.round(trainCount / daily.length * 100) : 0;
+    const avgEnergie = avg('energie') || 0;
+    const avgSommeil = avg('sommeil_qualite') || 0;
+    const avgMotiv   = avg('motivation') || 0;
 
-    const firstW = weekly.find(w => w.poids != null);
-    const lastW = [...weekly].reverse().find(w => w.poids != null);
-    const firstWt = weekly.find(w => w.tour_taille != null);
-    const lastWt = [...weekly].reverse().find(w => w.tour_taille != null);
-    const weightDelta = firstW && lastW ? Math.round((lastW.poids - firstW.poids) * 10) / 10 : null;
-    const tailleDelta = firstWt && lastWt ? Math.round((lastWt.tour_taille - firstWt.tour_taille) * 10) / 10 : null;
-    const avgScore = avg('energie');
+    const firstW  = weekly.find(w => w.poids != null);
+    const lastW   = [...weekly].reverse().find(w => w.poids != null);
+    const weightDelta = firstW && lastW && firstW !== lastW
+      ? Math.round((lastW.poids - firstW.poids) * 10) / 10 : null;
 
-    const fmtWeight = (d) => {
-      if (d == null) return { text: '–', cls: 'delta-neu' };
-      const cls = d < 0 ? 'delta-pos' : d > 0 ? 'delta-neg' : 'delta-neu';
-      const arrow = d < 0 ? '↓' : d > 0 ? '↑' : '=';
-      return { text: `${arrow} ${d > 0 ? '+' : ''}${d} kg`, cls };
+    // SVG ring helper
+    const R = 34, CIRC = 2 * Math.PI * R;
+    const mkRing = (pct, color, mainVal, mainUnit, label) => {
+      const offset = CIRC - CIRC * Math.min(1, Math.max(0, pct / 100));
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+        <svg width="86" height="86" viewBox="0 0 86 86">
+          <circle cx="43" cy="43" r="${R}" fill="none" stroke="#1C1A2A" stroke-width="8"/>
+          <circle cx="43" cy="43" r="${R}" fill="none" stroke="${color}" stroke-width="8"
+            stroke-dasharray="${CIRC.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"
+            stroke-linecap="round" transform="rotate(-90 43 43)"
+            style="transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)"/>
+          <text x="43" y="40" text-anchor="middle" fill="#F0EFF8"
+            font-size="17" font-weight="900" font-family="Montserrat,sans-serif">${mainVal}</text>
+          <text x="43" y="54" text-anchor="middle" fill="#7B7A90"
+            font-size="9" font-family="Inter,sans-serif">${mainUnit}</text>
+        </svg>
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-align:center;letter-spacing:.5px;text-transform:uppercase">${label}</div>
+      </div>`;
     };
-    const fmtTaille = (d) => {
-      if (d == null) return { text: '–', cls: 'delta-neu' };
-      const cls = d < 0 ? 'delta-pos' : d > 0 ? 'delta-neg' : 'delta-neu';
-      const arrow = d < 0 ? '↓' : d > 0 ? '↑' : '=';
-      return { text: `${arrow} ${d > 0 ? '+' : ''}${d} cm`, cls };
-    };
-    const wf = fmtWeight(weightDelta);
-    const tf = fmtTaille(tailleDelta);
-    const scoreCls = avgScore == null ? 'delta-neu' : avgScore >= 7 ? 'delta-pos' : avgScore >= 4.5 ? '' : 'delta-neg';
-    const scoreStyle = avgScore != null && avgScore >= 4.5 && avgScore < 7 ? 'style="color:var(--orange)"' : '';
+
+    const colEnergie = avgEnergie >= 7 ? '#00D4B4' : avgEnergie >= 5 ? '#FF9A3C' : '#FF4D6D';
+    const colProto   = protoRate  >= 80 ? '#00D4B4' : protoRate  >= 50 ? '#FF9A3C' : '#FF4D6D';
+    const colTrain   = '#9B8FFF';
+    const colSommeil = avgSommeil >= 7 ? '#00D4B4' : avgSommeil >= 5 ? '#FF9A3C' : '#FF4D6D';
+
+    // Mensuration deltas
+    const mensMetrics = [
+      { key:'poids',       label:'Poids',        unit:' kg', lib:true },
+      { key:'masse_grasse',label:'Masse grasse',  unit:' %',  lib:true },
+      { key:'tour_taille', label:'Tour de taille',unit:' cm', lib:true },
+      { key:'tour_hanches',label:'Hanches',       unit:' cm', lib:true },
+      { key:'tour_bras_g', label:'Bras',          unit:' cm', lib:false },
+      { key:'tour_cuisse_g',label:'Cuisses',      unit:' cm', lib:false },
+    ];
+    const mensRows = mensMetrics.map(m => {
+      const f = weekly.find(w => w[m.key] != null)?.[m.key];
+      const l = [...weekly].reverse().find(w => w[m.key] != null)?.[m.key];
+      if (f == null && l == null) return '';
+      const delta = f != null && l != null && f !== l ? Math.round((l-f)*10)/10 : null;
+      const isGood = delta != null ? (m.lib ? delta < 0 : delta > 0) : null;
+      const barColor = isGood === true ? '#00D4B4' : isGood === false ? '#FF4D6D' : '#7B7A90';
+      const arrow = delta != null ? (delta < 0 ? '↓' : delta > 0 ? '↑' : '=') : '';
+      const deltaStr = delta != null ? `${arrow} ${delta>0?'+':''}${delta}${m.unit}` : '–';
+      // progress bar: how close current is to start (for display only)
+      const barPct = f && l ? Math.min(100, Math.abs(delta||0) / (Math.abs(f) * 0.2) * 100) : 0;
+      return `<div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
+          <span style="font-size:12px;font-weight:600;color:var(--text)">${m.label}</span>
+          <span style="font-size:13px;font-weight:800;color:${barColor}">${deltaStr}</span>
+        </div>
+        <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${Math.min(100,barPct)}%;background:${barColor};border-radius:3px;transition:width 1s ease"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px">
+          <span>${f != null ? 'Départ '+f+m.unit : ''}</span>
+          <span>${l != null ? 'Maintenant '+l+m.unit : ''}</span>
+        </div>
+      </div>`;
+    }).filter(r => r);
+
+    const weightBadge = weightDelta != null
+      ? `<div style="display:inline-flex;align-items:center;gap:6px;background:${weightDelta<0?'rgba(0,212,180,0.12)':'rgba(255,77,109,0.12)'};border:1px solid ${weightDelta<0?'rgba(0,212,180,0.4)':'rgba(255,77,109,0.4)'};border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;color:${weightDelta<0?'var(--green)':'var(--red)'}">
+          ${weightDelta<0?'↓':'↑'} ${weightDelta<0?'':'+'}${weightDelta} kg depuis le début
+        </div>` : '';
 
     el.innerHTML = `
       <div class="section-title">Vue d'ensemble</div>
-      <div class="stat-overview-grid">
-        <div class="stat-big-card">
-          <div class="sbc-label">⚖️ Poids</div>
-          <div class="sbc-delta ${wf.cls}">${wf.text}</div>
-          <div class="sbc-sub">${firstW && lastW ? firstW.poids+' → '+lastW.poids+' kg' : 'Pas de données'}</div>
-        </div>
-        <div class="stat-big-card">
-          <div class="sbc-label">📐 Tour de taille</div>
-          <div class="sbc-delta ${tf.cls}">${tf.text}</div>
-          <div class="sbc-sub">${firstWt && lastWt ? firstWt.tour_taille+' → '+lastWt.tour_taille+' cm' : 'Pas de données'}</div>
-        </div>
-        <div class="stat-big-card">
-          <div class="sbc-label">⚡ Score moyen</div>
-          <div class="sbc-delta ${scoreCls}" ${scoreStyle}>${avgScore != null ? avgScore+'/10' : '–'}</div>
-          <div class="sbc-sub">Sur ${daily.length} check-in${daily.length!==1?'s':''}</div>
-        </div>
-        <div class="stat-big-card">
-          <div class="sbc-label">🏋️ Séances</div>
-          <div class="sbc-delta delta-pos">${trainCount}</div>
-          <div class="sbc-sub">${protoRate != null ? protoRate+'% protocole suivi' : 'Sur la période'}</div>
-        </div>
+      ${weightBadge ? `<div style="text-align:center;margin-bottom:16px">${weightBadge}</div>` : ''}
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:20px">
+        ${mkRing(avgEnergie*10, colEnergie, avgEnergie||'–', '/10', 'Énergie')}
+        ${mkRing(avgSommeil*10, colSommeil, avgSommeil||'–', '/10', 'Sommeil')}
+        ${mkRing(protoRate, colProto, protoRate+'%', 'suivi', 'Protocole')}
+        ${mkRing(trainRate, colTrain, trainCount, 'séances', 'Entraîn.')}
       </div>
-      ${weekly.length >= 2 ? `<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:16px">
-        <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;margin-bottom:12px">PROGRESSION MENSURATIONS</div>
-        ${buildMensProgressRows(weekly)}
-      </div>` : ''}`;
+      ${mensRows.length ? `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px">
+        <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;margin-bottom:16px">PROGRESSION DEPUIS LE DÉBUT</div>
+        ${mensRows.join('')}
+      </div>` : `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;margin-bottom:16px">
+        <div style="font-size:28px;margin-bottom:8px">📊</div>
+        <div style="font-size:13px;color:var(--muted)">Remplis ton bilan hebdomadaire<br/>pour voir ta progression ici</div>
+      </div>`}`;
   } catch (_) {}
-}
-
-function buildMensProgressRows(weekly) {
-  const first = weekly[0];
-  const last = weekly[weekly.length - 1];
-  const metrics = [
-    { key:'poids', label:'⚖️ Poids', unit:' kg', lowerIsBetter:true },
-    { key:'masse_grasse', label:'💧 Masse grasse', unit:' %', lowerIsBetter:true },
-    { key:'tour_taille', label:'📐 Tour de taille', unit:' cm', lowerIsBetter:true },
-    { key:'tour_hanches', label:'🍑 Tour de hanches', unit:' cm', lowerIsBetter:true },
-    { key:'tour_bras_g', label:'💪 Bras', unit:' cm', lowerIsBetter:false },
-    { key:'tour_cuisse_g', label:'🦵 Cuisses', unit:' cm', lowerIsBetter:false },
-    { key:'tour_poitrine', label:'🫁 Poitrine', unit:' cm', lowerIsBetter:false },
-  ];
-  const rows = metrics.map(m => {
-    const f = first[m.key], l = last[m.key];
-    if (f == null && l == null) return '';
-    const delta = f != null && l != null ? Math.round((l - f) * 10) / 10 : null;
-    const isGood = delta != null ? (m.lowerIsBetter ? delta < 0 : delta > 0) : null;
-    const cls = delta == null ? 'delta-neu' : delta === 0 ? 'delta-neu' : isGood ? 'delta-pos' : 'delta-neg';
-    const arrow = delta != null ? (delta > 0 ? '↑' : delta < 0 ? '↓' : '=') : '';
-    const valText = delta != null ? `${arrow} ${delta > 0 ? '+' : ''}${delta}${m.unit}` : (l != null ? l+m.unit : '–');
-    const subText = f != null && l != null ? `${f} → ${l}${m.unit}` : '';
-    return `<div class="progress-row">
-      <span class="pr-label">${m.label}</span>
-      <div style="text-align:right">
-        <div class="pr-delta ${cls}">${valText}</div>
-        ${subText ? `<div class="pr-vals">${subText}</div>` : ''}
-      </div>
-    </div>`;
-  }).filter(r => r);
-  return rows.length
-    ? `<div>${rows.join('')}</div>`
-    : '<p style="color:var(--muted);font-size:12px;text-align:center;padding:8px 0">Remplis ton bilan hebdomadaire pour voir ta progression ✨</p>';
 }
 
 loadToday();
