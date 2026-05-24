@@ -1153,26 +1153,23 @@ async function loadStatsOverview() {
     const weightDelta = firstW && lastW && firstW !== lastW
       ? Math.round((lastW.poids - firstW.poids) * 10) / 10 : null;
 
-    // SVG ring helper
-    const R = 44, CIRC = 2 * Math.PI * R;
-    const mkRing = (pct, color, mainVal, mainUnit, label, sub) => {
+    // SVG ring helper — compact single-row
+    const R = 28, CIRC = 2 * Math.PI * R;
+    const mkRing = (pct, color, mainVal, mainUnit, label) => {
       const offset = CIRC - CIRC * Math.min(1, Math.max(0, pct / 100));
-      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:10px">
-        <svg width="110" height="110" viewBox="0 0 110 110">
-          <circle cx="55" cy="55" r="${R}" fill="none" stroke="#1C1A2A" stroke-width="9"/>
-          <circle cx="55" cy="55" r="${R}" fill="none" stroke="${color}" stroke-width="9"
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1">
+        <svg width="70" height="70" viewBox="0 0 70 70">
+          <circle cx="35" cy="35" r="${R}" fill="none" stroke="#1C1A2A" stroke-width="6"/>
+          <circle cx="35" cy="35" r="${R}" fill="none" stroke="${color}" stroke-width="6"
             stroke-dasharray="${CIRC.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"
-            stroke-linecap="round" transform="rotate(-90 55 55)"
+            stroke-linecap="round" transform="rotate(-90 35 35)"
             style="transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)"/>
-          <text x="55" y="50" text-anchor="middle" fill="#F0EFF8"
-            font-size="22" font-weight="900" font-family="Montserrat,sans-serif">${mainVal}</text>
-          <text x="55" y="66" text-anchor="middle" fill="#7B7A90"
-            font-size="10" font-family="Inter,sans-serif">${mainUnit}</text>
+          <text x="35" y="32" text-anchor="middle" fill="#F0EFF8"
+            font-size="13" font-weight="900" font-family="Montserrat,sans-serif">${mainVal}</text>
+          <text x="35" y="44" text-anchor="middle" fill="#7B7A90"
+            font-size="8" font-family="Inter,sans-serif">${mainUnit}</text>
         </svg>
-        <div style="text-align:center">
-          <div style="font-size:12px;font-weight:700;color:var(--text)">${label}</div>
-          ${sub ? `<div style="font-size:10px;color:var(--muted);margin-top:2px">${sub}</div>` : ''}
-        </div>
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-align:center;letter-spacing:.3px">${label}</div>
       </div>`;
     };
 
@@ -1221,21 +1218,17 @@ async function loadStatsOverview() {
     el.innerHTML = `
       <div class="section-title">Vue d'ensemble</div>
       ${weightBadge ? `<div style="text-align:center;margin-bottom:14px">${weightBadge}</div>` : ''}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-        ${mkRing(avgEnergie*10, colEnergie, avgEnergie||'–', '/10', '⚡ Énergie', `moy. sur ${daily.length}j`)}
-        ${mkRing(avgSommeil*10, colSommeil, avgSommeil||'–', '/10', '🌙 Sommeil', 'qualité moyenne')}
-        ${mkRing(protoRate, colProto, protoRate+'%', 'du temps', '📋 Protocole', 'jours suivis')}
-        ${mkRing(trainRate, colTrain, trainCount, 'séances', '🏋️ Entraînement', `${trainRate}% des jours`)}
+      <div style="display:flex;gap:8px;margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 8px">
+        ${mkRing(avgEnergie*10, colEnergie, avgEnergie||'–', '/10', '⚡ Énergie')}
+        ${mkRing(avgSommeil*10, colSommeil, avgSommeil||'–', '/10', '🌙 Sommeil')}
+        ${mkRing(protoRate, colProto, protoRate+'%', 'suivi', '📋 Protocole')}
+        ${mkRing(trainRate, colTrain, trainCount, 'séances', '🏋️ Sport')}
       </div>
       ${mensRows.length ? `
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px">
-        <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;margin-bottom:16px">PROGRESSION DEPUIS LE DÉBUT</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;margin-bottom:12px">PROGRESSION DEPUIS LE DÉBUT</div>
         ${mensRows.join('')}
-      </div>` : `
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;margin-bottom:16px">
-        <div style="font-size:28px;margin-bottom:8px">📊</div>
-        <div style="font-size:13px;color:var(--muted)">Remplis ton bilan hebdomadaire<br/>pour voir ta progression ici</div>
-      </div>`}`;
+      </div>` : ''}`;
   } catch (_) {}
 }
 
