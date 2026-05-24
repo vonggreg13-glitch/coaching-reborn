@@ -306,8 +306,8 @@ function computeScores(checkins) {
 // ── Alert detection ───────────────────────────────────────────
 function computeAlerts(checkins, lastCheckinDate) {
   const alerts = [];
-  if (!checkins.length || daysSince(lastCheckinDate) >= 2) {
-    alerts.push({ type: 'decrochage', level: 'danger', icon: '🚨', message: 'Aucun check-in depuis 2+ jours' });
+  if (!checkins.length || daysSince(lastCheckinDate) >= 3) {
+    alerts.push({ type: 'decrochage', level: 'danger', icon: '🚨', message: 'Aucun check-in depuis 3+ jours' });
     return alerts;
   }
   const last3 = checkins.slice(0, 3);
