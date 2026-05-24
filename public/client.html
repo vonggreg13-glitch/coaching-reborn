@@ -472,6 +472,7 @@ function showTab(t){
   document.getElementById('tab-'+t).classList.add('active');
   const navEl = document.getElementById('nav-'+t);
   if(navEl) navEl.classList.add('active');
+  localStorage.setItem('last_tab', t);
   if(t==='historique'){loadHistory();renderClientCharts();loadStatsOverview();}
   if(t==='photos'){loadPhotoHistory();loadMealHistory();}
   if(t==='messages')loadMessages();
@@ -754,10 +755,8 @@ async function loadMealHistory() {
     </div>`;
 }
 
-let clientChartsInit = false;
+const destroyChart = (id) => { const c = Chart.getChart(id); if (c) c.destroy(); };
 async function renderClientCharts() {
-  if (clientChartsInit) return;
-  clientChartsInit = true;
   const chartDefaults = { responsive: true, maintainAspectRatio: false,
     plugins: { legend: { labels: { color: '#7B7A90', font: { size: 10 } } } },
     scales: {
@@ -774,6 +773,7 @@ async function renderClientCharts() {
   const labels30 = daily.map(r => r.date.slice(5));
   const wLabels = weekly.map(r => r.week.replace(/(\d{4})-W(\d+)/, 'S$2'));
 
+  destroyChart('clientChartDaily');
   new Chart(document.getElementById('clientChartDaily'), {
     type: 'line',
     data: {
@@ -798,6 +798,7 @@ async function renderClientCharts() {
     const intercept = (sy - slope * sx) / n;
     return poidsData.map((_, i) => Math.round((slope * i + intercept) * 10) / 10);
   })();
+  destroyChart('clientChartPoids');
   new Chart(document.getElementById('clientChartPoids'), {
     type: 'line',
     data: {
@@ -810,6 +811,7 @@ async function renderClientCharts() {
     options: chartDefaults
   });
 
+  destroyChart('clientChartMot');
   new Chart(document.getElementById('clientChartMot'), {
     type: 'line',
     data: {
@@ -822,6 +824,7 @@ async function renderClientCharts() {
     options: { ...chartDefaults, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, min: 0, max: 10 } } }
   });
 
+  destroyChart('clientChartMens');
   new Chart(document.getElementById('clientChartMens'), {
     type: 'line',
     data: {
@@ -1056,10 +1059,15 @@ async function loadProfile() {
   const r = await fetch('/api/client/profile', { headers: authHeaders() });
   const p = await r.json();
 
-  // Splash
+  // Splash — une seule fois par session
   const splash = document.getElementById('splash');
   document.getElementById('splashName').textContent = `Bonjour ${NAME?.split(' ')[0] || ''} 👋`;
-  setTimeout(() => { splash.style.display = 'none'; }, 2000);
+  if (sessionStorage.getItem('splash_shown')) {
+    splash.style.display = 'none';
+  } else {
+    sessionStorage.setItem('splash_shown', '1');
+    setTimeout(() => { splash.style.display = 'none'; }, 2000);
+  }
 
   // Avatar
   if (p.avatar) {
@@ -1236,6 +1244,10 @@ loadScores();
 checkUnread();
 loadProfile();
 registerPush('/client');
+
+// Restaurer le dernier onglet visité
+const _lastTab = localStorage.getItem('last_tab');
+if (_lastTab && document.getElementById('tab-' + _lastTab)) showTab(_lastTab);
 </script>
 </body>
 </html>
