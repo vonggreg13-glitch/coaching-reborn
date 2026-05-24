@@ -1154,22 +1154,25 @@ async function loadStatsOverview() {
       ? Math.round((lastW.poids - firstW.poids) * 10) / 10 : null;
 
     // SVG ring helper
-    const R = 34, CIRC = 2 * Math.PI * R;
-    const mkRing = (pct, color, mainVal, mainUnit, label) => {
+    const R = 44, CIRC = 2 * Math.PI * R;
+    const mkRing = (pct, color, mainVal, mainUnit, label, sub) => {
       const offset = CIRC - CIRC * Math.min(1, Math.max(0, pct / 100));
-      return `<div style="display:flex;flex-direction:column;align-items:center;gap:8px">
-        <svg width="86" height="86" viewBox="0 0 86 86">
-          <circle cx="43" cy="43" r="${R}" fill="none" stroke="#1C1A2A" stroke-width="8"/>
-          <circle cx="43" cy="43" r="${R}" fill="none" stroke="${color}" stroke-width="8"
+      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:10px">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="${R}" fill="none" stroke="#1C1A2A" stroke-width="9"/>
+          <circle cx="55" cy="55" r="${R}" fill="none" stroke="${color}" stroke-width="9"
             stroke-dasharray="${CIRC.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"
-            stroke-linecap="round" transform="rotate(-90 43 43)"
+            stroke-linecap="round" transform="rotate(-90 55 55)"
             style="transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)"/>
-          <text x="43" y="40" text-anchor="middle" fill="#F0EFF8"
-            font-size="17" font-weight="900" font-family="Montserrat,sans-serif">${mainVal}</text>
-          <text x="43" y="54" text-anchor="middle" fill="#7B7A90"
-            font-size="9" font-family="Inter,sans-serif">${mainUnit}</text>
+          <text x="55" y="50" text-anchor="middle" fill="#F0EFF8"
+            font-size="22" font-weight="900" font-family="Montserrat,sans-serif">${mainVal}</text>
+          <text x="55" y="66" text-anchor="middle" fill="#7B7A90"
+            font-size="10" font-family="Inter,sans-serif">${mainUnit}</text>
         </svg>
-        <div style="font-size:10px;font-weight:700;color:var(--muted);text-align:center;letter-spacing:.5px;text-transform:uppercase">${label}</div>
+        <div style="text-align:center">
+          <div style="font-size:12px;font-weight:700;color:var(--text)">${label}</div>
+          ${sub ? `<div style="font-size:10px;color:var(--muted);margin-top:2px">${sub}</div>` : ''}
+        </div>
       </div>`;
     };
 
@@ -1177,6 +1180,7 @@ async function loadStatsOverview() {
     const colProto   = protoRate  >= 80 ? '#00D4B4' : protoRate  >= 50 ? '#FF9A3C' : '#FF4D6D';
     const colTrain   = '#9B8FFF';
     const colSommeil = avgSommeil >= 7 ? '#00D4B4' : avgSommeil >= 5 ? '#FF9A3C' : '#FF4D6D';
+    const avgMotivPct = avgMotiv * 10;
 
     // Mensuration deltas
     const mensMetrics = [
@@ -1194,22 +1198,18 @@ async function loadStatsOverview() {
       const delta = f != null && l != null && f !== l ? Math.round((l-f)*10)/10 : null;
       const isGood = delta != null ? (m.lib ? delta < 0 : delta > 0) : null;
       const barColor = isGood === true ? '#00D4B4' : isGood === false ? '#FF4D6D' : '#7B7A90';
-      const arrow = delta != null ? (delta < 0 ? '↓' : delta > 0 ? '↑' : '=') : '';
-      const deltaStr = delta != null ? `${arrow} ${delta>0?'+':''}${delta}${m.unit}` : '–';
-      // progress bar: how close current is to start (for display only)
-      const barPct = f && l ? Math.min(100, Math.abs(delta||0) / (Math.abs(f) * 0.2) * 100) : 0;
-      return `<div style="margin-bottom:14px">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
-          <span style="font-size:12px;font-weight:600;color:var(--text)">${m.label}</span>
-          <span style="font-size:13px;font-weight:800;color:${barColor}">${deltaStr}</span>
+      const arrow = delta != null ? (delta < 0 ? '↓' : delta > 0 ? '↑' : '→') : '';
+      const deltaStr = delta != null ? `${arrow} ${delta>0?'+':''}${delta}${m.unit}` : (l != null ? l+m.unit : '–');
+      const barPct = f && l && delta ? Math.min(100, Math.abs(delta) / (Math.abs(f) * 0.15) * 100) : 0;
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">${m.label}</div>
+          <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+            <div style="height:100%;width:${barPct}%;background:${barColor};border-radius:2px;transition:width 1.2s ease"></div>
+          </div>
+          ${f != null && l != null ? `<div style="font-size:10px;color:var(--muted);margin-top:3px">${f}${m.unit} → ${l}${m.unit}</div>` : ''}
         </div>
-        <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">
-          <div style="height:100%;width:${Math.min(100,barPct)}%;background:${barColor};border-radius:3px;transition:width 1s ease"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px">
-          <span>${f != null ? 'Départ '+f+m.unit : ''}</span>
-          <span>${l != null ? 'Maintenant '+l+m.unit : ''}</span>
-        </div>
+        <div style="font-size:14px;font-weight:900;color:${barColor};font-family:'Montserrat',sans-serif;white-space:nowrap">${deltaStr}</div>
       </div>`;
     }).filter(r => r);
 
@@ -1220,12 +1220,12 @@ async function loadStatsOverview() {
 
     el.innerHTML = `
       <div class="section-title">Vue d'ensemble</div>
-      ${weightBadge ? `<div style="text-align:center;margin-bottom:16px">${weightBadge}</div>` : ''}
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:20px">
-        ${mkRing(avgEnergie*10, colEnergie, avgEnergie||'–', '/10', 'Énergie')}
-        ${mkRing(avgSommeil*10, colSommeil, avgSommeil||'–', '/10', 'Sommeil')}
-        ${mkRing(protoRate, colProto, protoRate+'%', 'suivi', 'Protocole')}
-        ${mkRing(trainRate, colTrain, trainCount, 'séances', 'Entraîn.')}
+      ${weightBadge ? `<div style="text-align:center;margin-bottom:14px">${weightBadge}</div>` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        ${mkRing(avgEnergie*10, colEnergie, avgEnergie||'–', '/10', '⚡ Énergie', `moy. sur ${daily.length}j`)}
+        ${mkRing(avgSommeil*10, colSommeil, avgSommeil||'–', '/10', '🌙 Sommeil', 'qualité moyenne')}
+        ${mkRing(protoRate, colProto, protoRate+'%', 'du temps', '📋 Protocole', 'jours suivis')}
+        ${mkRing(trainRate, colTrain, trainCount, 'séances', '🏋️ Entraînement', `${trainRate}% des jours`)}
       </div>
       ${mensRows.length ? `
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px">
