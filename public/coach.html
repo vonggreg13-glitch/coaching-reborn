@@ -528,10 +528,11 @@ async function createClient() {
 async function loadCoachStats() {
   const el = document.getElementById('statsList');
   el.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Chargement…</div>';
+  try {
   const r = await fetch('/api/coach/stats', { headers: authHeaders() });
   const s = await r.json();
   const adh = s.adherence != null ? Math.round(s.adherence) + '%' : '–';
-  const energy = s.avgEnergy != null ? s.avgEnergy.toFixed(1) + '/10' : '–';
+  const energy = s.avgEnergy != null && s.avgEnergy !== '–' ? parseFloat(s.avgEnergy).toFixed(1) + '/10' : '–';
   el.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
       <div class="sc-card"><div class="sc-val sc-green">${s.totalClients ?? 0}</div><div class="sc-lbl">Clients actifs</div></div>
@@ -547,6 +548,7 @@ async function loadCoachStats() {
       </div>`).join('')}
     ` : '<div style="color:var(--green);text-align:center;padding:12px;font-size:13px">✅ Tous les clients sont actifs</div>'}
   `;
+  } catch(e) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:20px">Erreur chargement stats</div>'; }
 }
 
 async function loadAllMessages(){
