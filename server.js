@@ -771,7 +771,7 @@ app.get('/api/coach/stats', requireCoach, (req, res) => {
     allCheckins.forEach(r => { if (r.energie) { totalEnergy += r.energie; energyCount++; } });
     const last = db.prepare('SELECT date FROM daily_checkins WHERE client_id = ? ORDER BY date DESC LIMIT 1').get(c.id);
     const daysSince = last ? Math.floor((Date.now() - new Date(last.date + 'T12:00').getTime()) / 86400000) : 999;
-    if (daysSince >= 3) inactif.push({ name: c.name, daysSince });
+    if (daysSince >= 3) inactif.push({ id: c.id, name: c.name, daysSince, lastCheckin: last ? last.date : null });
   }
 
   const adherence = totalClients > 0 ? Math.round(checkedInToday / totalClients * 100) : 0;
