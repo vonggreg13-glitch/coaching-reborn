@@ -1396,13 +1396,18 @@ app.get('/api/client/programs', requireAuth, (req, res) => {
   res.json(db.prepare('SELECT * FROM programs WHERE client_id = ? ORDER BY created_at DESC').all(user.id));
 });
 
-// ── SPA routes ────────────────────────────────────────────────
-app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-login.html')));
-app.get('/client', (req, res) => res.sendFile(path.join(__dirname, 'public', 'client.html')));
-app.get('/coach', (req, res) => res.sendFile(path.join(__dirname, 'public', 'coach.html')));
-app.get('/reset-password', (req, res) => res.sendFile(path.join(__dirname, 'public', 'reset-password.html')));
-app.get('/cycle', (req, res) => res.sendFile(path.join(__dirname, 'public', 'cycle.html')));
+// ── SPA routes (no-cache pour forcer le rechargement après déploiement) ──
+const noCache = (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  next();
+};
+app.get('/login', noCache, (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
+app.get('/admin', noCache, (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin-login.html')));
+app.get('/client', noCache, (req, res) => res.sendFile(path.join(__dirname, 'public', 'client.html')));
+app.get('/coach', noCache, (req, res) => res.sendFile(path.join(__dirname, 'public', 'coach.html')));
+app.get('/reset-password', noCache, (req, res) => res.sendFile(path.join(__dirname, 'public', 'reset-password.html')));
+app.get('/cycle', noCache, (req, res) => res.sendFile(path.join(__dirname, 'public', 'cycle.html')));
 app.get('/', (req, res) => res.redirect('/login'));
 
 // ── Start ─────────────────────────────────────────────────────
