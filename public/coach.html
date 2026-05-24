@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Dashboard Coach – GREGVONG COACHING</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#00D4B4;--gold-dark:#00A896;--gold-glow:rgba(0,212,180,0.12);
+  --bg:#0A0910;--surface:#111020;--surface2:#18162A;--surface3:#1E1C30;
+  --border:#22203A;--border2:rgba(255,255,255,0.06);
+  --text:#F0EFF8;--muted:#6B6A84;--muted2:#9B9AB4;
+  --red:#FF4D6D;--orange:#FF9A3C;--green:#00D4B4;--purple:#7C3AED
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:300px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface)}
+.sidebar-header{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.sidebar-brand-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.brand{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:2px}
+.sidebar-title{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:900;color:var(--text)}
+.icon-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s}
+.icon-btn:hover{border-color:var(--gold);color:var(--gold)}
+.stats-row{display:flex;gap:6px;margin-bottom:12px}
+.stat-pill{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 11px;font-size:11px;font-weight:600;color:var(--muted2);display:flex;align-items:center;gap:4px}
+.stat-pill strong{color:var(--gold);font-weight:800}
+.stat-pill.live{border-color:rgba(255,77,109,0.3);background:rgba(255,77,109,0.07);color:#FF7A96}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.5s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.search-bar{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 13px 9px 36px;color:var(--text);font-size:13px;width:100%;font-family:'Inter',sans-serif;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B6A84' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:11px center}
+.search-bar:focus{outline:none;border-color:rgba(0,212,180,0.5);background-color:var(--surface3)}
+
+/* VIEW TABS */
+.view-tabs{display:flex;gap:3px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.view-tab{flex:1;padding:7px 4px;border:none;border-radius:8px;background:none;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;transition:.2s;text-align:center;white-space:nowrap}
+.view-tab:hover{color:var(--muted2);background:var(--surface2)}
+.view-tab.active{background:var(--gold-glow);color:var(--gold);font-weight:700}
+
+/* SIDEBAR FOOTER */
+.sidebar-footer{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:6px;flex-shrink:0}
+.btn-new-client{flex:1;padding:10px;border:none;border-radius:10px;background:var(--gold);color:#050505;font-size:12px;font-weight:800;cursor:pointer;font-family:'Montserrat',sans-serif;letter-spacing:.3px;transition:.2s}
+.btn-new-client:hover{background:#00EDCC;box-shadow:0 4px 20px rgba(0,212,180,0.3)}
+
+/* CLIENT LIST */
+.client-list{overflow-y:auto;flex:1}
+.client-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:.15s;display:flex;align-items:center;gap:10px}
+.client-item:hover{background:rgba(0,212,180,0.04)}
+.client-item.active{background:rgba(0,212,180,0.08);border-left:3px solid var(--gold)}
+.client-item.has-alert{border-left:3px solid var(--red)}
+.client-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;color:#0D0B16;flex-shrink:0}
+.client-avatar.grey{background:var(--surface2)}
+.client-info{flex:1;min-width:0}
+.client-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.client-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.client-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.score-badge{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:900}
+.alert-count{background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:800}
+
+/* ALERT PANEL */
+.alert-item{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start}
+.alert-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.alert-level-danger{border-left:3px solid var(--red)}
+.alert-level-warning{border-left:3px solid var(--orange)}
+.alert-level-info{border-left:3px solid var(--gold)}
+.alert-name{font-weight:700;font-size:12px}
+.alert-msg{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* MAIN PANEL */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.main-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--surface)}
+.main-name{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:900}
+.main-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.header-actions{display:flex;gap:6px;align-items:center}
+.btn-sm{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
+.btn-sm:hover{border-color:var(--gold);color:var(--gold)}
+.btn-danger{border-color:rgba(255,77,109,0.4);color:var(--red)}
+.btn-danger:hover{background:rgba(255,77,109,0.1)}
+.btn-claude{background:linear-gradient(135deg,#7C3AED,#9F67FF);border:none;color:#fff}
+.btn-claude:hover{opacity:.9;color:#fff}
+
+/* SCORE STRIP */
+.score-strip{display:flex;gap:10px;padding:12px 20px;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.score-strip::-webkit-scrollbar{display:none}
+.sc-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 16px;text-align:center;flex:1;min-width:90px}
+.sc-val{font-family:'Montserrat',sans-serif;font-size:24px;font-weight:900;line-height:1}
+.sc-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+.sc-green{color:var(--green)}.sc-orange{color:var(--orange)}.sc-red{color:var(--red)}
+
+/* DETAIL TABS */
+.detail-tabs{display:flex;gap:2px;padding:8px 16px;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none;background:var(--surface)}
+.detail-tabs::-webkit-scrollbar{display:none}
+.detail-tab{padding:6px 13px;border:none;border-radius:8px;background:none;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0}
+.detail-tab:hover{background:var(--surface2);color:var(--muted2)}
+.detail-tab.active{background:var(--gold-glow);color:var(--gold);font-weight:700}
+
+/* DETAIL CONTENT */
+.detail-content{overflow-y:auto;flex:1;min-height:0;padding:20px;background:var(--bg)}
+
+/* METRIC CARDS */
+.metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;transition:.2s}
+.metric-card:hover{border-color:rgba(0,212,180,0.2)}
+.metric-top{display:flex;align-items:center;justify-content:space-between}
+.metric-icon{font-size:18px}
+.metric-val{font-family:'Montserrat',sans-serif;font-size:26px;font-weight:900;line-height:1}
+.metric-unit{font-size:13px;font-weight:600;color:var(--muted);margin-left:1px}
+.metric-lbl{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.3px}
+.metric-bar{height:4px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:2px}
+.metric-bar-fill{height:100%;border-radius:4px;transition:width .4s ease}
+.metric-avg{font-size:10px;color:var(--muted);margin-top:1px}
+/* Wide cards for protocol / training / nutrition */
+.metric-card.wide{grid-column:span 1}
+.metric-card-row{display:flex;align-items:center;gap:12px}
+.metric-card-icon-lg{font-size:28px;flex-shrink:0}
+.metric-card-body{flex:1;min-width:0}
+.metric-card-title{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800}
+.metric-card-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.metric-card-badge{border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;flex-shrink:0}
+.badge-green{background:rgba(0,212,180,0.15);color:var(--green)}
+.badge-red{background:rgba(255,77,109,0.15);color:var(--red)}
+.badge-orange{background:rgba(255,154,60,0.15);color:var(--orange)}
+
+/* ALERT CARDS */
+.alerts-section{margin-bottom:20px}
+.alert-card{display:flex;gap:12px;align-items:center;background:var(--surface);border-radius:12px;padding:12px 16px;margin-bottom:8px}
+.alert-card.danger{border-left:3px solid var(--red);background:rgba(255,77,109,0.05)}
+.alert-card.warning{border-left:3px solid var(--orange);background:rgba(255,154,60,0.05)}
+.alert-card.info{border-left:3px solid var(--gold);background:rgba(0,212,180,0.05)}
+.alert-card-text{flex:1}
+.alert-card-title{font-weight:700;font-size:13px;margin-bottom:2px}
+.alert-card-desc{font-size:11px;color:var(--muted)}
+
+/* TABLE — better readability */
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table thead{position:sticky;top:0;background:var(--bg);z-index:1}
+.data-table th{text-align:left;padding:10px 12px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid var(--border)}
+.data-table td{padding:10px 12px;border-bottom:1px solid rgba(37,35,54,.6)}
+.data-table tr:hover td{background:rgba(0,212,180,0.04)}
+.data-table .date-cell{font-weight:600;white-space:nowrap}
+.score-cell{display:inline-flex;align-items:center;gap:4px;font-weight:700;font-size:13px}
+.score-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.bool-yes{color:var(--green);font-size:14px}
+.bool-no{color:var(--muted);font-size:14px}
+
+/* SECTION TITLE */
+.section-title{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+
+/* NOTES */
+.note-item{background:var(--surface);border-radius:10px;padding:12px;margin-bottom:8px;font-size:13px}
+.note-date{font-size:10px;color:var(--muted);margin-bottom:4px}
+.note-form{display:flex;gap:8px;margin-bottom:16px}
+.note-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif}
+.note-input:focus{outline:none;border-color:var(--gold)}
+
+/* WEEKLY CARDS — mensurations */
+.weekly-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:12px}
+.weekly-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.weekly-card-week{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.weekly-card-poids{font-family:'Montserrat',sans-serif;font-size:22px;font-weight:900;color:var(--gold)}
+.weekly-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.wg-item{background:var(--surface2);border-radius:10px;padding:10px 12px}
+.wg-val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;color:var(--text)}
+.wg-lbl{font-size:10px;color:var(--muted);margin-top:2px;font-weight:500}
+.weekly-bilan{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.bilan-row{display:flex;gap:8px;align-items:flex-start;font-size:12px}
+.bilan-label{font-weight:700;flex-shrink:0;margin-top:1px}
+.bilan-text{color:var(--muted);line-height:1.5}
+/* RESSENTI */
+.ressenti-block{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:20px;position:relative}
+.ressenti-quote{font-size:13px;color:var(--text);line-height:1.6;font-style:italic}
+.ressenti-quote::before{content:'"';font-size:24px;color:var(--gold);font-family:Georgia,serif;line-height:1;display:block;margin-bottom:4px}
+
+/* MOBILE BACK BAR */
+.mobile-back-bar{display:none;align-items:center;gap:10px;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
+.mobile-back-btn{background:none;border:none;color:var(--gold);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;font-family:'Inter',sans-serif}
+.mobile-client-title{font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface);border:1px solid var(--gold);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--gold);z-index:999;transition:.3s;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}.toast.error{border-color:var(--red);color:var(--red)}
+.chip{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.chip-green{background:rgba(0,212,180,0.15);color:var(--green)}
+.chip-orange{background:rgba(255,154,60,0.15);color:var(--orange)}
+.chip-red{background:rgba(255,77,109,0.15);color:var(--red)}
+
+/* EVOLUTION CHARTS */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px}
+.chart-card.full{grid-column:span 2}
+.chart-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.chart-wrap{position:relative;height:160px}
+.chart-wrap.tall{height:200px}
+.stat-boxes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.stat-box-val{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:900;color:var(--gold)}
+.stat-box-lbl{font-size:10px;color:var(--muted);margin-top:3px}
+.stat-box-diff{font-size:11px;font-weight:700;margin-top:2px}
+.diff-pos{color:var(--green)}.diff-neg{color:var(--red)}.diff-neu{color:var(--muted)}
+.adherence-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.adh-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+.adh-ring{position:relative;width:60px;height:60px;margin:0 auto 8px}
+.adh-ring svg{transform:rotate(-90deg)}
+.adh-ring-bg{fill:none;stroke:var(--border);stroke-width:6}
+.adh-ring-fill{fill:none;stroke-width:6;stroke-linecap:round;transition:.5s}
+.adh-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900}
+.adh-lbl{font-size:11px;color:var(--muted)}
+
+@media(max-width:768px){
+  html,body{height:100%;overflow:hidden}
+  body{display:block;height:100%}
+
+  /* SIDEBAR : position fixe, plein écran */
+  .sidebar{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    z-index:10;
+    border-right:none;
+  }
+  /* Header fixe en haut */
+  .sidebar-header{
+    flex-shrink:0;
+    padding:12px 14px 8px;
+  }
+  .sidebar-title{font-size:15px;margin:2px 0 6px}
+  .stats-row{margin-bottom:6px;gap:6px}
+  .stat-pill{font-size:10px;padding:4px 10px}
+  /* Cacher la sauvegarde sur mobile */
+  button[onclick="downloadBackup()"]{display:none !important}
+  /* Tabs compacts scrollables */
+  .view-tabs{
+    flex-shrink:0;
+    flex-wrap:nowrap !important;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    padding:6px 14px;
+  }
+  .view-tabs::-webkit-scrollbar{display:none}
+  .view-tab{white-space:nowrap;flex-shrink:0;font-size:11px;padding:6px 10px}
+  /* Boutons nouveau client */
+  .sidebar > div{flex-shrink:0}
+  /* LISTE : tout l'espace restant, scroll natif */
+  #clientList,#alertList,#messageList,#statsList{
+    position:relative;
+    flex:1 !important;
+    min-height:0 !important;
+    max-height:none !important;
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch !important;
+    overscroll-behavior-y:contain;
+    padding-bottom:env(safe-area-inset-bottom,24px);
+  }
+  .client-item{padding:14px 16px;min-height:60px}
+
+  /* MAIN PANEL : par-dessus la sidebar quand actif */
+  .main{
+    display:none;
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    flex-direction:column;
+    overflow:hidden;
+    z-index:20;
+    background:var(--bg);
+  }
+
+  /* Contenu détail */
+  .charts-grid{grid-template-columns:1fr}
+  .chart-card.full{grid-column:span 1}
+  .metrics-grid{grid-template-columns:repeat(2,1fr)}
+  .stat-boxes{grid-template-columns:repeat(2,1fr)}
+  .adherence-row{grid-template-columns:repeat(3,1fr)}
+  .score-strip{padding:8px 12px;gap:8px}
+  .sc-card{min-width:80px;padding:10px 12px}
+  .detail-tabs{padding:6px 12px}
+  .detail-tab{font-size:11px;padding:5px 10px}
+  .detail-content{padding:12px}
+  .main-header{padding:10px 14px}
+  .header-actions{gap:6px}
+  .mobile-back-bar{display:flex !important}
+}
+@media(min-width:769px){
+  .mobile-back-bar{display:none !important}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-brand-row">
+      <div>
+        <div class="brand">GREGVONG COACHING</div>
+        <div class="sidebar-title">Dashboard Coach</div>
+      </div>
+      <button onclick="downloadBackup()" class="icon-btn" title="Télécharger sauvegarde">💾</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-pill"><strong id="todayCount">0</strong>/<strong id="totalCount">0</strong>&nbsp;check-ins</div>
+      <div class="stat-pill live"><span class="live-dot"></span>EN DIRECT</div>
+    </div>
+    <input class="search-bar" type="text" placeholder="Rechercher un client..." oninput="filterClients(this.value)" id="searchBar"/>
+  </div>
+
+  <div class="view-tabs">
+    <button class="view-tab active" id="vt-clients" onclick="setView('clients')">👥 Clients</button>
+    <button class="view-tab" id="vt-alertes" onclick="setView('alertes')">🚨 Alertes<span id="alertBadge" style="display:none;background:var(--red);color:#fff;border-radius:8px;padding:1px 5px;font-size:10px;margin-left:3px"></span></button>
+    <button class="view-tab" id="vt-messages" onclick="setView('messages')">💬 Messages<span id="msgGlobalBadge" style="display:none;background:var(--gold);color:#050505;border-radius:8px;padding:1px 5px;font-size:10px;margin-left:3px;font-weight:800"></span></button>
+    <button class="view-tab" id="vt-stats" onclick="setView('stats')">📊 Stats</button>
+  </div>
+
+  <div class="client-list" id="clientList"></div>
+  <div class="client-list" id="alertList" style="display:none"></div>
+  <div class="client-list" id="messageList" style="display:none"></div>
+  <div class="client-list" id="statsList" style="display:none;padding:16px"></div>
+
+  <div class="sidebar-footer">
+    <button onclick="openNewClient()" class="btn-new-client">+ Nouveau client</button>
+    <button onclick="copyGuideLink()" class="icon-btn" title="Guide d'utilisation">📖</button>
+  </div>
+</div>
+
+<!-- MODAL NOUVEAU CLIENT -->
+<div id="newClientModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:400px">
+    <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;margin-bottom:20px">➕ Nouveau client</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input id="nc-name" placeholder="Prénom et nom" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif"/>
+      <input id="nc-email" type="email" placeholder="Email" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif"/>
+      <input id="nc-password" type="text" placeholder="Mot de passe (min. 6 caractères)" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif"/>
+      <p style="font-size:11px;color:var(--muted)">📧 Un email de bienvenue avec les accès sera envoyé automatiquement.</p>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button onclick="closeNewClient()" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;background:none;color:var(--muted);cursor:pointer;font-size:13px">Annuler</button>
+        <button onclick="createClient()" id="nc-btn" style="flex:2;padding:10px;background:var(--gold);border:none;border-radius:8px;color:#050505;font-weight:800;cursor:pointer;font-size:13px">Créer le compte →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN PANEL -->
+<div class="main" id="mainPanel">
+  <div class="empty-state" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px">
+    <div style="width:72px;height:72px;border-radius:20px;background:var(--gold-glow);border:1px solid rgba(0,212,180,0.2);display:flex;align-items:center;justify-content:center;font-size:32px">👈</div>
+    <div style="font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;color:var(--text)">Sélectionne un client</div>
+    <div style="font-size:13px;color:var(--muted);max-width:240px;text-align:center;line-height:1.6">Clique sur un client dans la liste pour voir son suivi complet</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+const TOKEN = localStorage.getItem('coaching_token');
+const NAME  = localStorage.getItem('coaching_name');
+const ROLE  = localStorage.getItem('coaching_role');
+if (!TOKEN) location.href = '/login';
+if (ROLE !== 'coach') location.href = '/client';
+
+let allClients = [];
+let currentClientId = null;
+let currentDetailTab = 'today';
+let currentView = 'clients';
+
+// Mobile init: hide main panel on small screens
+if (window.innerWidth <= 768) {
+  document.getElementById('mainPanel').style.display = 'none';
+}
+
+function authHeaders(){ return {'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'}; }
+
+function partagerLienApp() {
+  const lien = 'https://coaching-app-production-6040.up.railway.app';
+  const message = `Bonjour ! Voici le lien pour accéder à ton espace coaching REBORN :\n\n${lien}\n\nConnecte-toi avec l'email et le mot de passe que je t'ai envoyés. Ajoute l'app sur ton écran d'accueil pour un accès rapide !`;
+  if (navigator.share) {
+    navigator.share({ title: 'App Coaching REBORN', text: message });
+  } else {
+    navigator.clipboard.writeText(message).then(() => showToast('Message copié !'));
+  }
+}
+
+// ── SCORE COLOR ────────────────────────────────────────────
+function scoreColor(v){ return v>=7?'sc-green':v>=4.5?'sc-orange':'sc-red'; }
+function scoreColorBadge(v){ return v>=7?'#00D4B4':v>=4.5?'#FF9A3C':'#FF4D6D'; }
+
+// ── LOAD CLIENTS ───────────────────────────────────────────
+async function loadClients(){
+  const r = await fetch('/api/coach/clients', { headers: authHeaders() });
+  allClients = await r.json();
+
+  const today = allClients.filter(c => c.energie != null).length;
+  document.getElementById('todayCount').textContent = today;
+  document.getElementById('totalCount').textContent = allClients.length;
+
+  renderClients(allClients);
+  loadAlerts();
+  // Badge messages global
+  const totalUnread = allClients.reduce((s, c) => s + (c.unread_messages || 0), 0);
+  const badge = document.getElementById('msgGlobalBadge');
+  if (badge) {
+    if (totalUnread > 0) { badge.textContent = totalUnread; badge.style.display = 'inline'; }
+    else badge.style.display = 'none';
+  }
+}
+
+function renderClients(clients){
+  const list = document.getElementById('clientList');
+  if (!clients.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:40px"><p>Aucun client</p></div>';
+    return;
+  }
+
+  // Sort: alerts first, then checked in, then alphabetical
+  const sorted = [...clients].sort((a,b) => {
+    const aAlert = (a.alerts||[]).some(al=>al.level==='danger');
+    const bAlert = (b.alerts||[]).some(bl=>bl.level==='danger');
+    if (aAlert !== bAlert) return aAlert ? -1 : 1;
+    const aDone = a.energie != null;
+    const bDone = b.energie != null;
+    if (aDone !== bDone) return aDone ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  list.innerHTML = sorted.map(c => {
+    const done = c.energie != null;
+    const score = c.scores?.global || 0;
+    const alerts = c.alerts || [];
+    const hasDanger = alerts.some(a => a.level === 'danger');
+    const alertCount = alerts.length;
+
+    return `<div class="client-item ${currentClientId==c.id?'active':''} ${hasDanger?'has-alert':''}" onclick="selectClient(${c.id})">
+      <div class="client-avatar ${!done?'grey':''}">${c.name[0].toUpperCase()}</div>
+      <div class="client-info">
+        <div class="client-name">${c.name}</div>
+        <div class="client-sub">${done ? `⚡${c.energie} · 😤${c.stress||5} · 🌙${c.sommeil_qualite||5}` : (c.last_checkin ? 'Vu le '+new Date(c.last_checkin+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'}) : 'Jamais')}</div>
+      </div>
+      <div class="client-right">
+        <div class="score-badge" style="color:${scoreColorBadge(score)}">${score||'–'}</div>
+        ${alertCount > 0 ? `<div class="alert-count">${alertCount}</div>` : ''}
+        ${c.unread_messages > 0 ? `<div style="background:var(--gold);color:#050505;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:800">💬 ${c.unread_messages}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── LOAD ALERTS ────────────────────────────────────────────
+async function loadAlerts(){
+  const r = await fetch('/api/coach/alerts', { headers: authHeaders() });
+  const alerts = await r.json();
+
+  const badge = document.getElementById('alertBadge');
+  if (alerts.length > 0) {
+    badge.textContent = alerts.length;
+    badge.style.display = 'inline';
+  }
+
+  const list = document.getElementById('alertList');
+  list.innerHTML = alerts.length ? alerts.map(a => `
+    <div class="alert-item alert-level-${a.level}" onclick="selectClient(${a.client_id})">
+      <div class="alert-icon">${a.icon}</div>
+      <div>
+        <div class="alert-name">${a.client_name}</div>
+        <div class="alert-msg">${a.message}</div>
+      </div>
+    </div>
+  `).join('') : '<div class="empty-state" style="padding:40px"><div class="icon">✅</div><p>Aucune alerte</p></div>';
+}
+
+function setView(v){
+  currentView = v;
+  document.getElementById('vt-clients').classList.toggle('active', v==='clients');
+  document.getElementById('vt-alertes').classList.toggle('active', v==='alertes');
+  document.getElementById('vt-messages').classList.toggle('active', v==='messages');
+  document.getElementById('vt-stats') && document.getElementById('vt-stats').classList.toggle('active', v==='stats');
+  document.getElementById('clientList').style.display = v==='clients' ? 'block' : 'none';
+  document.getElementById('alertList').style.display = v==='alertes' ? 'block' : 'none';
+  document.getElementById('messageList').style.display = v==='messages' ? 'block' : 'none';
+  document.getElementById('statsList').style.display = v==='stats' ? 'block' : 'none';
+  if (v === 'messages') loadAllMessages();
+  if (v === 'stats') loadCoachStats();
+}
+
+// ── NOUVEAU CLIENT ────────────────────────────────────────
+function openNewClient() {
+  const m = document.getElementById('newClientModal');
+  m.style.display = 'flex';
+}
+function closeNewClient() {
+  const m = document.getElementById('newClientModal');
+  m.style.display = 'none';
+  ['nc-name','nc-email','nc-password'].forEach(id => document.getElementById(id).value = '');
+}
+async function createClient() {
+  const name = document.getElementById('nc-name').value.trim();
+  const email = document.getElementById('nc-email').value.trim();
+  const password = document.getElementById('nc-password').value.trim();
+  if (!name || !email || !password) return showToast('Tous les champs sont requis', true);
+  const r = await fetch('/api/coach/create-client', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ name, email, password })
+  });
+  const data = await r.json();
+  if (data.success) {
+    showToast('✅ Client créé + email envoyé !');
+    closeNewClient();
+    loadClients();
+  } else {
+    showToast(data.error || 'Erreur création', true);
+  }
+}
+
+// ── STATS GLOBALES ────────────────────────────────────────
+async function loadCoachStats() {
+  const el = document.getElementById('statsList');
+  el.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Chargement…</div>';
+  const r = await fetch('/api/coach/stats', { headers: authHeaders() });
+  const s = await r.json();
+  const adh = s.adherence != null ? Math.round(s.adherence) + '%' : '–';
+  const energy = s.avgEnergy != null ? s.avgEnergy.toFixed(1) + '/10' : '–';
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <div class="sc-card"><div class="sc-val sc-green">${s.totalClients ?? 0}</div><div class="sc-lbl">Clients actifs</div></div>
+      <div class="sc-card"><div class="sc-val sc-green">${s.checkedInToday ?? 0}</div><div class="sc-lbl">Check-in aujourd'hui</div></div>
+      <div class="sc-card"><div class="sc-val sc-orange">${adh}</div><div class="sc-lbl">Adhérence 7j</div></div>
+      <div class="sc-card"><div class="sc-val sc-green">${energy}</div><div class="sc-lbl">Énergie moy.</div></div>
+    </div>
+    ${s.inactif && s.inactif.length ? `
+      <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">⚠️ Inactifs +3j</div>
+      ${s.inactif.map(c => `<div class="client-item" onclick="selectClient(${c.id})" style="border-left:3px solid var(--red)">
+        <div class="client-avatar grey">${(c.name||'?')[0].toUpperCase()}</div>
+        <div class="client-info"><div class="client-name">${c.name}</div><div class="client-sub">Dernier check-in : ${c.lastCheckin ? new Date(c.lastCheckin).toLocaleDateString('fr-FR') : 'jamais'}</div></div>
+      </div>`).join('')}
+    ` : '<div style="color:var(--green);text-align:center;padding:12px;font-size:13px">✅ Tous les clients sont actifs</div>'}
+  `;
+}
+
+async function loadAllMessages(){
+  const list = document.getElementById('messageList');
+  list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">Chargement…</div>';
+  // Récupérer tous les clients et leurs derniers messages
+  const clients = allClients;
+  if (!clients.length) { list.innerHTML = '<div class="empty-state" style="padding:40px"><p>Aucun client</p></div>'; return; }
+
+  const threads = await Promise.all(clients.map(async c => {
+    const r = await fetch(`/api/coach/messages/${c.id}`, { headers: authHeaders() });
+    const msgs = await r.json();
+    return { client: c, msgs, last: msgs[msgs.length - 1] || null };
+  }));
+
+  // Trier : non lus d'abord, puis par date du dernier message
+  const withMsgs = threads.filter(t => t.msgs.length > 0).sort((a, b) => {
+    const aUnread = a.client.unread_messages > 0;
+    const bUnread = b.client.unread_messages > 0;
+    if (aUnread !== bUnread) return aUnread ? -1 : 1;
+    return new Date(b.last.created_at) - new Date(a.last.created_at);
+  });
+
+  if (!withMsgs.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:40px"><div class="icon">💬</div><p>Aucun message</p></div>';
+    return;
+  }
+
+  list.innerHTML = withMsgs.map(({ client: c, msgs, last }) => {
+    const unread = c.unread_messages > 0;
+    const time = new Date(last.created_at).toLocaleString('fr-FR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+    const preview = last.body.length > 55 ? last.body.slice(0, 55) + '…' : last.body;
+    const fromClient = last.to_id !== c.id; // dernier message envoyé par le client
+    return `<div class="client-item ${currentClientId==c.id?'active':''}" onclick="selectClientAndMessages(${c.id})" style="${unread?'border-left:3px solid var(--gold)':''}">
+      <div class="client-avatar" style="${unread?'background:linear-gradient(135deg,var(--gold),var(--gold-dark))':'background:var(--surface2)'}">${c.name[0].toUpperCase()}</div>
+      <div class="client-info">
+        <div class="client-name" style="${unread?'color:var(--gold)':''}">${c.name}</div>
+        <div class="client-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">${fromClient?'':'Toi : '}${preview}</div>
+      </div>
+      <div class="client-right">
+        <div style="font-size:10px;color:var(--muted)">${time}</div>
+        ${unread ? `<div style="background:var(--gold);color:#050505;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:800">${c.unread_messages}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function selectClientAndMessages(id){
+  await selectClient(id);
+  // Ouvrir directement l'onglet messages
+  setTimeout(() => showDetailTab('messages', id), 100);
+  // Recharger pour mettre à jour les badges
+  await loadClients();
+  const badge = document.getElementById('msgGlobalBadge');
+  const total = allClients.reduce((s, c) => s + (c.unread_messages || 0), 0);
+  if (total > 0) { badge.textContent = total; badge.style.display = 'inline'; }
+  else badge.style.display = 'none';
+}
+
+function filterClients(q){
+  const filtered = allClients.filter(c => c.name.toLowerCase().includes(q.toLowerCase()) || c.email.toLowerCase().includes(q.toLowerCase()));
+  renderClients(filtered);
+}
+
+// ── SELECT CLIENT ──────────────────────────────────────────
+async function selectClient(id){
+  currentClientId = id;
+  document.querySelectorAll('.client-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll(`.client-item`).forEach(el => {
+    if (el.onclick?.toString().includes(`(${id})`)) el.classList.add('active');
+  });
+
+  const r = await fetch(`/api/coach/client/${id}`, { headers: authHeaders() });
+  const data = await r.json();
+  renderClientDetail(data);
+
+  if (window.innerWidth <= 768) {
+    document.getElementById('mainPanel').style.display = 'flex';
+  }
+}
+
+function mobileBack(){
+  if (window.innerWidth <= 768) {
+    document.getElementById('mainPanel').style.display = 'none';
+  }
+}
+
+function renderClientDetail(data){
+  const { client, daily, weekly, photos, mealPhotos, notes, scores, alerts } = data;
+  const panel = document.getElementById('mainPanel');
+
+  panel._mealPhotos = mealPhotos;
+  panel.innerHTML = `
+    <!-- MOBILE BACK BAR — always visible on phone -->
+    <div class="mobile-back-bar">
+      <button class="mobile-back-btn" onclick="mobileBack()">‹ Retour</button>
+      <div class="mobile-client-title">${client.name}</div>
+    </div>
+
+    <!-- DESKTOP HEADER -->
+    <div class="main-header">
+      <div>
+        <div class="main-name">${client.name}</div>
+        <div class="main-sub">${client.email} · Depuis ${new Date(client.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-sm btn-claude" onclick="analyserAvecClaude(${client.id})">✦ Claude</button>
+        <button class="btn-sm btn-danger" onclick="deleteClient(${client.id},'${client.name}')">🗑</button>
+      </div>
+    </div>
+
+    <!-- SCORES — horizontal scroll on mobile -->
+    <div class="score-strip">
+      <div class="sc-card"><div class="sc-val ${scoreColor(scores.global)}">${scores.global||'–'}</div><div class="sc-lbl">Forme globale</div></div>
+      <div class="sc-card"><div class="sc-val ${scoreColor(scores.recuperation)}">${scores.recuperation||'–'}</div><div class="sc-lbl">Récupération</div></div>
+      <div class="sc-card"><div class="sc-val ${scoreColor(scores.discipline)}">${scores.discipline||'–'}</div><div class="sc-lbl">Discipline</div></div>
+      <div class="sc-card"><div class="sc-val ${scoreColor(scores.stress)}">${scores.stress||'–'}</div><div class="sc-lbl">Anti-stress</div></div>
+    </div>
+
+    <!-- DETAIL TABS — horizontal scroll on mobile -->
+    <div class="detail-tabs">
+      <button class="detail-tab active" id="dt-today" onclick="showDetailTab('today',${client.id})">Aujourd'hui</button>
+      <button class="detail-tab" id="dt-evolution" onclick="showDetailTab('evolution',${client.id})">📈 Évolution</button>
+      <button class="detail-tab" id="dt-historique" onclick="showDetailTab('historique',${client.id})">Historique</button>
+      <button class="detail-tab" id="dt-mensurations" onclick="showDetailTab('mensurations',${client.id})">Mensurations</button>
+      <button class="detail-tab" id="dt-photos" onclick="showDetailTab('photos',${client.id})">📸 Photos</button>
+      <button class="detail-tab" id="dt-repas" onclick="showDetailTab('repas',${client.id})">🍽️ Repas</button>
+      <button class="detail-tab" id="dt-notes" onclick="showDetailTab('notes',${client.id})">Notes</button>
+      <button class="detail-tab" id="dt-cycle" onclick="showDetailTab('cycle',${client.id})">🌸 Cycle</button>
+      <button class="detail-tab" id="dt-messages" onclick="showDetailTab('messages',${client.id})">💬 Messages <span id="coachMsgBadge" style="display:none;background:var(--red);color:#fff;border-radius:8px;padding:1px 5px;font-size:10px;margin-left:2px"></span></button>
+      <button class="detail-tab" id="dt-objectifs" onclick="showDetailTab('objectifs',${client.id})">🎯 Objectifs</button>
+      <button class="detail-tab" id="dt-programme" onclick="showDetailTab('programme',${client.id})">📋 Programme</button>
+    </div>
+
+    <div class="detail-content" id="detailContent">
+      ${renderTodayTab(daily, alerts, client)}
+    </div>
+  `;
+
+  // Store data for tab switching
+  panel._data = { client, daily, weekly, photos, notes, scores, alerts };
+}
+
+function showDetailTab(tab, clientId){
+  document.querySelectorAll('.detail-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('dt-' + tab).classList.add('active');
+  currentDetailTab = tab;
+  const d = document.getElementById('mainPanel')._data;
+  const content = document.getElementById('detailContent');
+  if (tab === 'today') content.innerHTML = renderTodayTab(d.daily, d.alerts, d.client);
+  else if (tab === 'evolution') { content.innerHTML = renderEvolutionTab(d.daily, d.weekly); renderCharts(d.daily, d.weekly); }
+  else if (tab === 'historique') content.innerHTML = renderHistoriqueTab(d.daily);
+  else if (tab === 'mensurations') content.innerHTML = renderMensurationsTab(d.weekly);
+  else if (tab === 'photos') content.innerHTML = renderPhotosTab(d.photos);
+  else if (tab === 'repas') loadCoachMealPhotos(clientId, content);
+  else if (tab === 'notes') content.innerHTML = renderNotesTab(d.notes, clientId);
+  else if (tab === 'cycle') loadCycleTab(clientId, content);
+  else if (tab === 'messages') loadCoachMessages(clientId, content);
+  else if (tab === 'objectifs') loadCoachObjectifs(clientId, content);
+  else if (tab === 'programme') loadCoachProgrammes(clientId, content);
+}
+
+function renderTodayTab(daily, alerts, client){
+  const today = daily[0];
+  const recent = daily.slice(0,7);
+
+  let alertsHtml = '';
+  if (alerts && alerts.length) {
+    alertsHtml = `<div class="alerts-section">
+      <div class="section-title">🚨 Alertes actives</div>
+      ${alerts.map(a => `
+        <div class="alert-card ${a.level}">
+          <span style="font-size:22px">${a.icon}</span>
+          <div class="alert-card-text">
+            <div class="alert-card-title">${a.message}</div>
+            <div class="alert-card-desc">${a.level==='danger'?'Attention requise':a.level==='warning'?'À surveiller':'Information'}</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  if (!today) return `${alertsHtml}<div class="empty-state"><div class="icon">😴</div><p>Pas de check-in aujourd'hui</p><p style="font-size:12px;margin-top:8px">Dernier : ${daily[0]?new Date(daily[0].date+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}):'jamais'}</p></div>`;
+
+  // Helpers
+  const avg7 = (k, inv=false) => {
+    if (!recent.length) return null;
+    const a = (recent.reduce((s,b)=>s+(b[k]||5),0)/recent.length);
+    return inv ? (10-a).toFixed(1) : a.toFixed(1);
+  };
+  const barColor = (v, inv=false) => {
+    const n = inv ? 10-v : v;
+    return n>=7?'var(--green)':n>=4.5?'var(--orange)':'var(--red)';
+  };
+  const barW = (v, inv=false) => {
+    const n = inv ? 10-v : v;
+    return Math.max(4, Math.round(n*10)) + '%';
+  };
+  const metricCard = (icon, label, value, inv=false, avgKey=null) => {
+    const numVal = parseFloat(value)||5;
+    const color = barColor(numVal, inv);
+    const avgVal = avgKey ? avg7(avgKey, inv) : null;
+    return `<div class="metric-card">
+      <div class="metric-top">
+        <span class="metric-icon">${icon}</span>
+        <div style="text-align:right">
+          <span class="metric-val" style="color:${color}">${value}</span><span class="metric-unit">/10</span>
+        </div>
+      </div>
+      <div class="metric-lbl">${label}</div>
+      <div class="metric-bar"><div class="metric-bar-fill" style="width:${barW(numVal,inv)};background:${color}"></div></div>
+      ${avgVal ? `<div class="metric-avg">Moy. 7j : <strong style="color:${barColor(parseFloat(avgVal),inv)}">${avgVal}</strong></div>` : ''}
+    </div>`;
+  };
+
+  // Booleans section
+  const protoBadge = today.protocol_done
+    ? `<span class="metric-card-badge badge-green">✓ Respecté</span>`
+    : `<span class="metric-card-badge badge-red">✗ Non suivi</span>`;
+
+  const trainingInfo = today.training_done
+    ? [today.training_type||'Séance', today.training_duree?today.training_duree+'min':'', today.training_intensite?'Int. '+today.training_intensite+'/10':''].filter(Boolean).join(' · ')
+    : 'Pas de séance aujourd\'hui';
+  const trainingBadge = today.training_done
+    ? `<span class="metric-card-badge badge-green">✓ Fait</span>`
+    : `<span class="metric-card-badge badge-orange">– Repos</span>`;
+
+  const fringalesBadge = today.fringales
+    ? `<span class="metric-card-badge badge-red">⚠ Fringales</span>`
+    : `<span class="metric-card-badge badge-green">✓ Aucune</span>`;
+
+  return `
+    ${alertsHtml}
+    <div class="section-title">📊 Check-in du ${new Date(today.date+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</div>
+    <div class="metrics-grid">
+      ${metricCard('⚡','Énergie',today.energie,false,'energie')}
+      ${metricCard('😤','Stress (inv.)',today.stress||5,true,'stress')}
+      ${metricCard('🌙','Qualité sommeil',today.sommeil_qualite||5,false,'sommeil_qualite')}
+      ${metricCard('🎯','Motivation',today.motivation,false,'motivation')}
+      ${metricCard('🫁','Digestion',today.digestion,false,'digestion')}
+      ${metricCard('💧','Hydratation',today.hydratation||5,false,'hydratation')}
+      ${metricCard('🥗','Nutrition',today.respect_nutrition||5,false,'respect_nutrition')}
+      ${metricCard('🏆','Fierté',today.fierte||5,false,'fierte')}
+    </div>
+
+    <div class="section-title">🎯 Comportements</div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-card-row">
+          <div class="metric-card-icon-lg">${today.protocol_done?'✅':'❌'}</div>
+          <div class="metric-card-body">
+            <div class="metric-card-title">Protocole nutritionnel</div>
+            <div class="metric-card-sub">Respect du plan alimentaire</div>
+          </div>
+          ${protoBadge}
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-card-row">
+          <div class="metric-card-icon-lg">${today.training_done?'🏋️':'🛋️'}</div>
+          <div class="metric-card-body">
+            <div class="metric-card-title">${today.training_done?(today.training_type||'Entraînement'):'Entraînement'}</div>
+            <div class="metric-card-sub">${trainingInfo}</div>
+          </div>
+          ${trainingBadge}
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-card-row">
+          <div class="metric-card-icon-lg">${today.fringales?'🍫':'🥗'}</div>
+          <div class="metric-card-body">
+            <div class="metric-card-title">Fringales</div>
+            <div class="metric-card-sub">${today.fringales?'Envies de craquer signalées':'Aucune envie de craquer'}</div>
+          </div>
+          ${fringalesBadge}
+        </div>
+      </div>
+      ${(today.sommeil_heure_coucher||today.sommeil_heure_reveil) ? `
+      <div class="metric-card">
+        <div class="metric-card-row">
+          <div class="metric-card-icon-lg">🌙</div>
+          <div class="metric-card-body">
+            <div class="metric-card-title">Heures de sommeil</div>
+            <div class="metric-card-sub">${today.sommeil_heure_coucher?'Coucher : '+today.sommeil_heure_coucher:''} ${today.sommeil_heure_reveil?'· Réveil : '+today.sommeil_heure_reveil:''}</div>
+          </div>
+        </div>
+      </div>` : ''}
+      ${today.pas ? `
+      <div class="metric-card">
+        <div class="metric-card-row">
+          <div class="metric-card-icon-lg">🚶</div>
+          <div class="metric-card-body">
+            <div class="metric-card-title">Nombre de pas</div>
+            <div class="metric-card-sub">${today.pas.toLocaleString('fr-FR')} pas</div>
+          </div>
+          <span class="metric-card-badge ${today.pas>=8000?'badge-green':today.pas>=5000?'badge-orange':'badge-red'}">${today.pas>=8000?'✓ Objectif':'↑ Continuer'}</span>
+        </div>
+      </div>` : ''}
+    </div>
+
+    ${today.ressenti ? `
+    <div class="section-title">💬 Ressenti du jour</div>
+    <div class="ressenti-block">
+      <div class="ressenti-quote">${today.ressenti}</div>
+    </div>
+    ` : ''}
+  `;
+}
+
+function renderHistoriqueTab(daily){
+  if (!daily.length) return '<div class="empty-state"><div class="icon">📊</div><p>Aucun historique</p></div>';
+
+  const scoreCell = (v, inv=false) => {
+    const n = inv ? 10-v : +v;
+    const color = n>=7?'var(--green)':n>=4.5?'var(--orange)':'var(--red)';
+    const dot = n>=7?'var(--green)':n>=4.5?'var(--orange)':'var(--red)';
+    return `<span class="score-cell"><span class="score-dot" style="background:${dot}"></span><span style="color:${color};font-weight:700">${v}</span><span style="color:var(--muted);font-size:10px">/10</span></span>`;
+  };
+
+  return `
+    <div style="overflow-x:auto">
+    <table class="data-table">
+      <thead><tr>
+        <th>📅 Date</th>
+        <th>⚡ Énergie</th>
+        <th>😤 Stress</th>
+        <th>🌙 Sommeil</th>
+        <th>🎯 Motiv.</th>
+        <th>🫁 Digest.</th>
+        <th>💧 Hydrat.</th>
+        <th>🥗 Nutri.</th>
+        <th>🏆 Fierté</th>
+        <th>📋 Proto</th>
+        <th>🏋️ Séance</th>
+        <th>🍫 Fring.</th>
+        <th>🚶 Pas</th>
+      </tr></thead>
+      <tbody>
+        ${daily.map(r => {
+          const d = new Date(r.date+'T12:00');
+          const isToday = r.date === new Date().toISOString().slice(0,10);
+          const weekday = d.toLocaleDateString('fr-FR',{weekday:'short'});
+          const dateStr = d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+          const seanceDetail = r.training_done ? [r.training_type||'', r.training_duree?r.training_duree+'min':'', r.training_intensite?'Int.'+r.training_intensite:''].filter(Boolean).join(' · ') : '';
+          return `<tr style="${isToday?'background:rgba(0,212,180,0.05)':''}">
+            <td class="date-cell">
+              <span style="color:var(--muted);font-size:10px;display:block">${weekday}</span>
+              <span>${dateStr}${isToday?' <span style="color:var(--gold);font-size:10px">• Auj.</span>':''}</span>
+            </td>
+            <td>${scoreCell(r.energie)}</td>
+            <td>${scoreCell(r.stress||5, true)}</td>
+            <td>${scoreCell(r.sommeil_qualite||5)}</td>
+            <td>${scoreCell(r.motivation)}</td>
+            <td>${scoreCell(r.digestion)}</td>
+            <td>${scoreCell(r.hydratation||5)}</td>
+            <td>${scoreCell(r.respect_nutrition||5)}</td>
+            <td>${scoreCell(r.fierte||5)}</td>
+            <td><span class="${r.protocol_done?'bool-yes':'bool-no'}">${r.protocol_done?'✅':'✗'}</span></td>
+            <td>${r.training_done
+              ? `<span class="bool-yes" title="${seanceDetail}">✅${seanceDetail?'<br><span style=\'font-size:9px;color:var(--muted)\'>'+seanceDetail+'</span>':''}</span>`
+              : `<span class="bool-no">–</span>`}
+            <td><span class="${r.fringales?'bool-no':'bool-yes'}">${r.fringales?'⚠️':'✓'}</span></td>
+            <td style="font-size:11px;color:var(--muted)">${r.pas?r.pas.toLocaleString('fr-FR'):'–'}</td>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    </div>
+  `;
+}
+
+function renderMensurationsTab(weekly){
+  if (!weekly.length) return '<div class="empty-state"><div class="icon">📏</div><p>Aucune mensuration</p></div>';
+
+  // Compute poids evolution vs previous week
+  const poidsHistory = weekly.filter(w=>w.poids).map(w=>w.poids);
+
+  return weekly.map((w, i) => {
+    const prevPoids = weekly[i+1]?.poids;
+    const poidsDiff = w.poids && prevPoids ? (w.poids - prevPoids).toFixed(1) : null;
+    const diffColor = poidsDiff===null?'':parseFloat(poidsDiff)<0?'var(--green)':parseFloat(poidsDiff)>0?'var(--red)':'var(--muted)';
+    const measurements = [
+      w.masse_grasse && { val: w.masse_grasse+'%', lbl: '🔥 Masse grasse' },
+      w.tour_taille  && { val: w.tour_taille+'cm', lbl: '📐 Tour taille' },
+      w.tour_hanches && { val: w.tour_hanches+'cm', lbl: '📐 Tour hanches' },
+      w.tour_poitrine&& { val: w.tour_poitrine+'cm', lbl: '📐 Poitrine' },
+      w.tour_bras_g  && { val: w.tour_bras_g+'cm', lbl: '💪 Bras gauche' },
+      w.tour_bras_d  && { val: w.tour_bras_d+'cm', lbl: '💪 Bras droit' },
+      w.tour_cuisse_g&& { val: w.tour_cuisse_g+'cm', lbl: '🦵 Cuisse G' },
+      w.tour_cuisse_d&& { val: w.tour_cuisse_d+'cm', lbl: '🦵 Cuisse D' },
+      w.tour_mollet  && { val: w.tour_mollet+'cm', lbl: '🦵 Mollet' },
+      w.entrainements!=null && { val: w.entrainements+' séances', lbl: '🏋️ Entraînements' },
+    ].filter(Boolean);
+
+    return `<div class="weekly-card">
+      <div class="weekly-card-header">
+        <div>
+          <div class="weekly-card-week">${w.week}</div>
+          ${w.poids ? `<div class="weekly-card-poids">${w.poids} <span style="font-size:14px;color:var(--muted)">kg</span>
+            ${poidsDiff!==null?`<span style="font-size:13px;color:${diffColor};font-weight:700;margin-left:6px">${parseFloat(poidsDiff)>0?'+':''}${poidsDiff} kg</span>`:''}</div>` : ''}
+        </div>
+        <div style="text-align:right;font-size:11px;color:var(--muted)">
+          ${measurements.length} mesures
+        </div>
+      </div>
+      ${measurements.length ? `<div class="weekly-grid">${measurements.map(m=>`
+        <div class="wg-item">
+          <div class="wg-val">${m.val}</div>
+          <div class="wg-lbl">${m.lbl}</div>
+        </div>`).join('')}</div>` : '<p style="font-size:12px;color:var(--muted)">Pas de mensurations cette semaine</p>'}
+      ${(w.victoires||w.difficultes) ? `<div class="weekly-bilan">
+        ${w.victoires?`<div class="bilan-row"><span class="bilan-label">🏆</span><span class="bilan-text">${w.victoires}</span></div>`:''}
+        ${w.difficultes?`<div class="bilan-row"><span class="bilan-label">⚠️</span><span class="bilan-text">${w.difficultes}</span></div>`:''}
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderPhotosTab(photos){
+  if (!photos.length) return '<div class="empty-state"><div class="icon">📸</div><p>Aucune photo</p></div>';
+  const byWeek = {};
+  photos.forEach(p => { if(!byWeek[p.week]) byWeek[p.week]=[]; byWeek[p.week].push(p); });
+  return Object.entries(byWeek).map(([week,ps]) => `
+    <div style="margin-bottom:24px">
+      <div class="section-title">${week}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+        ${ps.map(p => `
+          <div>
+            <img src="/uploads/${p.filename}" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;background:var(--surface)">
+            <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px">${p.type}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function loadCoachMealPhotos(clientId, container) {
+  container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">Chargement…</div>';
+  try {
+    const r = await fetch(`/api/coach/client/${clientId}/meal-photos`, { headers: authHeaders() });
+    const data = await r.json();
+    if (!r.ok) { container.innerHTML = `<div style="padding:20px;color:var(--red)">Erreur ${r.status}: ${JSON.stringify(data)}</div>`; return; }
+    const photos = Array.isArray(data) ? data : [];
+    container.innerHTML = renderMealPhotosTab(photos);
+  } catch(e) {
+    container.innerHTML = `<div style="padding:20px;color:var(--red)">Erreur: ${e.message}</div>`;
+  }
+}
+
+function renderMealPhotosTab(photos){
+  if (!photos || !photos.length) return '<div class="empty-state"><div class="icon">🍽️</div><p>Aucune photo de repas</p></div>';
+  return `<div style="padding:16px">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+      ${photos.map(p => `
+        <div>
+          <img src="/uploads/${p.filename}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:var(--surface);cursor:pointer" onclick="window.open('/uploads/${p.filename}','_blank')">
+          <div style="font-size:10px;color:var(--gold);text-align:center;margin-top:4px;font-weight:600">${p.meal_type || ''}</div>
+          <div style="font-size:10px;color:var(--muted);text-align:center">${new Date(p.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+}
+
+function renderEvolutionTab(daily, weekly){
+  const last30 = daily.slice(0, 30).reverse();
+  const lastW  = weekly.slice(0, 8).reverse();
+
+  // Stat boxes — comparaison S-1 vs S-2
+  const s1 = daily.slice(0, 7);
+  const s2 = daily.slice(7, 14);
+  const avgS = (arr, k) => arr.length ? (arr.reduce((a,b)=>a+(b[k]||5),0)/arr.length).toFixed(1) : '–';
+  const diff = (a, b, inv=false) => {
+    if (a==='–'||b==='–') return '';
+    const d = inv ? (parseFloat(b)-parseFloat(a)) : (parseFloat(a)-parseFloat(b));
+    const sign = d>0?'+':'';
+    const cls = d>0.2?'diff-pos':d<-0.2?'diff-neg':'diff-neu';
+    return `<div class="stat-box-diff ${cls}">${sign}${d.toFixed(1)} vs S-1</div>`;
+  };
+
+  // Poids last/first weekly
+  const firstW = weekly[weekly.length-1];
+  const lastWPoids = weekly[0]?.poids;
+  const poidsTotal = lastWPoids && firstW?.poids ? (lastWPoids - firstW.poids).toFixed(1) : null;
+
+  // Adherence
+  const protoPct = s1.length ? Math.round(s1.filter(r=>r.protocol_done).length/s1.length*100) : 0;
+  const trainPct = s1.length ? Math.round(s1.filter(r=>r.training_done).length/s1.length*100) : 0;
+  const nutritPct = s1.length ? Math.round(s1.reduce((a,b)=>a+(b.respect_nutrition||5),0)/s1.length*10) : 0;
+
+  return `
+    <div class="section-title">📊 Résumé semaine en cours vs semaine précédente</div>
+    <div class="stat-boxes">
+      <div class="stat-box"><div class="stat-box-val">${avgS(s1,'energie')}</div><div class="stat-box-lbl">⚡ Énergie</div>${diff(avgS(s1,'energie'),avgS(s2,'energie'))}</div>
+      <div class="stat-box"><div class="stat-box-val">${avgS(s1,'stress')}</div><div class="stat-box-lbl">😤 Stress</div>${diff(avgS(s1,'stress'),avgS(s2,'stress'),true)}</div>
+      <div class="stat-box"><div class="stat-box-val">${avgS(s1,'sommeil_qualite')}</div><div class="stat-box-lbl">🌙 Sommeil</div>${diff(avgS(s1,'sommeil_qualite'),avgS(s2,'sommeil_qualite'))}</div>
+      <div class="stat-box"><div class="stat-box-val">${avgS(s1,'motivation')}</div><div class="stat-box-lbl">🎯 Motivation</div>${diff(avgS(s1,'motivation'),avgS(s2,'motivation'))}</div>
+    </div>
+
+    <div class="section-title">🎯 Adhérence cette semaine</div>
+    <div class="adherence-row">
+      ${renderRing(protoPct,'#00D4B4','Protocole')}
+      ${renderRing(trainPct,'#7C3AED','Séances')}
+      ${renderRing(nutritPct,'#FF9A3C','Nutrition')}
+    </div>
+
+    ${poidsTotal !== null ? `
+    <div class="section-title">⚖️ Évolution du poids</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:12px;color:var(--muted)">Début</div><div style="font-family:Montserrat;font-weight:900;font-size:22px">${firstW?.poids} kg</div></div>
+      <div style="font-family:Montserrat;font-weight:900;font-size:28px;color:${parseFloat(poidsTotal)<0?'var(--green)':parseFloat(poidsTotal)>0?'var(--red)':'var(--muted)'}">${parseFloat(poidsTotal)>0?'+':''}${poidsTotal} kg</div>
+      <div><div style="font-size:12px;color:var(--muted)">Maintenant</div><div style="font-family:Montserrat;font-weight:900;font-size:22px">${lastWPoids} kg</div></div>
+    </div>` : ''}
+
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <div class="chart-title">Énergie · Stress · Sommeil (30 jours)</div>
+        <div class="chart-wrap tall"><canvas id="chartDaily"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Poids hebdomadaire</div>
+        <div class="chart-wrap"><canvas id="chartPoids"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Motivation · Digestion (30j)</div>
+        <div class="chart-wrap"><canvas id="chartMot"></canvas></div>
+      </div>
+      <div class="chart-card full">
+        <div class="chart-title">Mensurations (tour de taille · hanches)</div>
+        <div class="chart-wrap"><canvas id="chartMens"></canvas></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderRing(pct, color, label){
+  const r = 24;
+  const circ = 2*Math.PI*r;
+  const fill = (pct/100)*circ;
+  return `
+    <div class="adh-card">
+      <div class="adh-ring">
+        <svg width="60" height="60" viewBox="0 0 60 60">
+          <circle class="adh-ring-bg" cx="30" cy="30" r="${r}"/>
+          <circle class="adh-ring-fill" cx="30" cy="30" r="${r}" stroke="${color}"
+            stroke-dasharray="${fill} ${circ}" stroke-dashoffset="0"/>
+        </svg>
+        <div class="adh-pct" style="color:${color}">${pct}%</div>
+      </div>
+      <div class="adh-lbl">${label}</div>
+    </div>`;
+}
+
+let chartInstances = {};
+
+function renderCharts(daily, weekly){
+  // Destroy old charts
+  Object.values(chartInstances).forEach(c => c.destroy());
+  chartInstances = {};
+
+  const last30 = daily.slice(0,30).reverse();
+  const lastW  = weekly.slice(0,8).reverse();
+  const labels30 = last30.map(r => {
+    const d = new Date(r.date+'T12:00');
+    return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+  });
+
+  Chart.defaults.color = '#7B7A90';
+  Chart.defaults.font.family = 'Inter';
+
+  const baseOpts = {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:12, font:{size:11} } } },
+    scales:{
+      x:{ grid:{color:'rgba(37,35,54,.8)'}, ticks:{font:{size:10}, maxTicksLimit:8} },
+      y:{ grid:{color:'rgba(37,35,54,.8)'}, ticks:{font:{size:10}} }
+    }
+  };
+
+  // Chart 1 — Énergie / Stress / Sommeil
+  const ctx1 = document.getElementById('chartDaily');
+  if (ctx1 && last30.length) {
+    chartInstances.daily = new Chart(ctx1, {
+      type:'line',
+      data:{
+        labels: labels30,
+        datasets:[
+          { label:'Énergie', data: last30.map(r=>r.energie), borderColor:'#00D4B4', backgroundColor:'rgba(0,212,180,0.1)', tension:.4, pointRadius:2 },
+          { label:'Stress', data: last30.map(r=>r.stress||5), borderColor:'#FF4D6D', backgroundColor:'rgba(255,77,109,0.1)', tension:.4, pointRadius:2 },
+          { label:'Sommeil', data: last30.map(r=>r.sommeil_qualite||5), borderColor:'#7C3AED', backgroundColor:'rgba(124,58,237,0.1)', tension:.4, pointRadius:2 }
+        ]
+      },
+      options:{ ...baseOpts, scales:{ ...baseOpts.scales, y:{ ...baseOpts.scales.y, min:1, max:10 } } }
+    });
+  }
+
+  // Chart 2 — Poids
+  const ctx2 = document.getElementById('chartPoids');
+  if (ctx2 && lastW.filter(r=>r.poids).length > 1) {
+    const wData = lastW.filter(r=>r.poids);
+    chartInstances.poids = new Chart(ctx2, {
+      type:'line',
+      data:{
+        labels: wData.map(r=>r.week.replace(/\d{4}-/,'')),
+        datasets:[{ label:'Poids (kg)', data: wData.map(r=>r.poids), borderColor:'#FF9A3C', backgroundColor:'rgba(255,154,60,0.15)', tension:.4, pointRadius:4, pointBackgroundColor:'#FF9A3C' }]
+      },
+      options:{ ...baseOpts, plugins:{ legend:{display:false} } }
+    });
+  } else if (ctx2) {
+    ctx2.parentElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:12px">Pas encore de données poids</div>';
+  }
+
+  // Chart 3 — Motivation / Digestion
+  const ctx3 = document.getElementById('chartMot');
+  if (ctx3 && last30.length) {
+    chartInstances.mot = new Chart(ctx3, {
+      type:'line',
+      data:{
+        labels: labels30,
+        datasets:[
+          { label:'Motivation', data: last30.map(r=>r.motivation), borderColor:'#FF9A3C', backgroundColor:'rgba(255,154,60,0.1)', tension:.4, pointRadius:2 },
+          { label:'Digestion', data: last30.map(r=>r.digestion), borderColor:'#00D4B4', backgroundColor:'rgba(0,212,180,0.1)', tension:.4, pointRadius:2 }
+        ]
+      },
+      options:{ ...baseOpts, scales:{ ...baseOpts.scales, y:{ ...baseOpts.scales.y, min:1, max:10 } } }
+    });
+  }
+
+  // Chart 4 — Mensurations
+  const ctx4 = document.getElementById('chartMens');
+  if (ctx4 && lastW.filter(r=>r.tour_taille||r.tour_hanches).length > 0) {
+    const mData = lastW.filter(r=>r.tour_taille||r.tour_hanches);
+    chartInstances.mens = new Chart(ctx4, {
+      type:'line',
+      data:{
+        labels: mData.map(r=>r.week.replace(/\d{4}-/,'')),
+        datasets:[
+          { label:'Tour taille (cm)', data: mData.map(r=>r.tour_taille||null), borderColor:'#00D4B4', tension:.4, pointRadius:4, spanGaps:true },
+          { label:'Tour hanches (cm)', data: mData.map(r=>r.tour_hanches||null), borderColor:'#7C3AED', tension:.4, pointRadius:4, spanGaps:true },
+          { label:'Tour bras G (cm)', data: mData.map(r=>r.tour_bras_g||null), borderColor:'#FF9A3C', tension:.4, pointRadius:4, spanGaps:true }
+        ]
+      },
+      options: baseOpts
+    });
+  } else if (ctx4) {
+    ctx4.parentElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:12px">Pas encore de mensurations</div>';
+  }
+}
+
+const CYCLE_PHASES = {
+  menstruelle: { emoji:'🩸', name:'Menstruelle', color:'#FF4D6D' },
+  folliculaire:{ emoji:'🌱', name:'Folliculaire', color:'#00D4B4' },
+  ovulatoire:  { emoji:'⚡', name:'Ovulatoire',   color:'#F59E0B' },
+  luteale:     { emoji:'🌙', name:'Lutéale',       color:'#7C3AED' },
+};
+
+async function loadCycleTab(clientId, container){
+  container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Chargement…</div>';
+  const r = await fetch(`/api/coach/client/${clientId}/cycle`, { headers: authHeaders() });
+  const data = await r.json();
+  container.innerHTML = renderCycleTab(data);
+}
+
+function renderCycleTab(data){
+  if (!data.configured) {
+    return `<div class="empty-state"><div class="icon">🌸</div><p>Suivi cycle non configuré</p><p style="font-size:12px;margin-top:8px;color:var(--muted)">La cliente doit configurer son cycle dans son espace client</p></div>`;
+  }
+  const { phaseInfo, history } = data;
+  const ph = CYCLE_PHASES[phaseInfo.phase] || CYCLE_PHASES.folliculaire;
+
+  // Phase summary
+  let html = `
+    <div style="background:var(--surface);border:1px solid ${ph.color};border-radius:14px;padding:18px;margin-bottom:16px;display:flex;align-items:center;gap:16px">
+      <div style="font-size:44px">${ph.emoji}</div>
+      <div>
+        <div style="font-family:Montserrat;font-size:18px;font-weight:900;color:${ph.color}">Phase ${ph.name}</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:3px">Jour <strong>${phaseInfo.jourCycle}</strong> / ${phaseInfo.cycleLength} · encore <strong>${phaseInfo.phaseDaysLeft} jour${phaseInfo.phaseDaysLeft>1?'s':''}</strong> dans cette phase</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Durée règles : ${phaseInfo.periodDuration}j · Cycle : ${phaseInfo.cycleLength}j</div>
+      </div>
+    </div>`;
+
+  // Coach tips for this phase
+  const tips = {
+    menstruelle: ['⚡ Énergie basse : ne pas pousser sur les performances','🍽️ Nutrition anti-inflammatoire : poissons gras, légumes verts, magnésium','🏃 Entraînement léger : mobilité, marche, yoga (RPE 2–4)','💤 Prioriser le sommeil et la récupération'],
+    folliculaire:['🚀 Fenêtre anabolique optimale : charges maximales possibles','📈 Idéal pour progresser et battre des records personnels','🥗 Protéines ↑, sensibilité insuline optimale','💡 Phase créative : bonne pour fixer de nouveaux objectifs'],
+    ovulatoire:  ['⚡ Peak performance : exploiter ce pic de force','⚠️ Attention à la laxité ligamentaire → technique irréprochable','🥦 Crucifères et fibres pour éliminer les œstrogènes','🧠 Confiance au maximum : bonne période pour les défis'],
+    luteale:     ['📉 Volume ↓, maintenir l\'intensité sur exercices techniques','🍫 Fringales sucrées physiologiques → +150-250 kcal OK','😤 SPM possible : surveiller irritabilité, rétention, insomnie','🧘 J23–28 : favoriser yoga, Pilates, cardio doux Z2'],
+  };
+
+  html += `<div class="section-title">💡 Recommandations coach</div>
+    <div style="background:var(--surface);border-radius:12px;padding:14px;margin-bottom:16px">
+      ${(tips[phaseInfo.phase]||[]).map(t=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text)">${t}</div>`).join('')}
+    </div>`;
+
+  // Recent logs
+  if (history && history.length) {
+    const recent = history.slice(0,14);
+    html += `<div class="section-title">📊 Journal cycle (14 derniers jours)</div>
+      <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead><tr><th>Date</th><th>Phase</th><th>⚡ Énergie</th><th>😣 Douleur</th><th>😊 Humeur</th><th>Symptômes</th></tr></thead>
+        <tbody>
+          ${recent.map(log=>{
+            const lph = CYCLE_PHASES[log.phase];
+            const symps = JSON.parse(log.symptomes||'[]');
+            return `<tr>
+              <td class="date-cell">${new Date(log.date+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</td>
+              <td><span style="color:${lph?.color||'var(--muted)'};font-weight:700">${lph?.emoji||''} ${lph?.name||log.phase}</span></td>
+              <td><span style="color:${log.energie>=7?'var(--green)':log.energie>=4?'var(--orange)':'var(--red)'};font-weight:700">${log.energie}/10</span></td>
+              <td><span style="color:${log.douleur>=7?'var(--red)':log.douleur>=4?'var(--orange)':'var(--green)'};font-weight:700">${log.douleur}/10</span></td>
+              <td><span style="color:${log.humeur>=7?'var(--green)':log.humeur>=4?'var(--orange)':'var(--red)'};font-weight:700">${log.humeur}/10</span></td>
+              <td style="font-size:11px;color:var(--muted)">${symps.slice(0,3).join(', ')}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+      </div>`;
+  }
+  return html;
+}
+
+function renderNotesTab(notes, clientId){
+  const d = document.getElementById('mainPanel')._data;
+  return `
+    <div class="section-title">💬 Citation motivante (visible par le client)</div>
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <input type="text" class="note-input" id="quoteInput" placeholder="Ex: Tu es plus fort que tes excuses..." style="flex:1"/>
+      <button class="btn-sm" onclick="saveQuote(${clientId})" style="border-color:var(--gold);color:var(--gold);white-space:nowrap">Envoyer</button>
+    </div>
+    <div class="section-title">Notes privées</div>
+    <div class="note-form">
+      <input type="text" class="note-input" id="noteInput" placeholder="Ajouter une note coach..." onkeydown="if(event.key==='Enter')saveNote(${clientId})"/>
+      <button class="btn-sm" onclick="saveNote(${clientId})" style="border-color:var(--gold);color:var(--gold)">Ajouter</button>
+    </div>
+    ${notes.length ? notes.map(n => `
+      <div class="note-item">
+        <div class="note-date">${new Date(n.created_at).toLocaleString('fr-FR')}</div>
+        ${n.note}
+      </div>
+    `).join('') : '<p style="color:var(--muted);font-size:13px">Aucune note</p>'}
+  `;
+}
+
+async function saveQuote(clientId){
+  const input = document.getElementById('quoteInput');
+  const quote = input?.value?.trim();
+  if (!quote) return;
+  await fetch(`/api/coach/client/${clientId}/quote`, { method:'PUT', headers: authHeaders(), body: JSON.stringify({ quote }) });
+  showToast('✅ Citation envoyée au client !');
+  input.value = '';
+}
+
+// ── ACTIONS ────────────────────────────────────────────────
+async function saveNote(clientId){
+  const input = document.getElementById('noteInput');
+  const note = input?.value?.trim();
+  if (!note) return;
+  await fetch(`/api/coach/client/${clientId}/note`, { method:'POST', headers: authHeaders(), body: JSON.stringify({ note }) });
+  showToast('Note ajoutée');
+  selectClient(clientId);
+}
+
+async function deleteClient(id, name){
+  if (!confirm(`Supprimer ${name} ? Cette action est irréversible.`)) return;
+  await fetch(`/api/coach/client/${id}`, { method:'DELETE', headers: authHeaders() });
+  showToast('Client supprimé');
+  document.getElementById('mainPanel').innerHTML = '<div class="empty-state"><div class="icon">👈</div><p>Sélectionne un client</p></div>';
+  currentClientId = null;
+  loadClients();
+}
+
+function analyserAvecClaude(clientId){
+  const d = document.getElementById('mainPanel')._data;
+  if (!d) return;
+  const { client, daily, weekly, scores, alerts } = d;
+  const last7 = daily.slice(0,7);
+  const lastWeekly = weekly[0];
+
+  const avgF = (arr,k) => arr.length ? (arr.reduce((a,b)=>a+(b[k]||5),0)/arr.length).toFixed(1) : 'N/A';
+
+  let text = `=== ANALYSE CLIENT GREGVONG COACHING ===\n\n`;
+  text += `CLIENT: ${client.name}\n`;
+  text += `Email: ${client.email}\n\n`;
+
+  text += `--- SCORES (7 derniers jours) ---\n`;
+  text += `Forme globale: ${scores.global}/10\n`;
+  text += `Récupération: ${scores.recuperation}/10\n`;
+  text += `Discipline: ${scores.discipline}/10\n`;
+  text += `Anti-stress: ${scores.stress}/10\n\n`;
+
+  if (alerts.length) {
+    text += `--- ALERTES ACTIVES ---\n`;
+    alerts.forEach(a => text += `${a.icon} ${a.message}\n`);
+    text += '\n';
+  }
+
+  text += `--- MOYENNES 7 JOURS ---\n`;
+  text += `Énergie: ${avgF(last7,'energie')}/10\n`;
+  text += `Stress: ${avgF(last7,'stress')}/10\n`;
+  text += `Sommeil: ${avgF(last7,'sommeil_qualite')}/10\n`;
+  text += `Motivation: ${avgF(last7,'motivation')}/10\n`;
+  text += `Digestion: ${avgF(last7,'digestion')}/10\n`;
+  text += `Protocoles suivis: ${last7.filter(r=>r.protocol_done).length}/${last7.length} jours\n`;
+  text += `Séances réalisées: ${last7.filter(r=>r.training_done).length}/${last7.length} jours\n\n`;
+
+  if (lastWeekly) {
+    text += `--- DERNIÈRES MENSURATIONS (${lastWeekly.week}) ---\n`;
+    if (lastWeekly.poids) text += `Poids: ${lastWeekly.poids} kg\n`;
+    if (lastWeekly.masse_grasse) text += `Masse grasse: ${lastWeekly.masse_grasse}%\n`;
+    if (lastWeekly.tour_taille) text += `Tour de taille: ${lastWeekly.tour_taille} cm\n`;
+  }
+
+  const lastCheckin = last7[0];
+  if (lastCheckin?.ressenti) {
+    text += `\n--- DERNIER RESSENTI ---\n"${lastCheckin.ressenti}"\n`;
+  }
+
+  text += `\n---\nEn tant que coach expert en transformation physique, perte de gras, nutrition fonctionnelle et gestion du stress, analyse ces données et donne-moi:\n1. Les points critiques à traiter en priorité\n2. Les corrélations importantes (ex: stress → fringales, sommeil → énergie)\n3. Les ajustements concrets à faire au programme\n4. Un message de feedback à envoyer au client`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('✅ Copié ! Colle dans Claude.ai');
+    setTimeout(() => window.open('https://claude.ai', '_blank'), 500);
+  }).catch(() => {
+    prompt('Copie ce texte:', text);
+  });
+}
+
+// ── SSE ────────────────────────────────────────────────────
+function connectSSE(){
+  const es = new EventSource('/api/stream');
+  es.onmessage = e => {
+    const d = JSON.parse(e.data);
+    if (d.type === 'daily_checkin' || d.type === 'new_client' || d.type === 'weekly_checkin') {
+      showToast(`🔔 ${d.client_name || 'Nouveau client'} – ${d.type === 'new_client' ? 'Inscription' : 'Check-in'}`);
+      loadClients();
+    }
+  };
+  es.onerror = () => setTimeout(connectSSE, 5000);
+}
+
+// ── MESSAGERIE COACH ──────────────────────────────────────
+async function loadCoachMessages(clientId, container){
+  container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Chargement…</div>';
+  const r = await fetch(`/api/coach/messages/${clientId}`, { headers: authHeaders() });
+  const msgs = await r.json();
+  const coachName = NAME;
+
+  container.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;min-height:120px" id="coachMsgList">
+      ${msgs.length ? msgs.map(m => {
+        const mine = m.from_name === coachName;
+        const time = new Date(m.created_at).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+        return `<div style="display:flex;flex-direction:column;align-items:${mine?'flex-end':'flex-start'};gap:2px">
+          <div style="max-width:72%;background:${mine?'var(--gold)':'var(--surface2)'};color:${mine?'#050505':'var(--text)'};border-radius:${mine?'14px 14px 4px 14px':'14px 14px 14px 4px'};padding:10px 13px;font-size:13px;line-height:1.5">${m.body}</div>
+          <div style="font-size:10px;color:var(--muted);padding:0 4px">${m.from_name} · ${time}</div>
+        </div>`;
+      }).join('') : '<p style="color:var(--muted);text-align:center;padding:30px 0">Aucun message.</p>'}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <textarea id="coachMsgInput" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;resize:none;height:50px" placeholder="Écrire un message…"></textarea>
+      <button onclick="sendCoachMessage(${clientId})" style="padding:10px 16px;background:var(--gold);border:none;border-radius:8px;color:#050505;font-weight:800;cursor:pointer;align-self:flex-end">Envoyer</button>
+    </div>`;
+
+  // scroll bas
+  const list = document.getElementById('coachMsgList');
+  if(list) list.scrollTop = list.scrollHeight;
+}
+
+async function sendCoachMessage(clientId){
+  const input = document.getElementById('coachMsgInput');
+  const body = input.value.trim();
+  if(!body) return;
+  input.value = '';
+  const r = await fetch(`/api/coach/messages/${clientId}`, {
+    method:'POST', headers: authHeaders(), body: JSON.stringify({body})
+  });
+  const data = await r.json();
+  if(data.success) loadCoachMessages(clientId, document.getElementById('detailContent'));
+  else showToast('Erreur envoi', true);
+}
+
+// ── OBJECTIFS COACH ───────────────────────────────────────
+async function loadCoachObjectifs(clientId, container){
+  container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Chargement…</div>';
+  const r = await fetch(`/api/coach/client/${clientId}/goals`, { headers: authHeaders() });
+  const goals = await r.json();
+
+  const GOAL_TYPES = [
+    {v:'poids',l:'Poids (kg)'},{v:'tour_taille',l:'Tour de taille (cm)'},{v:'tour_hanches',l:'Hanches (cm)'},
+    {v:'tour_bras_g',l:'Bras gauche (cm)'},{v:'masse_grasse',l:'Masse grasse (%)'},{v:'autre',l:'Autre'}
+  ];
+
+  container.innerHTML = `
+    <div class="section-title">Ajouter un objectif</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:8px">
+        <select id="goalType" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px">
+          ${GOAL_TYPES.map(t=>`<option value="${t.v}">${t.l}</option>`).join('')}
+        </select>
+        <input id="goalTarget" type="number" step="0.1" placeholder="Cible" style="width:90px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px"/>
+      </div>
+      <input id="goalLabel" placeholder="Titre de l'objectif (ex: Perdre 5 kg)" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif"/>
+      <textarea id="goalNote" placeholder="Note / explication (optionnel)" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;resize:none;height:50px"></textarea>
+      <button onclick="addGoal(${clientId})" style="padding:10px;background:var(--gold);border:none;border-radius:8px;color:#050505;font-weight:800;cursor:pointer;font-size:13px">+ Ajouter l'objectif</button>
+    </div>
+
+    <div class="section-title">Objectifs actuels (${goals.length})</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${goals.length ? goals.map(g=>`
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+          <div>
+            <div style="font-weight:700;font-size:13px">${g.label}</div>
+            ${g.target!=null?`<div style="font-size:11px;color:var(--gold);font-weight:700;margin-top:2px">Cible : ${g.target} ${g.type==='poids'?'kg':g.type==='masse_grasse'?'%':'cm'}</div>`:''}
+            ${g.note?`<div style="font-size:11px;color:var(--muted);margin-top:4px">${g.note}</div>`:''}
+          </div>
+          <button onclick="deleteGoal(${g.id},${clientId})" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--red);padding:4px 8px;cursor:pointer;font-size:12px;flex-shrink:0">🗑</button>
+        </div>`).join('')
+      : '<p style="color:var(--muted);text-align:center;padding:20px 0">Aucun objectif défini.</p>'}
+    </div>`;
+}
+
+async function addGoal(clientId){
+  const type = document.getElementById('goalType').value;
+  const label = document.getElementById('goalLabel').value.trim();
+  const target = document.getElementById('goalTarget').value;
+  const note = document.getElementById('goalNote').value.trim();
+  if(!label) return showToast('Titre requis', true);
+  const r = await fetch(`/api/coach/client/${clientId}/goals`, {
+    method:'POST', headers: authHeaders(),
+    body: JSON.stringify({ type, label, target: target ? parseFloat(target) : null, note })
+  });
+  const data = await r.json();
+  if(data.success){ showToast('✅ Objectif ajouté'); loadCoachObjectifs(clientId, document.getElementById('detailContent')); }
+  else showToast('Erreur', true);
+}
+
+async function deleteGoal(goalId, clientId){
+  await fetch(`/api/coach/goals/${goalId}`, { method:'DELETE', headers: authHeaders() });
+  loadCoachObjectifs(clientId, document.getElementById('detailContent'));
+}
+
+function showToast(msg, isError=false){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => t.className = 'toast', 3500);
+}
+
+// ── BACKUP ─────────────────────────────────────────────────
+async function downloadBackup() {
+  const r = await fetch('/api/coach/export', { headers: authHeaders() });
+  const blob = await r.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `backup-gvc-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ Sauvegarde téléchargée !');
+}
+
+// ── PROGRAMMES ────────────────────────────────────────────
+async function loadCoachProgrammes(clientId, container) {
+  container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Chargement…</div>';
+  const r = await fetch(`/api/coach/client/${clientId}/programs`, { headers: authHeaders() });
+  const programs = await r.json();
+
+  container.innerHTML = `
+    <div class="section-title">Ajouter un programme</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px;display:flex;flex-direction:column;gap:10px">
+      <input id="progTitle" placeholder="Titre (ex: Programme Semaine 1 — Force)" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif"/>
+      <input id="progUrl" placeholder="Lien Gamma (ou autre lien de présentation)" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif"/>
+      <button onclick="addProgramme(${clientId})" style="padding:10px;background:var(--gold);border:none;border-radius:8px;color:#050505;font-weight:800;cursor:pointer;font-size:13px">+ Envoyer le programme</button>
+    </div>
+
+    <div class="section-title">Programmes envoyés (${programs.length})</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${programs.length ? programs.map(p => `
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <div>
+            <div style="font-weight:700;font-size:13px">📋 ${p.title}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">${new Date(p.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <a href="${p.url}" target="_blank" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;color:var(--gold);font-size:12px;text-decoration:none">Voir</a>
+            <button onclick="deleteProgramme(${p.id},${clientId})" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--red);padding:5px 8px;cursor:pointer;font-size:12px">🗑</button>
+          </div>
+        </div>`).join('')
+      : '<p style="color:var(--muted);text-align:center;padding:20px 0">Aucun programme envoyé.</p>'}
+    </div>`;
+}
+
+async function addProgramme(clientId) {
+  const title = document.getElementById('progTitle').value.trim();
+  const url = document.getElementById('progUrl').value.trim();
+  if (!title || !url) return showToast('Titre et lien requis', true);
+  const r = await fetch(`/api/coach/client/${clientId}/programs`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify({ title, url })
+  });
+  const data = await r.json();
+  if (data.success) { showToast('✅ Programme envoyé !'); loadCoachProgrammes(clientId, document.getElementById('detailContent')); }
+  else showToast('Erreur', true);
+}
+
+async function deleteProgramme(progId, clientId) {
+  await fetch(`/api/coach/programs/${progId}`, { method: 'DELETE', headers: authHeaders() });
+  loadCoachProgrammes(clientId, document.getElementById('detailContent'));
+}
+
+// ── PUSH NOTIFICATIONS ────────────────────────────────────
+async function registerPush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) { await savePushSub(existing); return; }
+    const r = await fetch('/api/push/vapid-public-key');
+    const { publicKey } = await r.json();
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey)
+    });
+    await savePushSub(sub);
+  } catch (_) {}
+}
+async function savePushSub(sub) {
+  await fetch('/api/push/subscribe', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(sub)
+  });
+}
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+function copyGuideLink() {
+  const url = window.location.origin + '/guide.html';
+  navigator.clipboard.writeText(url).then(() => showToast('📖 Lien copié ! Envoie-le à ton client.'));
+}
+
+// ── INIT ───────────────────────────────────────────────────
+loadClients();
+connectSSE();
+registerPush();
+setInterval(loadClients, 60000);
+</script>
+</body>
+</html>

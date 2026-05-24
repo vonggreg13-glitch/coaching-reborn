@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Mon Cycle – GREGVONG COACHING</title>
+<meta name="theme-color" content="#0D0B16"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D0B16;--surface:#13111E;--surface2:#1C1A2A;--border:#252336;--text:#F0EFF8;--muted:#7B7A90;
+  --mens:#FF4D6D;--foll:#00D4B4;--ovul:#F59E0B;--lute:#7C3AED;
+  --phase:var(--foll);
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif}
+body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);padding-top:max(env(safe-area-inset-top),0px)}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.back-btn{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:0;line-height:1;flex-shrink:0}
+.topbar-title{font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px}
+.topbar-phase{margin-left:auto;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.08)}
+
+/* PAGE WRAP */
+.page{max-width:480px;margin:0 auto;padding:0 0 80px}
+
+/* PHASE HERO */
+.phase-hero{padding:24px 18px 20px;text-align:center;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(var(--phase-rgb),.08) 0%,transparent 100%)}
+.phase-emoji{font-size:52px;line-height:1;margin-bottom:8px}
+.phase-name{font-family:'Montserrat',sans-serif;font-size:22px;font-weight:900;color:var(--phase)}
+.phase-subtitle{font-size:13px;color:var(--muted);margin-top:4px}
+.phase-tag{display:inline-block;margin-top:10px;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid var(--phase);color:var(--phase)}
+
+/* CYCLE WHEEL */
+.wheel-section{display:flex;flex-direction:column;align-items:center;padding:20px 18px 12px}
+.wheel-wrap{position:relative;width:200px;height:200px;margin-bottom:16px}
+.wheel-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.wheel-day{font-family:'Montserrat',sans-serif;font-size:34px;font-weight:900;line-height:1;color:var(--phase)}
+.wheel-label{font-size:11px;color:var(--muted);margin-top:2px}
+.phase-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
+.phase-chip{background:var(--surface);border-radius:10px;padding:8px 6px;text-align:center;border:1px solid var(--border)}
+.phase-chip.active{border-color:var(--phase)}
+.phase-chip-emoji{font-size:16px}
+.phase-chip-name{font-size:10px;font-weight:700;margin-top:3px;color:var(--muted)}
+.phase-chip-days{font-size:9px;color:var(--muted);margin-top:1px}
+.phase-chip.active .phase-chip-name{color:var(--phase)}
+
+/* CARDS */
+.section{padding:18px 18px 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px}
+.card-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+
+/* DAILY LOG */
+.log-done{text-align:center;padding:20px;color:var(--muted)}
+.log-done .check{font-size:36px;margin-bottom:8px;color:var(--phase)}
+.slider-row{margin-bottom:14px}
+.slider-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.slider-name{font-size:13px;font-weight:600}
+.slider-val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;color:var(--phase)}
+.slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;outline:none;cursor:pointer;background:var(--border)}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--phase);cursor:pointer;border:3px solid var(--bg)}
+.symptomes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
+.symp-btn{padding:7px 6px;border-radius:8px;border:1px solid var(--border);background:none;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;text-align:center;transition:.15s}
+.symp-btn.selected{border-color:var(--phase);color:var(--phase);background:rgba(var(--phase-rgb),.1)}
+.note-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;resize:vertical;min-height:60px;margin-bottom:14px}
+.note-input:focus{outline:none;border-color:var(--phase)}
+
+/* GUIDE TABS */
+.guide-tabs{display:flex;overflow-x:auto;gap:6px;padding:4px 18px 0;-webkit-overflow-scrolling:touch}
+.guide-tab{white-space:nowrap;flex-shrink:0;padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:none;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:.15s}
+.guide-tab.active{border-color:var(--phase);color:var(--phase);background:rgba(var(--phase-rgb),.08)}
+.guide-content{padding:14px 18px 0;display:none}
+.guide-content.active{display:block}
+
+/* GUIDE ITEMS */
+.guide-item{background:var(--surface);border-radius:12px;padding:14px;margin-bottom:10px}
+.guide-item-title{font-size:11px;font-weight:700;color:var(--phase);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.guide-item-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.guide-item-list li{font-size:13px;color:var(--text);line-height:1.4;display:flex;gap:8px;align-items:flex-start}
+.guide-item-list li::before{content:'›';color:var(--phase);flex-shrink:0;font-weight:700}
+.guide-warning{background:rgba(255,154,60,.08);border:1px solid rgba(255,154,60,.3);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#FF9A3C;line-height:1.5}
+.guide-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(var(--phase-rgb),.12);color:var(--phase);margin:2px}
+.supplement-row{display:flex;gap:10px;align-items:flex-start;padding:10px;background:var(--surface2);border-radius:10px;margin-bottom:6px}
+.supplement-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.supplement-detail{font-size:11px;color:var(--muted);line-height:1.4}
+
+/* SEED CYCLING */
+.seed-card{background:linear-gradient(135deg,rgba(0,212,180,.06),rgba(124,58,237,.06));border:1px solid rgba(0,212,180,.2);border-radius:16px;padding:16px;margin:0 18px 12px}
+.seed-title{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:800;color:var(--foll);margin-bottom:10px}
+.seed-row{display:flex;gap:10px;align-items:center;margin-bottom:8px;font-size:12px}
+.seed-badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;flex-shrink:0}
+
+/* SETUP */
+.setup-card{margin:20px 18px 0;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px}
+.setup-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:18px;margin-bottom:6px}
+.setup-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:block}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:15px;font-family:'Inter',sans-serif}
+.form-input:focus{outline:none;border-color:var(--foll)}
+.form-hint{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* BTN */
+.btn-primary{width:100%;padding:14px;border-radius:12px;border:none;background:var(--phase);color:#0D0B16;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:900;cursor:pointer;margin-top:6px}
+.btn-outline{width:100%;padding:11px;border-radius:10px;border:1px solid var(--border);background:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;margin-top:6px}
+
+/* HISTORY */
+.history-strip{display:flex;gap:4px;overflow-x:auto;padding:0 18px 4px;-webkit-overflow-scrolling:touch}
+.hist-day{flex-shrink:0;width:28px;text-align:center}
+.hist-dot{width:24px;height:24px;border-radius:50%;margin:0 auto 3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#0D0B16}
+.hist-date{font-size:9px;color:var(--muted)}
+
+/* TOAST */
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--phase);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--phase);z-index:99;transition:.3s;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* LOADER */
+.loader{text-align:center;padding:80px 20px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back-btn" onclick="location.href='/client'">‹</button>
+  <div class="topbar-title">🌸 Mon Cycle</div>
+  <div class="topbar-phase" id="topbarPhase">–</div>
+</div>
+
+<div class="page" id="app">
+  <div class="loader">Chargement…</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TOKEN = localStorage.getItem('coaching_token');
+if (!TOKEN) location.href = '/login';
+
+// ── Phase config ─────────────────────────────────────────────
+const PHASES = {
+  menstruelle: { emoji:'🩸', name:'Menstruelle', color:'#FF4D6D', rgb:'255,77,109', short:'Mens.' },
+  folliculaire:{ emoji:'🌱', name:'Folliculaire', color:'#00D4B4', rgb:'0,212,180', short:'Foll.' },
+  ovulatoire:  { emoji:'⚡', name:'Ovulatoire',   color:'#F59E0B', rgb:'245,158,11', short:'Ovul.' },
+  luteale:     { emoji:'🌙', name:'Lutéale',       color:'#7C3AED', rgb:'124,58,237', short:'Lut.' },
+};
+
+const SYMPTOMES = {
+  menstruelle: ['Crampes','Fatigue','Maux de tête','Dos douloureux','Nausées','Saignements abondants','Humeur basse','Envie chocolat'],
+  folliculaire:['Bonne énergie','Motivation haute','Peau lumineuse','Sommeil léger','Libido montante','Appétit normal','Créativité'],
+  ovulatoire:  ['Énergie max','Col muqueux','Légère douleur côté','Libido haute','Chaleur corporelle','Confiance haute'],
+  luteale:     ['Fringales sucrées','Seins sensibles','Ballonnements','Irritabilité','Rétention eau','Fatigue','Acné','Insomnie'],
+};
+
+// ── Guide content by phase ────────────────────────────────────
+const GUIDE = {
+  menstruelle: {
+    nutrition: {
+      items:[
+        {title:'✅ Favoriser',list:['Sardines, maquereau, saumon → anti-inflammatoire','Épinards, lentilles, orties, spiruline → fer','Chocolat noir >70%, avocat, amandes → magnésium','Kiwi, agrumes, poivron cru → vit. C (absorption fer)','Banane, patate douce → potassium anti-rétention']},
+        {title:'❌ Éviter',list:['Alcool → inhibe absorption du fer','Café à jeun / excès caféine → crampes aggravées','Sucres raffinés & ultra-transformés → inflammation','Produits laitiers conventionnels si crampes']}
+      ]},
+    sport:{items:[
+      {title:'⭐ Cette semaine',list:['Repos actif : marche douce, mobilité, yoga','RPE 2–4/10 · 20–40 min maximum','Travail technique avec charges légères si tu te sens bien','STOP si vertiges, douleurs aiguës ou nausées']},
+      {title:'💡 Mindset',list:['Phase de reconstruction, pas de surpassement','Écoute ton corps — c\'est un signal, pas une faiblesse']}
+    ]},
+    supplements:{items:[
+      {name:'Magnésium bisglycinate',dose:'300–400 mg',moment:'Soir au coucher',objectif:'Spasmolytique, anti-crampes, sommeil'},
+      {name:'Oméga-3 EPA/DHA',dose:'2–3 g',moment:'Repas du soir',objectif:'Anti-inflammatoire, ↓ prostaglandines'},
+      {name:'Vitamine B6 (P5P)',dose:'50 mg',moment:'Matin au repas',objectif:'Équilibre hormonal, réduction crampes'},
+      {name:'Vitamine C (ascorbate)',dose:'500–1000 mg',moment:'Repas riche en fer',objectif:'Absorption du fer ×3'},
+      {name:'Zinc bisglycinate',dose:'15–25 mg',moment:'Soir (loin du fer)',objectif:'Régénération muqueuse, immunité'},
+    ]},
+    mental:{items:[
+      {title:'🧠 Cette phase',list:['Tendance naturelle à l\'introspection → utile pour bilan','Journaling 5 min : "Qu\'ai-je accompli ? Qu\'est-ce que je veux lâcher ?"','Cohérence cardiaque 3×/j (5-3-5) → très efficace pour les crampes','Réduire la charge sociale et professionnelle si possible','Visualisation : renouvellement et régénération']}
+    ]}
+  },
+  folliculaire:{
+    nutrition:{items:[
+      {title:'✅ Focus protéines & anabolisme',list:['Œufs, poulet, bœuf maigre, saumon, cottage → MPS maximale','Sardines, maquereau, noix, chia → oméga-3, cerveau','Huîtres, bœuf, graines courge → zinc (folliculogenèse)','Fruits & légumes colorés, baies, brocoli → antioxydants','Noix du Brésil 2–3/j → sélénium (qualité ovocytaire)']},
+      {title:'📅 Seed cycling',list:['Graines de lin moulues + courge → 1 c.à.s chacune/j','Moudre fraîchement, conserver 2j max au frigo']}
+    ]},
+    sport:{items:[
+      {title:'🚀 Ta meilleure phase !',list:['L\'œstradiol ↑ → récupération optimale, anabolisme maximal','Force & hypertrophie : 4–5×/semaine, RPE 7–8/10','Augmente progressivement les charges +10–15%','HIIT possible : 2× max/semaine, 20–25 min','Défis physiques → les records personnels sont possibles !']}
+    ]},
+    supplements:{items:[
+      {name:'Magnésium bisglycinate',dose:'300 mg',moment:'Soir',objectif:'Cofacteur enzymatique, énergie'},
+      {name:'Zinc bisglycinate',dose:'15–20 mg',moment:'Soir coucher',objectif:'Folliculogenèse, immunité'},
+      {name:'CoQ10 ubiquinol',dose:'100–200 mg',moment:'Repas gras',objectif:'Énergie mitochondriale (surtout >35 ans)'},
+      {name:'Complexe vitamines B actives',dose:'1 gélule',moment:'Matin au repas',objectif:'Méthylation, énergie, hormones'},
+      {name:'Oméga-3 EPA/DHA',dose:'2–3 g',moment:'Repas soir',objectif:'Anti-inflammatoire, fertilité'},
+    ]},
+    mental:{items:[
+      {title:'💡 Capitalise !',list:['Phase idéale pour lancer de nouveaux projets et défis','Prendre des décisions importantes, avoir des conversations difficiles','Rituel matin : visualisation 5 min + 1 intention','Attention au piège du "oui à tout" : l\'œstradiol booste la sociabilité mais épuise']}
+    ]}
+  },
+  ovulatoire:{
+    nutrition:{items:[
+      {title:'✅ Soutien hépatique & DIM naturel',list:['Brocoli, kale, chou-fleur, roquette → DIM naturel (métabolisme œstrogènes)','Graines de lin moulues, légumineuses, fruits → fibres solubles','Betterave, romarin, curcuma + poivre, thé vert → antioxydants foie','Ail, oignon, poireau → glutathion, détox foie','Eau plate 2,5 L/j + électrolytes si sport intense']},
+    ]},
+    sport:{items:[
+      {title:'⚡ Peak performance',list:['Pic testostérone + œstradiol → exploite tes records !','Force maximale : 85–95% 1RM, 3–5 reps','TECHNIQUE PRIORITAIRE : ligaments plus laxes → risque blessure ↑','Échauffement LONG : 15 min minimum obligatoire','Nutrition péri-training : glucides 30–60 min avant, protéines après']},
+      {title:'⚠️ Attention',list:['Laxité ligamentaire accrue sous œstrogènes','Prioriser la forme parfaite sur TOUS les mouvements','Pas d\'ego-lifting cette semaine']}
+    ]},
+    supplements:{items:[
+      {name:'DIM (Diindolylméthane)',dose:'100–200 mg',moment:'Repas midi',objectif:'Métabolisme protecteur des œstrogènes'},
+      {name:'Calcium-D-Glucarate',dose:'500–1000 mg',moment:'Repas',objectif:'Glucuronidation hépatique œstrogènes'},
+      {name:'NAC (N-Acétyl-Cystéine)',dose:'600 mg',moment:'Matin à jeun',objectif:'Glutathion, détox foie phase II'},
+      {name:'Magnésium bisglycinate',dose:'300 mg',moment:'Soir',objectif:'Cofacteur aromatase, anti-rétention'},
+    ]},
+    mental:{items:[
+      {title:'✨ Ton moment de briller',list:['Pic de confiance, charisme et assertivité au maximum','Phase idéale : prises de parole, négociations, présentations','Libido en hausse → connexion avec soi facilitée','Être vigilante à ne pas promettre plus qu\'on peut tenir']}
+    ]}
+  },
+  luteale:{
+    nutrition:{items:[
+      {title:'🛡️ Anti-SPM',list:['JAMAIS glucides seuls : toujours avec protéines + fibres + graisses','Augmenter légèrement les calories +150–250 kcal → PHYSIOLOGIQUE','Amidon résistant : riz/pommes de terre refroidis → anti-fringales','Sélénium : 2–3 noix du Brésil/j → pilier anti-SPM','Éviter sucres rapides, jus de fruits, alcool → fringales exponentielles']},
+      {title:'📅 Seed cycling',list:['Graines de tournesol + sésame → 1 c.à.s chacune/j','Vitamine E → soutien corps jaune / Zinc + sélénium → progestérone']}
+    ]},
+    sport:{items:[
+      {title:'🔵 J18–22 : Modéré',list:['Force modérée : 70–80% 1RM, volume légèrement réduit','Cardio Zone 2 (60–70% FCmax) : brûle graisses, ne surcharge pas','HIIT max 1×/semaine si récupération bonne']},
+      {title:'🟣 J23–28 : Douceur',list:['Yoga, Pilates, étirements, mobilité, respiration','Éviter HIIT : cortisol ↑ → aggrave fringales et rétention','Marche 30 min/j minimum → régule insuline et humeur','Récupération active : bain chaud, massage, sauna si toléré']}
+    ]},
+    supplements:{items:[
+      {name:'Magnésium bisglycinate',dose:'400 mg (↑)',moment:'Soir',objectif:'Crampes, SPM nerveux, sommeil, anti-sucre'},
+      {name:'Vitamine B6 (P5P)',dose:'50 mg',moment:'Matin au repas',objectif:'SPM émotionnel, sérotonine, progestérone'},
+      {name:'Safran (extrait standardisé)',dose:'30 mg',moment:'Repas',objectif:'SPM émotionnel, anxiété, fringales sucrées'},
+      {name:'Gattilier (Vitex) EPS',dose:'5 mL ou 400 mg',moment:'Matin à jeun',objectif:'↑ phase lutéale, ↓ prolactine — CI pilule contraceptive'},
+      {name:'Zinc bisglycinate',dose:'15 mg',moment:'Soir',objectif:'Cofacteur stéroïdogenèse, anti-inflammation'},
+      {name:'Oméga-3 EPA/DHA',dose:'2–3 g',moment:'Soir repas',objectif:'↓ prostaglandines, SPM physique'},
+    ]},
+    mental:{items:[
+      {title:'🧘 Récupération & introspection',list:['Journaling lutéal : "Qu\'est-ce qui me pèse ? Qu\'est-ce qui se termine ?"','Cohérence cardiaque 3×/j → régule cortisol et sérotonine','Réduire stimulations (réseaux, bruit, obligations sociales)','Rituel anti-fringales : 10 grandes respirations + verre d\'eau avant de manger']},
+      {title:'⚠️ SPM vs PMDD',list:['SPM normal : irritabilité légère 2–5 jours avant règles','PMDD : dépression franche, rage > 7 jours → consulter un médecin']}
+    ]}
+  }
+};
+
+// ── State ────────────────────────────────────────────────────
+let data = null;
+let selectedSymptomes = [];
+let activeGuideTab = 'nutrition';
+
+// ── API ──────────────────────────────────────────────────────
+const h = () => ({ 'Authorization':'Bearer '+TOKEN, 'Content-Type':'application/json' });
+
+async function load(){
+  try {
+    const r = await fetch('/api/client/cycle', { headers: h() });
+    if (r.status === 401) { location.href = '/login'; return; }
+    data = await r.json();
+    render();
+  } catch(e) {
+    document.getElementById('app').innerHTML = `
+      <div style="text-align:center;padding:60px 20px">
+        <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+        <div style="font-family:Montserrat;font-weight:800;font-size:16px;margin-bottom:8px">Erreur de connexion</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px">${e.message}</div>
+        <button onclick="load()" style="padding:12px 24px;border-radius:10px;border:1px solid var(--foll);background:none;color:var(--foll);font-weight:700;font-size:14px;cursor:pointer">Réessayer</button>
+      </div>`;
+  }
+}
+
+async function setup(e){
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const r = await fetch('/api/client/cycle/setup', { method:'POST', headers:h(),
+    body: JSON.stringify({ last_period_start: fd.get('lps'), cycle_length: fd.get('cl'), period_duration: fd.get('pd') })
+  });
+  const res = await r.json();
+  if (res.success) { load(); showToast('✅ Cycle configuré !'); }
+}
+
+async function logDay(){
+  const energie = document.getElementById('logEnergie')?.value;
+  const douleur = document.getElementById('logDouleur')?.value;
+  const humeur  = document.getElementById('logHumeur')?.value;
+  const notes   = document.getElementById('logNotes')?.value;
+  const r = await fetch('/api/client/cycle/log', { method:'POST', headers:h(),
+    body: JSON.stringify({ energie, douleur, humeur, symptomes: selectedSymptomes, notes })
+  });
+  const res = await r.json();
+  if (res.success) { showToast('✅ Journal enregistré !'); load(); }
+}
+
+function toggleSymptome(s){
+  const idx = selectedSymptomes.indexOf(s);
+  if (idx>-1) selectedSymptomes.splice(idx,1); else selectedSymptomes.push(s);
+  document.querySelectorAll('.symp-btn').forEach(btn => {
+    btn.classList.toggle('selected', selectedSymptomes.includes(btn.dataset.s));
+  });
+}
+
+// ── Render ───────────────────────────────────────────────────
+function render(){
+  const app = document.getElementById('app');
+  applyPhaseTheme(data.configured ? data.phaseInfo?.phase : 'folliculaire');
+
+  if (!data.configured) {
+    renderSetup(app);
+    return;
+  }
+
+  const { phaseInfo, todayLog, history, settings } = data;
+  const ph = PHASES[phaseInfo.phase] || PHASES.folliculaire;
+
+  document.getElementById('topbarPhase').textContent = ph.emoji + ' J' + phaseInfo.jourCycle;
+
+  app.innerHTML = `
+    ${renderPhaseHero(phaseInfo, ph)}
+    ${renderWheel(phaseInfo)}
+    <div class="section">
+      <div class="card-title" style="padding-left:2px">📓 Journal du jour</div>
+      ${todayLog ? renderLogDone(todayLog, ph) : renderLogForm(phaseInfo.phase)}
+    </div>
+    ${renderGuideTabs()}
+    ${renderGuideContent(phaseInfo.phase)}
+    ${renderSeedCycling(phaseInfo)}
+    ${renderHistory(history, phaseInfo)}
+    ${renderUpdateSetup(settings)}
+  `;
+  rebindGuide();
+}
+
+function applyPhaseTheme(phase){
+  const ph = PHASES[phase] || PHASES.folliculaire;
+  document.documentElement.style.setProperty('--phase', ph.color);
+  document.documentElement.style.setProperty('--phase-rgb', ph.rgb);
+}
+
+function renderSetup(app){
+  app.innerHTML = `
+    <div style="text-align:center;padding:30px 18px 0">
+      <div style="font-size:48px">🌸</div>
+      <div style="font-family:Montserrat;font-size:22px;font-weight:900;margin:10px 0 6px">Synchronise ton cycle</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">Méthode REBORN — Axe Femme<br/>Nutrition · Sport · Suppléments adaptés à ta phase</div>
+    </div>
+    <div class="setup-card">
+      <div class="setup-title">Configuration initiale</div>
+      <div class="setup-sub">Indique le premier jour de tes dernières règles. Je calculerai automatiquement ta phase et t'adapte les recommandations.</div>
+      <form onsubmit="setup(event)">
+        <div class="form-group">
+          <label class="form-label">1er jour de tes dernières règles</label>
+          <input class="form-input" type="date" name="lps" required max="${new Date().toISOString().slice(0,10)}"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Durée de ton cycle (jours)</label>
+          <input class="form-input" type="number" name="cl" value="28" min="21" max="40"/>
+          <div class="form-hint">Varie de 21 à 40 jours — entre ta moyenne habituelle</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Durée de tes règles (jours)</label>
+          <input class="form-input" type="number" name="pd" value="5" min="2" max="10"/>
+        </div>
+        <button class="btn-primary" type="submit">Configurer mon cycle →</button>
+      </form>
+    </div>`;
+}
+
+function renderPhaseHero(phaseInfo, ph){
+  const daysLeft = phaseInfo.phaseDaysLeft;
+  return `
+    <div class="phase-hero" style="--phase-rgb:${ph.rgb}">
+      <div class="phase-emoji">${ph.emoji}</div>
+      <div class="phase-name" style="color:${ph.color}">Phase ${ph.name}</div>
+      <div class="phase-subtitle">Jour ${phaseInfo.jourCycle} de ton cycle · ${daysLeft} jour${daysLeft>1?'s':''} restant${daysLeft>1?'s':''} dans cette phase</div>
+      <div class="phase-tag" style="border-color:${ph.color};color:${ph.color}">J${phaseInfo.jourCycle} / ${phaseInfo.cycleLength}</div>
+    </div>`;
+}
+
+function renderWheel(pi){
+  const { jourCycle, cycleLength, periodDuration, follEnd, ovEnd } = pi;
+  const cx=100, cy=100, r=78, strokeW=18;
+
+  function arc(startDay, endDay, color, total){
+    if(startDay>=endDay) return '';
+    const s = (startDay-1)/total * 360 - 90;
+    const e = (endDay-1)/total * 360 - 90;
+    const largeArc = (e-s)>180?1:0;
+    const rad = a => a*Math.PI/180;
+    const x1=cx+r*Math.cos(rad(s)), y1=cy+r*Math.sin(rad(s));
+    const x2=cx+r*Math.cos(rad(e)), y2=cy+r*Math.sin(rad(e));
+    return `<path d="M${x1},${y1} A${r},${r} 0 ${largeArc} 1 ${x2},${y2}" fill="none" stroke="${color}" stroke-width="${strokeW}" stroke-linecap="round"/>`;
+  }
+  // Current day dot
+  const dotAngle = ((jourCycle-1)/cycleLength*360-90)*Math.PI/180;
+  const dotX=cx+(r)*Math.cos(dotAngle), dotY=cy+(r)*Math.sin(dotAngle);
+  const ph = PHASES[pi.phase];
+
+  const phaseChips = Object.entries(PHASES).map(([k,v])=>{
+    const startDay = k==='menstruelle'?1:k==='folliculaire'?periodDuration+1:k==='ovulatoire'?follEnd+1:ovEnd+1;
+    const endDay   = k==='menstruelle'?periodDuration:k==='folliculaire'?follEnd:k==='ovulatoire'?ovEnd:cycleLength;
+    const active   = k===pi.phase;
+    return `<div class="phase-chip ${active?'active':''}" style="${active?'border-color:'+v.color:''}">
+      <div class="phase-chip-emoji">${v.emoji}</div>
+      <div class="phase-chip-name" style="${active?'color:'+v.color:''}">${v.short}</div>
+      <div class="phase-chip-days">J${startDay}–${endDay}</div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="wheel-section">
+      <div class="wheel-wrap">
+        <svg viewBox="0 0 200 200" width="200" height="200">
+          <!-- track -->
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="${strokeW}"/>
+          <!-- phases -->
+          ${arc(1, periodDuration+1, PHASES.menstruelle.color, cycleLength)}
+          ${arc(periodDuration+1, follEnd+1, PHASES.folliculaire.color, cycleLength)}
+          ${arc(follEnd+1, ovEnd+1, PHASES.ovulatoire.color, cycleLength)}
+          ${arc(ovEnd+1, cycleLength+1, PHASES.luteale.color, cycleLength)}
+          <!-- current dot -->
+          <circle cx="${dotX.toFixed(1)}" cy="${dotY.toFixed(1)}" r="10" fill="${ph.color}" stroke="var(--bg)" stroke-width="3"/>
+        </svg>
+        <div class="wheel-center">
+          <div class="wheel-day" style="color:${ph.color}">J${jourCycle}</div>
+          <div class="wheel-label">/ ${cycleLength}</div>
+        </div>
+      </div>
+      <div class="phase-row">${phaseChips}</div>
+    </div>`;
+}
+
+function renderLogDone(log, ph){
+  const symps = JSON.parse(log.symptomes||'[]');
+  return `<div class="log-done">
+    <div class="check" style="color:${ph.color}">✓</div>
+    <div style="font-weight:700;margin-bottom:8px">Journal enregistré aujourd'hui</div>
+    <div style="display:flex;justify-content:center;gap:16px;font-size:13px;color:var(--muted);margin-bottom:10px">
+      <span>⚡ ${log.energie}/10</span>
+      <span>😣 Douleur ${log.douleur}/10</span>
+      <span>😊 ${log.humeur}/10</span>
+    </div>
+    ${symps.length?`<div>${symps.map(s=>`<span class="guide-pill">${s}</span>`).join('')}</div>`:''}
+    ${log.notes?`<div style="font-size:12px;color:var(--muted);margin-top:8px;font-style:italic">"${log.notes}"</div>`:''}
+  </div>`;
+}
+
+function renderLogForm(phase){
+  const symps = SYMPTOMES[phase]||[];
+  return `
+    <div class="card">
+      <div class="card-title">Comment tu te sens aujourd'hui ?</div>
+      <div class="slider-row">
+        <div class="slider-label"><span class="slider-name">⚡ Énergie</span><span class="slider-val" id="vEnergie">5</span></div>
+        <input class="slider" type="range" id="logEnergie" min="1" max="10" value="5" oninput="document.getElementById('vEnergie').textContent=this.value"/>
+      </div>
+      <div class="slider-row">
+        <div class="slider-label"><span class="slider-name">😣 Douleur / Inconfort</span><span class="slider-val" id="vDouleur">0</span></div>
+        <input class="slider" type="range" id="logDouleur" min="0" max="10" value="0" oninput="document.getElementById('vDouleur').textContent=this.value"/>
+      </div>
+      <div class="slider-row">
+        <div class="slider-label"><span class="slider-name">😊 Humeur générale</span><span class="slider-val" id="vHumeur">5</span></div>
+        <input class="slider" type="range" id="logHumeur" min="1" max="10" value="5" oninput="document.getElementById('vHumeur').textContent=this.value"/>
+      </div>
+      <div class="card-title" style="margin-bottom:10px">Symptômes du jour</div>
+      <div class="symptomes-grid">
+        ${symps.map(s=>`<button class="symp-btn" data-s="${s}" onclick="toggleSymptome('${s}')">${s}</button>`).join('')}
+      </div>
+      <textarea class="note-input" id="logNotes" placeholder="Notes libres... comment tu vis cette phase ?"></textarea>
+      <button class="btn-primary" onclick="logDay()">Enregistrer mon journal</button>
+    </div>`;
+}
+
+function renderGuideTabs(){
+  return `
+    <div class="section" style="padding-top:20px"><div class="card-title" style="padding-left:2px">📖 Guide de la phase</div></div>
+    <div class="guide-tabs" id="guideTabs">
+      <button class="guide-tab ${activeGuideTab==='nutrition'?'active':''}" onclick="switchGuide('nutrition')">🥦 Nutrition</button>
+      <button class="guide-tab ${activeGuideTab==='sport'?'active':''}" onclick="switchGuide('sport')">🏋️ Entraînement</button>
+      <button class="guide-tab ${activeGuideTab==='supplements'?'active':''}" onclick="switchGuide('supplements')">💊 Suppléments</button>
+      <button class="guide-tab ${activeGuideTab==='mental'?'active':''}" onclick="switchGuide('mental')">🧠 Mental</button>
+    </div>`;
+}
+
+function renderGuideContent(phase){
+  const g = GUIDE[phase];
+  if (!g) return '';
+  const sections = ['nutrition','sport','supplements','mental'];
+  return sections.map(tab => {
+    const isActive = tab === activeGuideTab;
+    const content = g[tab];
+    if (!content) return '';
+    let html = '';
+    if (tab === 'supplements') {
+      html = content.items.map(s=>`
+        <div class="supplement-row">
+          <div style="font-size:22px;flex-shrink:0">💊</div>
+          <div>
+            <div class="supplement-name">${s.name}</div>
+            <div class="supplement-detail"><strong>${s.dose}</strong> · ${s.moment}<br/>${s.objectif}</div>
+          </div>
+        </div>`).join('');
+      if (phase==='luteale') html += `<div class="guide-warning">⚠️ Gattilier : CI si pilule contraceptive, grossesse, allaitement. Minimum 3 cycles pour les effets.</div>`;
+      if (phase==='ovulatoire') html += `<div class="guide-warning">⚠️ Charbon actif (si ballonnements) : TOUJOURS à 2h minimum de tout médicament ou complément.</div>`;
+    } else {
+      html = content.items.map(item=>`
+        <div class="guide-item">
+          <div class="guide-item-title">${item.title}</div>
+          <ul class="guide-item-list">${item.list.map(l=>`<li>${l}</li>`).join('')}</ul>
+        </div>`).join('');
+    }
+    return `<div class="guide-content ${isActive?'active':''}" id="guide-${tab}">${html}</div>`;
+  }).join('');
+}
+
+function renderSeedCycling(pi){
+  const isLuteale = pi.phase === 'luteale';
+  const s = isLuteale
+    ? { seeds:'🌻 Tournesol + 🌿 Sésame', dose:'1 c.à.s de chaque / jour', desc:'Vitamine E → soutien corps jaune · Zinc + sélénium → progestérone', color:PHASES.luteale.color }
+    : { seeds:'🌾 Lin moulu + 🎃 Courge', dose:'1 c.à.s de chaque / jour', desc:'Lignanes → modulateurs œstrogéniques doux · Zinc → folliculogenèse', color:PHASES.folliculaire.color };
+  return `
+    <div class="seed-card">
+      <div class="seed-title">🌱 Seed Cycling — Rotation des graines</div>
+      <div class="seed-row">
+        <span class="seed-badge" style="background:rgba(0,212,180,.15);color:${s.color}">${isLuteale?'Phase Lutéale':'Phase Folli/Menstr.'}</span>
+        <strong style="font-size:13px">${s.seeds}</strong>
+      </div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6">${s.dose}<br/>${s.desc}</div>
+      ${!isLuteale?'<div style="font-size:11px;color:var(--muted);margin-top:6px">💡 Moudre fraîchement · conserver max 2 jours au frigo</div>':''}
+    </div>`;
+}
+
+function renderHistory(history, pi){
+  if (!history || history.length < 2) return '';
+  const last30 = history.slice(0,30).reverse();
+  const dots = last30.map(log=>{
+    const phColor = PHASES[log.phase]?.color || 'var(--muted)';
+    return `<div class="hist-day">
+      <div class="hist-dot" style="background:${phColor};opacity:${log.energie?1:.4}">${log.energie||'·'}</div>
+      <div class="hist-date">${log.date.slice(5)}</div>
+    </div>`;
+  }).join('');
+  return `
+    <div class="section"><div class="card-title" style="padding-left:2px">📊 Historique (30 derniers jours)</div></div>
+    <div class="history-strip">${dots}</div>`;
+}
+
+function renderUpdateSetup(settings){
+  return `
+    <div class="section" style="padding-top:20px">
+      <form onsubmit="setup(event)" style="display:flex;flex-direction:column;gap:10px;background:var(--surface);border-radius:14px;padding:14px;border:1px solid var(--border)">
+        <div class="card-title">⚙️ Mettre à jour mon cycle</div>
+        <div class="form-group" style="margin-bottom:6px">
+          <label class="form-label">1er jour dernières règles</label>
+          <input class="form-input" type="date" name="lps" value="${settings.last_period_start}" required/>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <label class="form-label">Durée cycle</label>
+            <input class="form-input" type="number" name="cl" value="${settings.cycle_length}" min="21" max="40"/>
+          </div>
+          <div>
+            <label class="form-label">Durée règles</label>
+            <input class="form-input" type="number" name="pd" value="${settings.period_duration}" min="2" max="10"/>
+          </div>
+        </div>
+        <button class="btn-outline" type="submit">Mettre à jour</button>
+      </form>
+    </div>`;
+}
+
+function switchGuide(tab){
+  activeGuideTab = tab;
+  document.querySelectorAll('.guide-tab').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase().includes(tab==='supplements'?'suppl':tab==='sport'?'entra':tab)));
+  document.querySelectorAll('.guide-content').forEach(c=>{
+    c.classList.toggle('active', c.id==='guide-'+tab);
+  });
+}
+
+function rebindGuide(){
+  // tabs already bound via onclick
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+load();
+</script>
+</body>
+</html>

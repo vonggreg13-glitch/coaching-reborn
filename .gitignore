@@ -1,0 +1,9 @@
+node_modules/
+*.db
+*.db-shm
+*.db-wal
+public/uploads/*.jpg
+public/uploads/*.jpeg
+public/uploads/*.png
+public/uploads/*.webp
+.env

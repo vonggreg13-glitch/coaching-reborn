@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Mode d'emploi – GREGVONG COACHING</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#00D4B4;--gold-dark:#00A896;
+  --bg:#0D0B16;--surface:#13111E;--surface2:#1C1A2A;
+  --border:#252336;--text:#F0EFF8;--muted:#7B7A90;
+  --red:#FF4D6D;--orange:#FF9A3C;--green:#00D4B4
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 0 60px}
+
+/* HERO */
+.hero{background:linear-gradient(160deg,#13111E 0%,#0D0B16 100%);border-bottom:1px solid var(--border);padding:48px 24px 40px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(0,212,180,0.12),transparent);pointer-events:none}
+.hero-brand{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:12px}
+.hero-title{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:900;line-height:1.1;margin-bottom:12px}
+.hero-title span{color:var(--gold)}
+.hero-sub{font-size:14px;color:var(--muted);max-width:320px;margin:0 auto;line-height:1.6}
+
+/* NAV PILLS */
+.nav-pills{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:20px 24px 4px;-webkit-overflow-scrolling:touch}
+.nav-pills::-webkit-scrollbar{display:none}
+.pill{flex:0 0 auto;padding:7px 14px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:.2s;text-decoration:none;white-space:nowrap}
+.pill.active,.pill:hover{border-color:var(--gold);color:var(--gold);background:rgba(0,212,180,0.08)}
+
+/* SECTIONS */
+.section{padding:0 16px;margin-top:32px}
+.section-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;padding:0 8px}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:12px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-dark));border-radius:16px 16px 0 0}
+.card-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.card-icon{width:44px;height:44px;border-radius:12px;background:rgba(0,212,180,0.12);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.card-title{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:800}
+.card-badge{font-size:10px;font-weight:700;color:var(--gold);background:rgba(0,212,180,0.12);border-radius:6px;padding:2px 8px;margin-left:auto;flex-shrink:0}
+.card-body{font-size:13px;line-height:1.7;color:#C8C7D8}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.step{display:flex;gap:12px;align-items:flex-start}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--gold);color:#050505;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-text{font-size:13px;line-height:1.6;color:#C8C7D8}
+.step-text strong{color:var(--text)}
+
+/* TAGS */
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tag{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid var(--border);color:var(--muted)}
+.tag-green{border-color:rgba(0,212,180,.3);color:var(--gold);background:rgba(0,212,180,.07)}
+.tag-orange{border-color:rgba(255,154,60,.3);color:var(--orange);background:rgba(255,154,60,.07)}
+.tag-red{border-color:rgba(255,77,109,.3);color:var(--red);background:rgba(255,77,109,.07)}
+
+/* TIP BOX */
+.tip{background:rgba(0,212,180,0.07);border:1px solid rgba(0,212,180,0.2);border-radius:12px;padding:14px 16px;margin-top:14px;font-size:12px;line-height:1.6;color:var(--gold)}
+.tip-icon{font-size:14px;margin-right:6px}
+
+/* SCORE GRID */
+.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.score-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.score-emoji{font-size:20px;margin-bottom:4px}
+.score-name{font-size:11px;color:var(--muted);font-weight:600}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:32px 24px 0}
+
+/* BOTTOM CTA */
+.cta{margin:32px 16px 0;background:linear-gradient(135deg,rgba(0,212,180,0.15),rgba(0,168,150,0.08));border:1px solid rgba(0,212,180,0.3);border-radius:20px;padding:28px 24px;text-align:center}
+.cta-title{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:900;margin-bottom:8px}
+.cta-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6}
+.cta-btn{display:inline-block;background:var(--gold);color:#050505;font-weight:800;font-size:14px;padding:14px 28px;border-radius:12px;text-decoration:none;font-family:'Montserrat',sans-serif}
+
+/* INSTALL BANNER */
+.install{margin:24px 16px 0;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start}
+.install-icon{font-size:28px;flex-shrink:0}
+.install-title{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;margin-bottom:4px}
+.install-text{font-size:12px;color:var(--muted);line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-brand">GREGVONG COACHING</div>
+  <h1 class="hero-title">Ton application<br><span>Méthode REBORN</span></h1>
+  <p class="hero-sub">Tout ce que tu dois savoir pour tirer le maximum de ton espace coaching.</p>
+</div>
+
+<!-- INSTALL BANNER -->
+<div class="install">
+  <div class="install-icon">📲</div>
+  <div>
+    <div class="install-title">Installe l'app sur ton téléphone</div>
+    <div class="install-text">Sur iPhone : appuie sur <strong style="color:var(--text)">Partager</strong> puis <strong style="color:var(--text)">"Sur l'écran d'accueil"</strong>.<br>Sur Android : appuie sur les <strong style="color:var(--text)">3 points</strong> puis <strong style="color:var(--text)">"Ajouter à l'écran d'accueil"</strong>.</div>
+  </div>
+</div>
+
+<!-- SECTION : CHECK-IN -->
+<div class="section" id="checkin">
+  <div class="section-title">L'essentiel</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">✅</div>
+      <div>
+        <div class="card-title">Check-in quotidien</div>
+      </div>
+      <div class="card-badge">CHAQUE JOUR</div>
+    </div>
+    <div class="card-body">
+      Le check-in est la pierre angulaire de ta progression. Tu renseignes chaque jour tes données clés pour que je puisse suivre ton évolution en temps réel.
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Poids</strong> — Entre ton poids du matin à jeun, de préférence après les toilettes.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Nutrition</strong> — Note de 1 à 10 la qualité de ton alimentation hier.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Hydratation</strong> — Combien de litres d'eau as-tu bu ?</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text"><strong>Sommeil</strong> — Qualité de ta nuit de 1 à 10.</div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-text"><strong>Énergie</strong> — Ton niveau d'énergie général de 1 à 10.</div></div>
+      <div class="step"><div class="step-num">6</div><div class="step-text"><strong>Entraînement</strong> — As-tu fait ta séance hier ? Oui ou non.</div></div>
+    </div>
+    <div class="tip"><span class="tip-icon">💡</span>Plus ton check-in est précis, plus le coaching est efficace. 30 secondes par jour, des résultats qui durent.</div>
+  </div>
+</div>
+
+<!-- SECTION : SCORES -->
+<div class="section" id="bilan">
+  <div class="section-title">Ton bilan</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📊</div>
+      <div><div class="card-title">Scores & Bilan</div></div>
+    </div>
+    <div class="card-body">
+      Chaque check-in génère un <strong style="color:var(--gold)">score global</strong> qui reflète l'ensemble de ta progression. Tu peux voir l'évolution de chaque pilier en un coup d'œil.
+    </div>
+    <div class="score-grid">
+      <div class="score-item"><div class="score-emoji">🥗</div><div class="score-name">Nutrition</div></div>
+      <div class="score-item"><div class="score-emoji">💧</div><div class="score-name">Hydratation</div></div>
+      <div class="score-item"><div class="score-emoji">😴</div><div class="score-name">Sommeil</div></div>
+      <div class="score-item"><div class="score-emoji">⚡</div><div class="score-name">Énergie</div></div>
+      <div class="score-item"><div class="score-emoji">🏋️</div><div class="score-name">Entraînement</div></div>
+      <div class="score-item"><div class="score-emoji">⚖️</div><div class="score-name">Poids</div></div>
+    </div>
+    <div class="tip"><span class="tip-icon">🔥</span>Un badge <strong>streak</strong> s'allume quand tu enchaînes plusieurs jours consécutifs de check-in. Maintiens ta série !</div>
+  </div>
+</div>
+
+<!-- SECTION : MESSAGES -->
+<div class="section" id="messages">
+  <div class="section-title">Communication</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">💬</div>
+      <div><div class="card-title">Messages</div></div>
+      <div class="card-badge">DIRECT COACH</div>
+    </div>
+    <div class="card-body">
+      Échange directement avec moi depuis l'onglet <strong style="color:var(--gold)">Messages</strong>. Tu peux lui poser tes questions, partager tes ressentis ou signaler une difficulté.
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text">Tape ton message dans le champ en bas de l'écran.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">Appuie sur <strong>Envoyer</strong> — je reçois une notification instantanée.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">Tu reçois une notification push dès qu'il te répond.</div></div>
+    </div>
+    <div class="tip"><span class="tip-icon">📣</span>Active les notifications sur ton téléphone pour ne rater aucune réponse de ma part.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📅</div>
+      <div><div class="card-title">RDV Coach</div></div>
+    </div>
+    <div class="card-body">
+      L'onglet <strong style="color:var(--gold)">RDV Coach</strong> ouvre directement mon calendrier pour réserver ta séance de suivi. Choisis le créneau qui te convient en quelques secondes.
+    </div>
+  </div>
+</div>
+
+<!-- SECTION : PROGRAMME -->
+<div class="section" id="programme">
+  <div class="section-title">Ton programme</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📋</div>
+      <div><div class="card-title">Programme d'entraînement</div></div>
+      <div class="card-badge">PERSONNALISÉ</div>
+    </div>
+    <div class="card-body">
+      Je dépose ton programme directement dans l'app. Retrouve tes séances, tes exercices et les vidéos explicatives dans l'onglet <strong style="color:var(--gold)">Programme</strong>.
+    </div>
+    <div class="tags">
+      <span class="tag tag-green">Séances complètes</span>
+      <span class="tag tag-green">Exercices détaillés</span>
+      <span class="tag tag-green">Mis à jour par moi</span>
+    </div>
+    <div class="tip"><span class="tip-icon">🔄</span>Je peux mettre ton programme à jour à tout moment. Consulte cet onglet avant chaque séance.</div>
+  </div>
+</div>
+
+<!-- SECTION : OBJECTIFS -->
+<div class="section" id="objectifs">
+  <div class="section-title">Progression</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🎯</div>
+      <div><div class="card-title">Objectifs</div></div>
+    </div>
+    <div class="card-body">
+      Je définis tes objectifs personnalisés dans l'onglet <strong style="color:var(--gold)">Objectifs</strong>. Chaque objectif est accompagné d'une barre de progression pour mesurer ton avancement semaine après semaine.
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">•</div><div class="step-text">Perte de poids cible</div></div>
+      <div class="step"><div class="step-num">•</div><div class="step-text">Nombre de séances par semaine</div></div>
+      <div class="step"><div class="step-num">•</div><div class="step-text">Score moyen à atteindre</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📈</div>
+      <div><div class="card-title">Statistiques</div></div>
+    </div>
+    <div class="card-body">
+      L'onglet <strong style="color:var(--gold)">Stats</strong> affiche tous tes graphiques d'évolution : poids, énergie, nutrition, sommeil… avec une <strong style="color:var(--text)">ligne de tendance</strong> pour visualiser ta progression réelle sur la durée.
+    </div>
+    <div class="tip"><span class="tip-icon">📉</span>La tendance ne ment pas — même si le poids fluctue au jour le jour, la ligne de tendance montre la vraie direction.</div>
+  </div>
+</div>
+
+<!-- SECTION : PHOTOS -->
+<div class="section" id="photos">
+  <div class="section-title">Suivi visuel</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📸</div>
+      <div><div class="card-title">Photos de progression</div></div>
+    </div>
+    <div class="card-body">
+      Ajoute tes photos de suivi dans l'onglet <strong style="color:var(--gold)">Photos</strong>. L'app affiche automatiquement une comparaison <strong style="color:var(--text)">Avant / Après</strong> pour visualiser ta transformation.
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text">Appuie sur <strong>Ajouter une photo</strong>.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">Prends la photo dans les mêmes conditions : même lumière, même position, même heure.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">La comparaison avant/après se met à jour automatiquement.</div></div>
+    </div>
+    <div class="tags">
+      <span class="tag tag-orange">Confidentielles</span>
+      <span class="tag tag-orange">Visibles par moi uniquement</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🍽️</div>
+      <div><div class="card-title">Photos des repas</div></div>
+    </div>
+    <div class="card-body">
+      Photographie tes repas pour que je puisse t'aider à optimiser ton alimentation. Un retour concret vaut mieux qu'une description approximative.
+    </div>
+    <div class="tip"><span class="tip-icon">👁️</span>Je vois tes photos et je te donne des conseils précis sur tes portions et la qualité de tes repas.</div>
+  </div>
+</div>
+
+<!-- SECTION : CYCLE -->
+<div class="section" id="cycle">
+  <div class="section-title">Suivi féminin</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🌙</div>
+      <div><div class="card-title">Cycle hormonal</div></div>
+    </div>
+    <div class="card-body">
+      L'onglet <strong style="color:var(--gold)">Cycle</strong> te permet de suivre ton cycle hormonal pour adapter l'entraînement et la nutrition à chaque phase. J'intègre ces données dans ton programme.
+    </div>
+    <div class="tags">
+      <span class="tag tag-green">Phase folliculaire</span>
+      <span class="tag tag-green">Ovulation</span>
+      <span class="tag tag-green">Phase lutéale</span>
+      <span class="tag tag-red">Menstruations</span>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- CTA -->
+<div class="cta">
+  <div class="cta-title">Prêt(e) à démarrer ?</div>
+  <div class="cta-sub">Fais ton premier check-in dès aujourd'hui.<br>Chaque jour compte dans la Méthode REBORN.</div>
+  <a href="/client" class="cta-btn">Accéder à mon espace →</a>
+</div>
+
+</body>
+</html>

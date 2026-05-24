@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GREGVONG COACHING – Connexion</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#00D4B4"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="GV Coaching"/>
+  <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--gold:#00D4B4;--gold-light:#33EDD4;--gold-dark:#00A896;--bg:#0D0B16;--surface:#13111E;--surface-2:#1A1828;--border:#252336;--text:#F0EFF8;--muted:#7B7A90}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;visibility:hidden}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:420px}
+    .logo-wrap{text-align:center;margin-bottom:32px}
+    .logo-img{width:56px;height:56px;object-fit:contain;background:#fff;border-radius:10px;padding:6px;margin-bottom:12px}
+    .logo-text{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold)}
+    .tabs{display:flex;background:var(--surface-2);border-radius:10px;padding:4px;margin-bottom:28px;gap:4px}
+    .tab{flex:1;padding:10px;text-align:center;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);transition:.2s}
+    .tab.active{background:var(--surface);color:var(--text)}
+    label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+    .field{margin-bottom:18px}
+    input{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:'Inter',sans-serif;outline:none;transition:.2s}
+    input:focus{border-color:var(--gold)}
+    .btn{width:100%;padding:14px;border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;transition:.2s;margin-top:4px}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,180,.3)}
+    .btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:#f87171;margin-bottom:16px;display:none}
+    .panel{display:none}
+    .panel.active{display:block}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo-wrap">
+    <img class="logo-img" src="/logo.jpg" alt="Logo" onerror="this.style.display='none'"/>
+    <div class="logo-text">GREGVONG COACHING</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:6px">Espace client</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('login')">Connexion</div>
+    <div class="tab" onclick="switchTab('register')">Créer un compte</div>
+  </div>
+
+  <div id="errMsg" class="error"></div>
+
+  <!-- LOGIN -->
+  <div id="loginPanel" class="panel active">
+    <div class="field"><label>Email</label><input id="loginEmail" type="email" placeholder="ton@email.com" autocomplete="email"/></div>
+    <div class="field"><label>Mot de passe</label><input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+    <button class="btn" id="loginBtn" onclick="doLogin()">Se connecter →</button>
+    <div id="forgotWrap" style="text-align:center;margin-top:14px">
+      <a href="#" onclick="showForgot(event)" style="font-size:12px;color:var(--muted);text-decoration:none">Mot de passe oublié ?</a>
+    </div>
+    <div id="forgotSection" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Ton email</label>
+      <input id="forgotEmail" type="email" placeholder="ton@email.com" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:Inter,sans-serif;outline:none;margin-bottom:10px"/>
+      <button class="btn" id="forgotBtn" onclick="doForgot()" style="margin-top:0">Envoyer le lien →</button>
+      <div id="forgotSuccess" style="display:none;margin-top:12px;background:rgba(0,212,180,.1);border:1px solid rgba(0,212,180,.3);border-radius:8px;padding:12px;font-size:13px;color:var(--gold);text-align:center">
+        ✅ Email envoyé ! Vérifie ta boîte mail.
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="registerPanel" class="panel">
+    <div class="field"><label>Prénom et Nom</label><input id="regName" type="text" placeholder="Jean Dupont"/></div>
+    <div class="field"><label>Email</label><input id="regEmail" type="email" placeholder="ton@email.com" autocomplete="email"/></div>
+    <div class="field"><label>Mot de passe (min. 6 caractères)</label><input id="regPass" type="password" placeholder="••••••••" autocomplete="new-password"/></div>
+    <button class="btn" id="regBtn" onclick="doRegister()">Créer mon compte →</button>
+  </div>
+</div>
+
+<script>
+function showForgot(e) {
+  e.preventDefault();
+  const s = document.getElementById('forgotSection');
+  s.style.display = s.style.display === 'none' ? 'block' : 'none';
+}
+async function doForgot() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email) return;
+  const btn = document.getElementById('forgotBtn');
+  btn.disabled = true; btn.textContent = 'Envoi...';
+  await fetch('/api/auth/forgot-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
+  document.getElementById('forgotSuccess').style.display = 'block';
+  btn.style.display = 'none';
+}
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('loginPanel').classList.toggle('active', tab==='login');
+  document.getElementById('registerPanel').classList.toggle('active', tab==='register');
+  showErr('');
+}
+function showErr(msg) {
+  const el = document.getElementById('errMsg');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+function saveToken(token, role, name) {
+  localStorage.setItem('coaching_token', token);
+  localStorage.setItem('coaching_role', role);
+  localStorage.setItem('coaching_name', name || '');
+}
+async function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Connexion…';
+  showErr('');
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPass').value;
+  try {
+    const r = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password}) });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.error || 'Erreur'); return; }
+    saveToken(d.token, d.role, d.name);
+    window.location.href = d.role === 'coach' ? '/coach' : '/client';
+  } catch { showErr('Erreur de connexion'); }
+  finally { btn.disabled=false; btn.textContent='Se connecter →'; }
+}
+async function doRegister() {
+  const btn = document.getElementById('regBtn');
+  btn.disabled = true; btn.textContent = 'Création…';
+  showErr('');
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPass').value;
+  if (!name || !email || !password) { showErr('Tous les champs sont requis'); btn.disabled=false; btn.textContent='Créer mon compte →'; return; }
+  try {
+    const r = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password, name}) });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.error || 'Erreur'); return; }
+    saveToken(d.token, d.role, d.name);
+    window.location.href = '/client';
+  } catch { showErr('Erreur de connexion'); }
+  finally { btn.disabled=false; btn.textContent='Créer mon compte →'; }
+}
+// Enter key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('loginPanel').classList.contains('active')) doLogin();
+    else doRegister();
+  }
+});
+// Already logged in?
+const token = localStorage.getItem('coaching_token');
+const role = localStorage.getItem('coaching_role');
+if (token && role) {
+  fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
+    .then(r => {
+      if (r.ok) {
+        window.location.href = role === 'coach' ? '/coach' : '/client';
+      } else {
+        // Token invalide → on nettoie et on affiche la page de login
+        localStorage.removeItem('coaching_token');
+        localStorage.removeItem('coaching_role');
+        localStorage.removeItem('coaching_name');
+        document.body.style.visibility = 'visible';
+      }
+    })
+    .catch(() => { document.body.style.visibility = 'visible'; });
+} else {
+  document.body.style.visibility = 'visible';
+}
+</script>
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+</body>
+</html>

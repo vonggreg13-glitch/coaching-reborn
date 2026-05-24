@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Mon Espace – GREGVONG COACHING</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#00D4B4;--gold-dark:#00A896;--bg:#0D0B16;--surface:#13111E;
+  --surface2:#1C1A2A;--border:#252336;--text:#F0EFF8;--muted:#7B7A90;
+  --red:#FF4D6D;--orange:#FF9A3C;--green:#00D4B4;
+}
+html{background:var(--bg)}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex:0 0 64px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;gap:3px;border:none;background:none;color:var(--muted);font-family:'Inter',sans-serif;font-size:9px;cursor:pointer;transition:.2s;white-space:nowrap}
+.nav-btn.active{color:var(--gold)}
+.nav-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}
+.header{padding:20px 20px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.header-left{display:flex;flex-direction:column}
+.header-brand{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;color:var(--gold);text-transform:uppercase}
+.header-name{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:800}
+.avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;color:#0D0B16;flex-shrink:0}
+.tab{display:none;padding:16px 20px}
+.tab.active{display:block}
+.scores-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.score-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 8px;text-align:center}
+.score-val{font-family:'Montserrat',sans-serif;font-size:20px;font-weight:900;line-height:1}
+.score-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+.score-green{color:var(--green)}.score-orange{color:var(--orange)}.score-red{color:var(--red)}
+.done-banner{background:rgba(0,212,180,0.1);border:1px solid rgba(0,212,180,0.3);border-radius:14px;padding:16px;text-align:center;margin-bottom:16px}
+.done-banner .icon{font-size:32px;margin-bottom:8px}
+.done-banner h3{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:800;color:var(--gold)}
+.done-banner p{font-size:13px;color:var(--muted);margin-top:4px}
+.checkin-mode-tabs{display:flex;gap:8px;margin-bottom:20px}
+.mode-btn{flex:1;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--muted);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;text-align:center}
+.mode-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(0,212,180,0.08)}
+.progress-bar{height:3px;background:var(--border);border-radius:2px;margin-bottom:20px;overflow:hidden}
+.progress-fill{height:100%;background:var(--gold);border-radius:2px;transition:.3s}
+.question{margin-bottom:20px}
+.q-label{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.q-label span.q-val{color:var(--gold);font-size:15px;font-weight:900}
+.q-sub{font-size:11px;color:var(--muted);margin-bottom:8px}
+input[type=range]{width:100%;-webkit-appearance:none;height:6px;border-radius:3px;background:var(--border);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--gold);cursor:pointer;box-shadow:0 0 8px rgba(0,212,180,.4)}
+.slider-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px}
+.toggle-row{display:flex;gap:8px;flex-wrap:wrap}
+.toggle-btn{padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
+.toggle-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(0,212,180,0.1)}
+.training-extra{display:none;flex-direction:column;gap:12px;margin-top:12px}
+.training-extra.visible{display:flex}
+.input-row{display:flex;gap:8px}
+.input-field{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif}
+.input-field:focus{outline:none;border-color:var(--gold)}
+textarea.input-field{resize:none;height:70px}
+.btn-submit{width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:14px;color:#0D0B16;font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;cursor:pointer;margin-top:8px;letter-spacing:1px}
+.btn-submit:active{opacity:.9;transform:scale(.98)}
+.section-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.history-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:20px}
+.day-cell{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+.day-done{background:rgba(0,212,180,0.2);color:var(--gold)}.day-empty{background:var(--surface);color:var(--muted)}.day-today{border:2px solid var(--gold)}
+.history-list{display:flex;flex-direction:column;gap:8px}
+.history-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px}
+.hi-date{font-size:11px;color:var(--muted);margin-bottom:8px}
+.hi-chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(0,212,180,0.12);color:var(--gold)}
+.chip.red{background:rgba(255,77,109,0.12);color:var(--red)}.chip.orange{background:rgba(255,154,60,0.12);color:var(--orange)}
+.weekly-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.field-group{display:flex;flex-direction:column;gap:4px}
+.field-label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px}
+.divider{height:1px;background:var(--border);margin:16px 0}
+.photo-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.photo-slot{aspect-ratio:3/4;border:2px dashed var(--border);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden;background:var(--surface)}
+.photo-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:10px}
+.photo-slot-label{font-size:11px;color:var(--muted);margin-top:6px;font-weight:600}
+.photo-slot input{display:none}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface);border:1px solid var(--gold);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--gold);z-index:999;transition:.3s;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}.toast.error{border-color:var(--red);color:var(--red)}
+/* SPLASH */
+.splash{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;animation:splashOut 0.4s ease 1.6s forwards}
+@keyframes splashOut{to{opacity:0;pointer-events:none}}
+.splash-logo{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:4px;color:var(--gold);text-transform:uppercase}
+.splash-name{font-family:'Montserrat',sans-serif;font-size:32px;font-weight:900;color:#fff;animation:fadeUp .5s ease .2s both}
+.splash-sub{font-size:13px;color:var(--muted);animation:fadeUp .5s ease .4s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+/* STREAK */
+.streak-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,154,60,0.15);border:1px solid rgba(255,154,60,0.4);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:800;color:var(--orange)}
+/* QUOTE */
+.coach-quote{background:var(--surface);border-left:3px solid var(--gold);border-radius:0 12px 12px 0;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#ccc;font-style:italic;line-height:1.5}
+.coach-quote::before{content:'"';font-size:22px;color:var(--gold);font-family:Georgia,serif;line-height:1;display:block;margin-bottom:4px}
+/* SCORE DELTA */
+.score-delta{font-size:9px;font-weight:700;margin-top:2px}
+.delta-up{color:var(--green)}.delta-down{color:var(--red)}.delta-neu{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="splash" id="splash">
+  <div class="splash-logo">GREGVONG COACHING</div>
+  <div class="splash-name" id="splashName">Bonjour 👋</div>
+  <div class="splash-sub">Méthode REBORN</div>
+</div>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-brand">GREGVONG COACHING</div>
+    <div class="header-name" id="headerName">Mon Espace</div>
+    <div id="streakBadge" style="display:none;margin-top:5px"></div>
+  </div>
+  <label style="cursor:pointer" title="Changer ma photo">
+    <div class="avatar" id="avatarEl">?</div>
+    <input type="file" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+  </label>
+</div>
+
+<!-- TAB CHECKIN -->
+<div class="tab active" id="tab-checkin">
+  <div class="scores-row">
+    <div class="score-card"><div class="score-val" id="s-global">–</div><div class="score-lbl">Forme</div><div class="score-delta" id="d-global"></div></div>
+    <div class="score-card"><div class="score-val" id="s-recup">–</div><div class="score-lbl">Récup</div></div>
+    <div class="score-card"><div class="score-val" id="s-disci">–</div><div class="score-lbl">Discipline</div></div>
+    <div class="score-card"><div class="score-val" id="s-stress">–</div><div class="score-lbl">Anti-stress</div></div>
+  </div>
+  <div id="coachQuote" style="display:none" class="coach-quote"></div>
+  <div id="achievedBanner" style="display:none;background:rgba(0,212,180,0.12);border:1px solid rgba(0,212,180,0.4);border-radius:14px;padding:14px;text-align:center;margin-bottom:16px">
+    <div style="font-size:28px">🏆</div>
+    <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;color:var(--gold);margin-top:6px" id="achievedText">Objectif atteint !</div>
+  </div>
+
+
+  <div id="doneBanner" class="done-banner" style="display:none">
+    <div class="icon">✅</div>
+    <h3>Check-in validé aujourd'hui !</h3>
+    <p id="doneTime">Continue comme ça 💪</p>
+    <button class="mode-btn" style="margin-top:12px;max-width:220px;margin:12px auto 0" onclick="showForm()">Modifier mes réponses</button>
+  </div>
+
+  <div id="checkinForm">
+    <div class="checkin-mode-tabs">
+      <button class="mode-btn active" id="modeExpress" onclick="setMode('express')">⚡ Express<br/><span style="font-size:10px;font-weight:400">~2 min</span></button>
+      <button class="mode-btn" id="modeComplet" onclick="setMode('complet')">📋 Complet<br/><span style="font-size:10px;font-weight:400">~4 min</span></button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+    <form id="formDaily" onsubmit="submitDaily(event)">
+
+      <div class="question">
+        <div class="q-label">⚡ Énergie <span class="q-val" id="v-energie">5</span>/10</div>
+        <div class="q-sub">Comment tu te sens physiquement ?</div>
+        <input type="range" min="1" max="10" value="5" oninput="updateSlider(this,'v-energie')" name="energie" id="r-energie"/>
+        <div class="slider-labels"><span>😴 Épuisé</span><span>🔥 Au top</span></div>
+      </div>
+
+      <div class="question">
+        <div class="q-label">😤 Stress <span class="q-val" id="v-stress">5</span>/10</div>
+        <div class="q-sub">1 = zen total · 10 = très stressé</div>
+        <input type="range" min="1" max="10" value="5" oninput="updateSlider(this,'v-stress')" name="stress" id="r-stress"/>
+        <div class="slider-labels"><span>😌 Zen</span><span>🤯 Stressé</span></div>
+      </div>
+
+      <div class="question">
+        <div class="q-label">🌙 Sommeil <span class="q-val" id="v-sommeil">5</span>/10</div>
+        <div class="q-sub">Qualité de ta nuit ?</div>
+        <input type="range" min="1" max="10" value="5" oninput="updateSlider(this,'v-sommeil')" name="sommeil_qualite" id="r-sommeil"/>
+        <div class="slider-labels"><span>💤 Très mal</span><span>😴 Excellent</span></div>
+      </div>
+
+      <div class="question">
+        <div class="q-label">🎯 Motivation <span class="q-val" id="v-motivation">5</span>/10</div>
+        <input type="range" min="1" max="10" value="5" oninput="updateSlider(this,'v-motivation')" name="motivation" id="r-motivation"/>
+        <div class="slider-labels"><span>😞 Zéro</span><span>🚀 Maximum</span></div>
+      </div>
+
+      <div class="question">
+        <div class="q-label">🫁 Digestion <span class="q-val" id="v-digestion">5</span>/10</div>
+        <input type="range" min="1" max="10" value="5" oninput="updateSlider(this,'v-digestion')" name="digestion" id="r-digestion"/>
+        <div class="slider-labels"><span>😣 Mauvaise</span><span>✅ Parfaite</span></div>
+      </div>
+
+      <div class="question">
+        <div class="q-label">📋 Protocole suivi ?</div>
+        <div class="toggle-row">
+          <button type="button" class="toggle-btn active" id="proto-oui" onclick="setToggle('protocol','oui')">✅ Oui, tout</button>
+          <button type="button" class="toggle-btn" id="proto-partiel" onclick="setToggle('protocol','partiel')">⚠️ Partiel</button>
+          <button type="button" class="toggle-btn" id="proto-non" onclick="setToggle('protocol','non')">❌ Non</button>
+        </div>
+        <input type="hidden" name="protocol_done" id="h-protocol" value="1"/>
+      </div>
+
+      <div class="question">
+        <div class="q-label">🏋️ Séance réalisée ?</div>
+        <div class="toggle-row">
+          <button type="button" class="toggle-btn active" id="train-oui" onclick="setTraining(true)">✅ Oui</button>
+          <button type="button" class="toggle-btn" id="train-non" onclick="setTraining(false)">❌ Non / Repos</button>
+        </div>
+        <input type="hidden" name="training_done" id="h-training" value="1"/>
+        <div class="training-extra visible" id="trainingExtra">
+          <div class="input-row">
+            <select class="input-field" name="training_type">
+              <option value="">Type de séance</option>
+              <option value="muscu">💪 Musculation</option>
+              <option value="cardio">🏃 Cardio</option>
+              <option value="hiit">⚡ HIIT</option>
+              <option value="yoga">🧘 Yoga / Mobilité</option>
+              <option value="marche">🚶 Marche active</option>
+              <option value="autre">Autre</option>
+            </select>
+            <input class="input-field" type="number" name="training_duree" placeholder="Durée (min)" min="0" max="240" style="max-width:110px"/>
+          </div>
+          <div class="question" style="margin:0">
+            <div class="q-label">Intensité perçue <span class="q-val" id="v-intensite">5</span>/10</div>
+            <input type="range" min="1" max="10" value="5" oninput="updateSlider(this,'v-intensite')" name="training_intensite"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION COMPLETE UNIQUEMENT -->
+      <div id="completeSection" style="display:none">
+
+        <div class="question">
+          <div class="q-label">💧 Hydratation <span class="q-val" id="v-hydrat">5</span>/10</div>
+          <div class="q-sub">Est-ce que tu as bien bu ?</div>
+          <input type="range" min="1" max="10" value="5" oninput="updateSlider(this,'v-hydrat')" name="hydratation"/>
+          <div class="slider-labels"><span>🏜️ Très peu</span><span>💧 Très bien</span></div>
+        </div>
+
+        <div class="question">
+          <div class="q-label">🥗 Nutrition respectée <span class="q-val" id="v-nutri">5</span>/10</div>
+          <input type="range" min="1" max="10" value="5" oninput="updateSlider(this,'v-nutri')" name="respect_nutrition"/>
+          <div class="slider-labels"><span>❌ Hors plan</span><span>✅ Plan parfait</span></div>
+        </div>
+
+        <div class="question">
+          <div class="q-label">🍫 Fringales aujourd'hui ?</div>
+          <div class="toggle-row">
+            <button type="button" class="toggle-btn" id="fring-oui" onclick="setFringales(true)">Oui 😩</button>
+            <button type="button" class="toggle-btn active" id="fring-non" onclick="setFringales(false)">Non ✅</button>
+          </div>
+          <input type="hidden" name="fringales" id="h-fringales" value="0"/>
+        </div>
+
+        <div class="question">
+          <div class="q-label">🏆 Fierté du jour <span class="q-val" id="v-fierte">5</span>/10</div>
+          <input type="range" min="1" max="10" value="5" oninput="updateSlider(this,'v-fierte')" name="fierte"/>
+          <div class="slider-labels"><span>😞</span><span>🏆</span></div>
+        </div>
+
+        <div class="question">
+          <div class="q-label">🌙 Heure de sommeil <span style="font-size:10px;color:var(--muted);font-weight:400">(optionnel)</span></div>
+          <div class="input-row">
+            <div style="flex:1"><div class="field-label" style="margin-bottom:4px">Coucher</div><input class="input-field" type="time" name="sommeil_heure_coucher"/></div>
+            <div style="flex:1"><div class="field-label" style="margin-bottom:4px">Réveil</div><input class="input-field" type="time" name="sommeil_heure_reveil"/></div>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-label">🚶 Nombre de pas <span style="font-size:10px;color:var(--muted);font-weight:400">(optionnel)</span></div>
+          <input class="input-field" type="number" name="pas" placeholder="ex: 8500" min="0" max="50000"/>
+        </div>
+
+      </div>
+
+      <div class="question">
+        <div class="q-label">💬 Ressenti <span style="font-size:10px;color:var(--muted);font-weight:400">(optionnel)</span></div>
+        <textarea class="input-field" name="ressenti" id="t-ressenti" placeholder="Quelque chose à partager avec ton coach ?"></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">VALIDER MON CHECK-IN ✓</button>
+    </form>
+  </div>
+</div>
+
+<!-- TAB HEBDO -->
+<div class="tab" id="tab-hebdo">
+  <div class="section-title">Bilan de la semaine</div>
+  <form id="formWeekly" onsubmit="submitWeekly(event)">
+    <div class="section-title" style="margin-bottom:8px;margin-top:4px">📊 Physique</div>
+    <div class="weekly-grid">
+      <div class="field-group"><div class="field-label">Poids (kg)</div><input class="input-field" type="number" name="poids" step="0.1" placeholder="72.5"/></div>
+      <div class="field-group"><div class="field-label">Masse grasse (%)</div><input class="input-field" type="number" name="masse_grasse" step="0.1" placeholder="18.5"/></div>
+      <div class="field-group"><div class="field-label">Tour de taille (cm)</div><input class="input-field" type="number" name="tour_taille" placeholder="80"/></div>
+      <div class="field-group"><div class="field-label">Tour de hanches (cm)</div><input class="input-field" type="number" name="tour_hanches" placeholder="95"/></div>
+      <div class="field-group"><div class="field-label">Bras gauche (cm)</div><input class="input-field" type="number" name="tour_bras_g" placeholder="34"/></div>
+      <div class="field-group"><div class="field-label">Bras droit (cm)</div><input class="input-field" type="number" name="tour_bras_d" placeholder="34"/></div>
+      <div class="field-group"><div class="field-label">Cuisse gauche (cm)</div><input class="input-field" type="number" name="tour_cuisse_g" placeholder="55"/></div>
+      <div class="field-group"><div class="field-label">Cuisse droite (cm)</div><input class="input-field" type="number" name="tour_cuisse_d" placeholder="55"/></div>
+      <div class="field-group"><div class="field-label">Mollet (cm)</div><input class="input-field" type="number" name="tour_mollet" placeholder="36"/></div>
+      <div class="field-group"><div class="field-label">Poitrine (cm)</div><input class="input-field" type="number" name="tour_poitrine" placeholder="95"/></div>
+      <div class="field-group" style="grid-column:span 2"><div class="field-label">Séances réalisées cette semaine</div><input class="input-field" type="number" name="entrainements" placeholder="3" min="0" max="14"/></div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-title">🏆 Bilan</div>
+    <div class="question"><div class="q-label">Victoires de la semaine ✅</div><textarea class="input-field" name="victoires" placeholder="Ce qui s'est bien passé..."></textarea></div>
+    <div class="question"><div class="q-label">Difficultés rencontrées ⚠️</div><textarea class="input-field" name="difficultes" placeholder="Ce qui a été dur..."></textarea></div>
+    <div class="question"><div class="q-label">Note pour ton coach 💬</div><textarea class="input-field" name="notes" placeholder="Quelque chose à me communiquer ?"></textarea></div>
+    <button type="submit" class="btn-submit">ENVOYER MON BILAN ✓</button>
+  </form>
+</div>
+
+<!-- TAB PHOTOS -->
+<div class="tab" id="tab-photos">
+  <div class="section-title">Photos progrès</div>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Semaine <span id="currentWeek" style="color:var(--gold)"></span></p>
+  <div class="photo-slots">
+    <div class="photo-slot" onclick="document.getElementById('ph-front').click()">
+      <span style="font-size:24px">📸</span><span class="photo-slot-label">Face</span>
+      <img id="prev-front" style="display:none"/>
+      <input type="file" id="ph-front" accept="image/*" onchange="previewPhoto(this,'prev-front')"/>
+    </div>
+    <div class="photo-slot" onclick="document.getElementById('ph-side').click()">
+      <span style="font-size:24px">📸</span><span class="photo-slot-label">Côté</span>
+      <img id="prev-side" style="display:none"/>
+      <input type="file" id="ph-side" accept="image/*" onchange="previewPhoto(this,'prev-side')"/>
+    </div>
+    <div class="photo-slot" onclick="document.getElementById('ph-back').click()">
+      <span style="font-size:24px">📸</span><span class="photo-slot-label">Dos</span>
+      <img id="prev-back" style="display:none"/>
+      <input type="file" id="ph-back" accept="image/*" onchange="previewPhoto(this,'prev-back')"/>
+    </div>
+  </div>
+  <button class="btn-submit" onclick="uploadPhotos()">ENVOYER MES PHOTOS 📸</button>
+  <div id="photoHistory" style="margin-top:24px"></div>
+
+  <div class="divider"></div>
+  <div class="section-title">🍽️ Photos repas</div>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Prends en photo tes repas pour le suivi nutrition</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+    <button class="mode-btn active" id="meal-pdj" onclick="setMealType('petit-dejeuner',this)">☀️ Petit-déj</button>
+    <button class="mode-btn" id="meal-dej" onclick="setMealType('dejeuner',this)">🌞 Déjeuner</button>
+    <button class="mode-btn" id="meal-din" onclick="setMealType('diner',this)">🌙 Dîner</button>
+    <button class="mode-btn" id="meal-col" onclick="setMealType('collation',this)">🍎 Collation</button>
+  </div>
+
+  <div class="photo-slot" style="width:100%;margin-bottom:12px" onclick="document.getElementById('ph-meal').click()">
+    <span style="font-size:32px">🍽️</span>
+    <span class="photo-slot-label">Appuie pour prendre une photo</span>
+    <img id="prev-meal" style="display:none;width:100%;border-radius:10px;margin-top:8px"/>
+    <input type="file" id="ph-meal" accept="image/*" capture="environment" onchange="previewMeal(this)"/>
+  </div>
+  <button class="btn-submit" onclick="uploadMealPhoto()" id="btnMeal">ENVOYER LA PHOTO 🍽️</button>
+  <div id="mealHistory" style="margin-top:20px"></div>
+</div>
+
+<!-- TAB HISTORIQUE -->
+<div class="tab" id="tab-historique">
+  <div class="section-title">7 derniers jours</div>
+  <div class="history-grid" id="historyGrid"></div>
+
+  <div class="section-title" style="margin-top:16px">📈 Ma progression</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px">
+    <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;margin-bottom:10px">ÉNERGIE / STRESS / SOMMEIL (30j)</div>
+    <canvas id="clientChartDaily" height="140"></canvas>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px">
+    <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;margin-bottom:10px">POIDS (kg)</div>
+    <canvas id="clientChartPoids" height="140"></canvas>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px">
+    <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;margin-bottom:10px">MOTIVATION / DIGESTION (30j)</div>
+    <canvas id="clientChartMot" height="140"></canvas>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:16px">
+    <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;margin-bottom:10px">MENSURATIONS (cm)</div>
+    <canvas id="clientChartMens" height="140"></canvas>
+  </div>
+
+  <div class="section-title">Historique</div>
+  <div class="history-list" id="historyList"></div>
+
+  <div style="margin-top:20px;padding-bottom:4px">
+    <button onclick="exportPDF()" style="width:100%;padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">
+      📄 Exporter mon rapport PDF
+    </button>
+  </div>
+</div>
+
+<!-- TAB MESSAGES -->
+<div class="tab" id="tab-messages">
+  <div class="section-title">💬 Messages avec mon coach</div>
+  <div id="msgList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;min-height:100px"></div>
+  <div style="display:flex;gap:8px;position:sticky;bottom:84px;background:var(--bg);padding:10px 0">
+    <textarea id="msgInput" class="input-field" placeholder="Écris ton message…" style="height:50px;flex:1;resize:none"></textarea>
+    <button onclick="sendMessage()" style="padding:10px 16px;background:var(--gold);border:none;border-radius:10px;color:#050505;font-weight:800;cursor:pointer;align-self:flex-end;white-space:nowrap">Envoyer</button>
+  </div>
+</div>
+
+<!-- TAB PROGRAMME -->
+<div class="tab" id="tab-programme">
+  <div class="section-title">📋 Mon programme</div>
+  <div id="progList"></div>
+</div>
+
+<!-- TAB OBJECTIFS -->
+<div class="tab" id="tab-objectifs">
+  <div class="section-title">🎯 Mes objectifs</div>
+  <div id="goalsList" style="display:flex;flex-direction:column;gap:10px">
+    <p style="color:var(--muted);text-align:center;padding:40px 0">Ton coach n'a pas encore défini d'objectifs.</p>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" id="nav-checkin" onclick="showTab('checkin')">
+    <svg viewBox="0 0 24 24"><polyline points="9,11 12,14 22,4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Check-in
+  </button>
+  <button class="nav-btn" id="nav-hebdo" onclick="showTab('hebdo')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Bilan
+  </button>
+  <button class="nav-btn" id="nav-messages" onclick="showTab('messages')" style="position:relative">
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span id="msgBadge" style="display:none;position:absolute;top:6px;right:14px;background:var(--red);color:#fff;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:800;display:none;align-items:center;justify-content:center">!</span>
+    Messages
+  </button>
+  <button class="nav-btn" id="nav-programme" onclick="showTab('programme')">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Programme
+  </button>
+  <button class="nav-btn" id="nav-objectifs" onclick="showTab('objectifs')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Objectifs
+  </button>
+  <button class="nav-btn" id="nav-photos" onclick="showTab('photos')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>Photos
+  </button>
+  <button class="nav-btn" id="nav-historique" onclick="showTab('historique')">
+    <svg viewBox="0 0 24 24"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>Stats
+  </button>
+  <a class="nav-btn" href="/cycle" style="text-decoration:none;color:var(--muted)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 6.36 15.36"/><circle cx="12" cy="12" r="3"/></svg>Cycle
+  </a>
+  <a class="nav-btn" href="https://calendly.com/gregvong-coaching/30min" target="_blank" style="text-decoration:none;color:var(--gold)">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>RDV Coach
+  </a>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+const TOKEN = localStorage.getItem('coaching_token');
+const NAME  = localStorage.getItem('coaching_name');
+const ROLE  = localStorage.getItem('coaching_role');
+if (!TOKEN) location.href = '/login';
+if (ROLE === 'coach') location.href = '/coach';
+document.getElementById('headerName').textContent = NAME || 'Mon Espace';
+document.getElementById('avatarEl').textContent = (NAME||'?')[0].toUpperCase();
+document.getElementById('currentWeek').textContent = getWeekStr();
+
+function authHeaders(){ return {'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'}; }
+
+async function loadScores(){
+  try{
+    const r = await fetch('/api/client/scores',{headers:authHeaders()});
+    const s = await r.json();
+    const set=(id,v)=>{
+      const el=document.getElementById(id);if(!el)return;
+      el.textContent=v||'–';
+      el.className='score-val '+(v>=7?'score-green':v>=4.5?'score-orange':'score-red');
+    };
+    set('s-global',s.global);set('s-recup',s.recuperation);
+    set('s-disci',s.discipline);set('s-stress',s.stress);
+  }catch(_){}
+}
+
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  const navEl = document.getElementById('nav-'+t);
+  if(navEl) navEl.classList.add('active');
+  if(t==='historique'){loadHistory();renderClientCharts();}
+  if(t==='photos'){loadPhotoHistory();loadMealHistory();}
+  if(t==='messages')loadMessages();
+  if(t==='objectifs')loadGoals();
+  if(t==='programme')loadProgrammes();
+  if(t==='hebdo')loadWeeklyForm();
+}
+
+function setMode(mode){
+  document.getElementById('modeExpress').classList.toggle('active',mode==='express');
+  document.getElementById('modeComplet').classList.toggle('active',mode==='complet');
+  document.getElementById('completeSection').style.display=mode==='complet'?'block':'none';
+  updateProgress();
+}
+
+function showForm(){
+  document.getElementById('doneBanner').style.display='none';
+  document.getElementById('checkinForm').style.display='block';
+  if(window.lastCheckin) prefillDailyForm(window.lastCheckin);
+}
+
+function prefillDailyForm(c){
+  const setSlider=(id,valId,val)=>{const el=document.getElementById(id);if(el&&val!=null){el.value=val;const v=document.getElementById(valId);if(v)v.textContent=val;}};
+  setSlider('r-energie','v-energie',c.energie);
+  setSlider('r-stress','v-stress',c.stress);
+  setSlider('r-sommeil','v-sommeil',c.sommeil_qualite);
+  setSlider('r-motivation','v-motivation',c.motivation);
+  setSlider('r-digestion','v-digestion',c.digestion);
+  const qSlider=(name,valId,val)=>{const el=document.querySelector(`[name="${name}"]`);if(el&&val!=null){el.value=val;const v=document.getElementById(valId);if(v)v.textContent=val;}};
+  qSlider('hydratation','v-hydrat',c.hydratation);
+  qSlider('respect_nutrition','v-nutri',c.respect_nutrition);
+  qSlider('fierte','v-fierte',c.fierte);
+  if(c.protocol_done!=null) setToggle('protocol',c.protocol_done?'oui':'non');
+  setTraining(c.training_done==1);
+  if(c.training_done==1){
+    const tt=document.querySelector('[name=training_type]');if(tt) tt.value=c.training_type||'';
+    const td=document.querySelector('[name=training_duree]');if(td) td.value=c.training_duree||'';
+    const ti=document.querySelector('[name=training_intensite]');if(ti&&c.training_intensite){ti.value=c.training_intensite;document.getElementById('v-intensite').textContent=c.training_intensite;}
+  }
+  setFringales(c.fringales==1);
+  const shc=document.querySelector('[name=sommeil_heure_coucher]');if(shc) shc.value=c.sommeil_heure_coucher||'';
+  const shr=document.querySelector('[name=sommeil_heure_reveil]');if(shr) shr.value=c.sommeil_heure_reveil||'';
+  const pas=document.querySelector('[name=pas]');if(pas) pas.value=c.pas||'';
+  const res=document.getElementById('t-ressenti');if(res) res.value=c.ressenti||'';
+  if(c.hydratation||c.respect_nutrition||c.fierte!=null||c.fringales!=null){setMode('complet');}
+  updateProgress();
+}
+
+function updateSlider(el,id){
+  document.getElementById(id).textContent=el.value;
+  updateProgress();
+}
+
+function updateProgress(){
+  const sliders=document.querySelectorAll('#formDaily input[type=range]');
+  let filled=0;
+  sliders.forEach(s=>{if(parseInt(s.value)!==5)filled++;});
+  document.getElementById('progressFill').style.width=Math.min(100,Math.round(filled/sliders.length*100))+'%';
+}
+
+function setToggle(name,val){
+  if(name==='protocol'){
+    ['oui','partiel','non'].forEach(v=>document.getElementById('proto-'+v).classList.remove('active'));
+    document.getElementById('proto-'+val).classList.add('active');
+    document.getElementById('h-protocol').value=val==='oui'?1:0;
+  }
+}
+
+function setTraining(done){
+  document.getElementById('train-oui').classList.toggle('active',done);
+  document.getElementById('train-non').classList.toggle('active',!done);
+  document.getElementById('h-training').value=done?1:0;
+  document.getElementById('trainingExtra').classList.toggle('visible',done);
+}
+
+function setFringales(val){
+  document.getElementById('fring-oui').classList.toggle('active',val);
+  document.getElementById('fring-non').classList.toggle('active',!val);
+  document.getElementById('h-fringales').value=val?1:0;
+}
+
+async function loadToday(){
+  const r=await fetch('/api/client/today',{headers:authHeaders()});
+  const data=await r.json();
+  if(data.checkin){
+    window.lastCheckin=data.checkin;
+    const c=data.checkin;
+    document.getElementById('doneBanner').style.display='block';
+    document.getElementById('checkinForm').style.display='none';
+    document.getElementById('doneTime').textContent=`⚡ ${c.energie}/10 · 😤 Stress ${c.stress||5}/10 · 🌙 Sommeil ${c.sommeil_qualite||5}/10`;
+  }
+}
+
+async function submitDaily(e){
+  e.preventDefault();
+  const fd=new FormData(e.target);
+  const body={};
+  fd.forEach((v,k)=>body[k]=v===''?v:(isNaN(Number(v))?v:Number(v)));
+  const btn=document.getElementById('submitBtn');
+  btn.textContent='⏳ Envoi...';btn.disabled=true;
+  const r=await fetch('/api/client/daily',{method:'POST',headers:authHeaders(),body:JSON.stringify(body)});
+  const data=await r.json();
+  if(data.success){
+    showToast('✅ Check-in validé !');
+    if(navigator.vibrate) navigator.vibrate([80,40,80]);
+    loadToday();loadScores();
+  }
+  else showToast(data.error||'Erreur',true);
+  btn.textContent='VALIDER MON CHECK-IN ✓';btn.disabled=false;
+}
+
+async function submitWeekly(e){
+  e.preventDefault();
+  const fd=new FormData(e.target);const body={};
+  fd.forEach((v,k)=>body[k]=v===''?undefined:(isNaN(Number(v))?v:Number(v)));
+  const r=await fetch('/api/client/weekly',{method:'POST',headers:authHeaders(),body:JSON.stringify(body)});
+  const data=await r.json();
+  if(data.success){showToast('✅ Bilan mis à jour !');}
+  else showToast(data.error||'Erreur',true);
+}
+
+async function loadWeeklyForm(){
+  try{
+    const r=await fetch('/api/client/weekly',{headers:authHeaders()});
+    const rows=await r.json();
+    if(!rows.length) return;
+    const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+3-((d.getDay()+6)%7));
+    const week1=new Date(d.getFullYear(),0,4);
+    const wn=1+Math.round(((d-week1)/86400000-3+(week1.getDay()+6)%7)/7);
+    const currentWeek=`${d.getFullYear()}-W${String(wn).padStart(2,'0')}`;
+    const current=rows.find(row=>row.week===currentWeek);
+    if(!current) return;
+    const form=document.getElementById('formWeekly');
+    ['poids','masse_grasse','tour_taille','tour_hanches','tour_bras_g','tour_bras_d','tour_cuisse_g','tour_cuisse_d','tour_mollet','tour_poitrine','entrainements'].forEach(k=>{
+      const el=form.querySelector(`[name=${k}]`);if(el&&current[k]!=null) el.value=current[k];
+    });
+    ['victoires','difficultes','notes'].forEach(k=>{
+      const el=form.querySelector(`[name=${k}]`);if(el&&current[k]) el.value=current[k];
+    });
+  }catch(_){}
+}
+
+async function loadHistory(){
+  const r=await fetch('/api/client/history',{headers:authHeaders()});
+  const rows=await r.json();
+  const grid=document.getElementById('historyGrid');
+  grid.innerHTML='';
+  const today=new Date();
+  for(let i=6;i>=0;i--){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    const found=rows.find(r=>r.date===ds);
+    const day=d.toLocaleDateString('fr-FR',{weekday:'narrow'});
+    const cell=document.createElement('div');
+    cell.className='day-cell '+(found?'day-done':'day-empty')+(i===0?' day-today':'');
+    cell.innerHTML=`<span style="text-align:center">${day}<br/>${d.getDate()}</span>`;
+    grid.appendChild(cell);
+  }
+  const list=document.getElementById('historyList');
+  list.innerHTML=rows.length?'':'<p style="color:var(--muted);text-align:center">Aucun historique</p>';
+  rows.forEach(r=>{
+    const item=document.createElement('div');item.className='history-item';
+    const chips=[
+      {l:'⚡',v:r.energie},{l:'😤',v:r.stress},{l:'🌙',v:r.sommeil_qualite},
+      {l:'🎯',v:r.motivation},{l:'🫁',v:r.digestion}
+    ].filter(c=>c.v!=null);
+    item.innerHTML=`
+      <div class="hi-date">${new Date(r.date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</div>
+      <div class="hi-chips">
+        ${chips.map(c=>`<span class="chip ${c.v<=4?'red':c.v<=6?'orange':''}">${c.l} ${c.v}/10</span>`).join('')}
+        ${r.protocol_done?'<span class="chip">✅ Protocole</span>':''}
+        ${r.training_done?'<span class="chip">🏋️ Séance</span>':''}
+        ${r.fringales?'<span class="chip orange">🍫 Fringales</span>':''}
+      </div>
+      ${r.ressenti?`<p style="font-size:12px;color:var(--muted);margin-top:8px;font-style:italic">"${r.ressenti}"</p>`:''}
+    `;
+    list.appendChild(item);
+  });
+}
+
+function previewPhoto(input,previewId){
+  if(input.files&&input.files[0]){
+    const img=document.getElementById(previewId);
+    img.src=URL.createObjectURL(input.files[0]);img.style.display='block';
+    img.parentElement.querySelector('span:not(.photo-slot-label)').style.display='none';
+  }
+}
+
+async function uploadPhotos(){
+  const fd=new FormData();
+  [{id:'ph-front',type:'front'},{id:'ph-side',type:'side'},{id:'ph-back',type:'back'}].forEach(s=>{
+    const f=document.getElementById(s.id).files[0];
+    if(f){fd.append('photos',f);fd.append('types',s.type);}
+  });
+  if(!fd.has('photos'))return showToast('Sélectionne au moins une photo',true);
+  const r=await fetch('/api/client/photos',{method:'POST',headers:{'Authorization':'Bearer '+TOKEN},body:fd});
+  const data=await r.json();
+  if(data.success){showToast(`✅ ${data.count} photo(s) envoyée(s) !`);loadPhotoHistory();}
+  else showToast(data.error||'Erreur',true);
+}
+
+async function loadPhotoHistory(){
+  const r=await fetch('/api/client/photos',{headers:authHeaders()});
+  const photos=await r.json();
+  const el=document.getElementById('photoHistory');
+  if(!photos.length){el.innerHTML='';return;}
+
+  // Comparaison avant/après (première et dernière photo)
+  let compareHtml = '';
+  if(photos.length >= 2){
+    const first = photos[photos.length - 1];
+    const last = photos[0];
+    compareHtml = `
+      <div class="section-title">Avant / Après</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+        <div style="position:relative">
+          <img src="/uploads/${first.filename}" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px">
+          <div style="position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.7);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px">AVANT · ${first.week}</div>
+        </div>
+        <div style="position:relative">
+          <img src="/uploads/${last.filename}" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px">
+          <div style="position:absolute;bottom:8px;right:8px;background:var(--gold);color:#050505;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px">MAINTENANT · ${last.week}</div>
+        </div>
+      </div>`;
+  }
+
+  const byWeek={};
+  photos.forEach(p=>{if(!byWeek[p.week])byWeek[p.week]=[];byWeek[p.week].push(p);});
+  el.innerHTML= compareHtml + Object.entries(byWeek).slice(0,4).map(([week,ps])=>`
+    <div style="margin-bottom:20px">
+      <div class="section-title">${week}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${ps.map(p=>`<img src="/uploads/${p.filename}" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px">`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+let currentMealType = 'petit-dejeuner';
+function setMealType(type, btn) {
+  currentMealType = type;
+  document.querySelectorAll('#meal-pdj,#meal-dej,#meal-din,#meal-col').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function previewMeal(input) {
+  const img = document.getElementById('prev-meal');
+  if (input.files[0]) { img.src = URL.createObjectURL(input.files[0]); img.style.display = 'block'; }
+}
+async function uploadMealPhoto() {
+  const file = document.getElementById('ph-meal').files[0];
+  if (!file) return showToast('Prends une photo d\'abord', true);
+  const fd = new FormData();
+  fd.append('photo', file);
+  fd.append('meal_type', currentMealType);
+  const btn = document.getElementById('btnMeal');
+  btn.disabled = true; btn.textContent = 'Envoi…';
+  const r = await fetch('/api/client/meal-photos', { method:'POST', headers:{'Authorization':'Bearer '+TOKEN}, body:fd });
+  const data = await r.json();
+  btn.disabled = false; btn.textContent = 'ENVOYER LA PHOTO 🍽️';
+  if (data.success) {
+    showToast('✅ Photo repas envoyée !');
+    document.getElementById('ph-meal').value = '';
+    document.getElementById('prev-meal').style.display = 'none';
+    loadMealHistory();
+  } else showToast(data.error || 'Erreur', true);
+}
+async function loadMealHistory() {
+  const r = await fetch('/api/client/meal-photos', { headers: authHeaders() });
+  const photos = await r.json();
+  const el = document.getElementById('mealHistory');
+  if (!photos.length) { el.innerHTML = ''; return; }
+  const labels = { 'petit-dejeuner':'☀️ Petit-déj','dejeuner':'🌞 Déjeuner','diner':'🌙 Dîner','collation':'🍎 Collation' };
+  el.innerHTML = `<div class="section-title">Mes derniers repas</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      ${photos.slice(0,9).map(p=>`
+        <div style="position:relative">
+          <img src="/uploads/${p.filename}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px">
+          <div style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,0.7);font-size:9px;padding:2px 5px;border-radius:6px;color:#fff">${labels[p.meal_type]||p.meal_type}</div>
+        </div>`).join('')}
+    </div>`;
+}
+
+let clientChartsInit = false;
+async function renderClientCharts() {
+  if (clientChartsInit) return;
+  clientChartsInit = true;
+  const chartDefaults = { responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#7B7A90', font: { size: 10 } } } },
+    scales: {
+      x: { ticks: { color: '#7B7A90', font: { size: 9 }, maxTicksLimit: 8 }, grid: { color: '#252336' } },
+      y: { ticks: { color: '#7B7A90', font: { size: 9 } }, grid: { color: '#252336' } }
+    }
+  };
+  const [dailyRes, weeklyRes] = await Promise.all([
+    fetch('/api/client/history', { headers: authHeaders() }),
+    fetch('/api/client/weekly', { headers: authHeaders() })
+  ]);
+  const daily = (await dailyRes.json()).slice().reverse();
+  const weekly = (await weeklyRes.json()).slice().reverse();
+  const labels30 = daily.map(r => r.date.slice(5));
+  const wLabels = weekly.map(r => r.week.replace(/(\d{4})-W(\d+)/, 'S$2'));
+
+  new Chart(document.getElementById('clientChartDaily'), {
+    type: 'line',
+    data: {
+      labels: labels30,
+      datasets: [
+        { label: 'Énergie', data: daily.map(r => r.energie), borderColor: '#00D4B4', backgroundColor: 'rgba(0,212,180,.08)', tension: .4, pointRadius: 2, fill: true },
+        { label: 'Stress', data: daily.map(r => r.stress), borderColor: '#FF4D6D', backgroundColor: 'rgba(255,77,109,.05)', tension: .4, pointRadius: 2 },
+        { label: 'Sommeil', data: daily.map(r => r.sommeil_qualite), borderColor: '#9B8FFF', backgroundColor: 'rgba(155,143,255,.05)', tension: .4, pointRadius: 2 }
+      ]
+    },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, min: 0, max: 10 } } }
+  });
+
+  const poidsData = weekly.map(r => r.poids);
+  const trendData = (() => {
+    const pts = poidsData.map((y, x) => ({ x, y })).filter(p => p.y != null);
+    if (pts.length < 2) return poidsData;
+    const n = pts.length;
+    const sx = pts.reduce((s, p) => s + p.x, 0), sy = pts.reduce((s, p) => s + p.y, 0);
+    const sxy = pts.reduce((s, p) => s + p.x * p.y, 0), sx2 = pts.reduce((s, p) => s + p.x * p.x, 0);
+    const slope = (n * sxy - sx * sy) / (n * sx2 - sx * sx);
+    const intercept = (sy - slope * sx) / n;
+    return poidsData.map((_, i) => Math.round((slope * i + intercept) * 10) / 10);
+  })();
+  new Chart(document.getElementById('clientChartPoids'), {
+    type: 'line',
+    data: {
+      labels: wLabels,
+      datasets: [
+        { label: 'Poids (kg)', data: poidsData, borderColor: '#00D4B4', backgroundColor: 'rgba(0,212,180,.1)', tension: .4, pointRadius: 3, fill: true },
+        { label: 'Tendance', data: trendData, borderColor: 'rgba(255,154,60,0.7)', borderDash: [5,4], pointRadius: 0, tension: 0, fill: false }
+      ]
+    },
+    options: chartDefaults
+  });
+
+  new Chart(document.getElementById('clientChartMot'), {
+    type: 'line',
+    data: {
+      labels: labels30,
+      datasets: [
+        { label: 'Motivation', data: daily.map(r => r.motivation), borderColor: '#FF9A3C', backgroundColor: 'rgba(255,154,60,.08)', tension: .4, pointRadius: 2 },
+        { label: 'Digestion', data: daily.map(r => r.digestion), borderColor: '#00D4B4', backgroundColor: 'rgba(0,212,180,.05)', tension: .4, pointRadius: 2 }
+      ]
+    },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, min: 0, max: 10 } } }
+  });
+
+  new Chart(document.getElementById('clientChartMens'), {
+    type: 'line',
+    data: {
+      labels: wLabels,
+      datasets: [
+        { label: 'Taille', data: weekly.map(r => r.tour_taille), borderColor: '#00D4B4', tension: .4, pointRadius: 3 },
+        { label: 'Hanches', data: weekly.map(r => r.tour_hanches), borderColor: '#FF4D6D', tension: .4, pointRadius: 3 },
+        { label: 'Bras G', data: weekly.map(r => r.tour_bras_g), borderColor: '#FF9A3C', tension: .4, pointRadius: 3 }
+      ]
+    },
+    options: chartDefaults
+  });
+}
+
+function getWeekStr(){
+  const d=new Date();d.setHours(0,0,0,0);
+  d.setDate(d.getDate()+3-((d.getDay()+6)%7));
+  const w1=new Date(d.getFullYear(),0,4);
+  const wn=1+Math.round(((d-w1)/86400000-3+(w1.getDay()+6)%7)/7);
+  return `${d.getFullYear()}-W${String(wn).padStart(2,'0')}`;
+}
+
+function showToast(msg,isError=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(isError?' error':'');
+  setTimeout(()=>t.className='toast',3000);
+}
+
+// ── PROGRAMMES ────────────────────────────────────────────
+async function loadProgrammes() {
+  const r = await fetch('/api/client/programs', { headers: authHeaders() });
+  const programs = await r.json();
+  const el = document.getElementById('progList');
+  if (!programs.length) {
+    el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:40px 0">Ton coach n\'a pas encore envoyé de programme.</p>';
+    return;
+  }
+  el.innerHTML = programs.map((p, i) => `
+    <div style="margin-bottom:16px">
+      <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;margin-bottom:8px;color:var(--gold)">📋 ${p.title}</div>
+      <iframe src="${embedUrl(p.url)}" style="width:100%;height:520px;border:none;border-radius:14px;background:var(--surface)" allowfullscreen loading="${i===0?'eager':'lazy'}"></iframe>
+    </div>
+  `).join('<div style="height:1px;background:var(--border);margin:20px 0"></div>');
+}
+
+function embedUrl(url) {
+  // Gamma: gamma.app/docs/xxx -> gamma.app/embed/xxx
+  if (url.includes('gamma.app/docs/')) return url.replace('gamma.app/docs/', 'gamma.app/embed/');
+  return url;
+}
+
+// ── PUSH NOTIFICATIONS ────────────────────────────────────
+async function registerPush(redirectUrl) {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) { await saveSub(existing); return; }
+    const r = await fetch('/api/push/vapid-public-key');
+    const { publicKey } = await r.json();
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey)
+    });
+    await saveSub(sub);
+  } catch (_) {}
+}
+async function saveSub(sub) {
+  await fetch('/api/push/subscribe', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(sub)
+  });
+}
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+// ── MESSAGERIE ─────────────────────────────────────────────
+async function loadMessages(){
+  const r = await fetch('/api/messages', {headers: authHeaders()});
+  const msgs = await r.json();
+  const el = document.getElementById('msgList');
+  if(!msgs.length){ el.innerHTML='<p style="color:var(--muted);text-align:center;padding:20px 0">Aucun message pour l\'instant.</p>'; return; }
+  el.innerHTML = msgs.map(m => {
+    const mine = m.from_name === NAME;
+    const time = new Date(m.created_at).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    return `<div style="display:flex;flex-direction:column;align-items:${mine?'flex-end':'flex-start'};gap:2px">
+      <div style="max-width:78%;background:${mine?'var(--gold)':'var(--surface2)'};color:${mine?'#050505':'var(--text)'};border-radius:${mine?'14px 14px 4px 14px':'14px 14px 14px 4px'};padding:10px 13px;font-size:13px;line-height:1.5">${m.body}</div>
+      <div style="font-size:10px;color:var(--muted);padding:0 4px">${time}</div>
+    </div>`;
+  }).join('');
+  // scroll bas
+  el.scrollTop = el.scrollHeight;
+  // effacer badge
+  const badge = document.getElementById('msgBadge');
+  if(badge) badge.style.display = 'none';
+}
+
+async function sendMessage(){
+  const input = document.getElementById('msgInput');
+  const body = input.value.trim();
+  if(!body) return;
+  input.value = '';
+  const r = await fetch('/api/messages',{method:'POST',headers:authHeaders(),body:JSON.stringify({body})});
+  const data = await r.json();
+  if(data.success) loadMessages();
+  else showToast('Erreur envoi',true);
+}
+
+// Vérifier les messages non lus au chargement
+async function checkUnread(){
+  const r = await fetch('/api/messages/unread',{headers:authHeaders()});
+  const data = await r.json();
+  const badge = document.getElementById('msgBadge');
+  if(badge && data.count > 0){ badge.style.display = 'flex'; }
+}
+
+// Envoyer avec Enter (Shift+Enter = saut de ligne)
+document.getElementById('msgInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+});
+
+// ── OBJECTIFS ─────────────────────────────────────────────
+async function loadGoals(){
+  const r = await fetch('/api/client/goals',{headers:authHeaders()});
+  const goals = await r.json();
+  const el = document.getElementById('goalsList');
+  if(!goals.length){ el.innerHTML='<p style="color:var(--muted);text-align:center;padding:40px 0">Ton coach n\'a pas encore défini d\'objectifs.</p>'; return; }
+  el.innerHTML = goals.map(g => {
+    const hasTarget = g.target != null;
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:${hasTarget?'12px':'0'}">
+        <div>
+          <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px">${g.label}</div>
+          ${g.note?`<div style="font-size:12px;color:var(--muted);margin-top:4px">${g.note}</div>`:''}
+        </div>
+        ${hasTarget?`<div style="font-family:'Montserrat',sans-serif;font-size:18px;font-weight:900;color:var(--gold)">${g.target}${g.type==='poids'?' kg':g.type==='pourcentage'?' %':' cm'}</div>`:''}
+      </div>
+      <div style="height:4px;background:var(--border);border-radius:4px;overflow:hidden">
+        <div style="height:100%;background:var(--gold);border-radius:4px;width:0%;transition:.5s" id="goal-bar-${g.id}"></div>
+      </div>
+    </div>`;
+  }).join('');
+  // Animer les barres avec les données du dernier bilan
+  const wr = await fetch('/api/client/weekly',{headers:authHeaders()});
+  const weekly = await wr.json();
+  const last = weekly[0] || {};
+  goals.forEach(g => {
+    const bar = document.getElementById('goal-bar-'+g.id);
+    if(!bar || g.target == null) return;
+    let current = null;
+    if(g.type==='poids') current = last.poids;
+    else if(g.type==='tour_taille') current = last.tour_taille;
+    else if(g.type==='tour_hanches') current = last.tour_hanches;
+    else if(g.type==='masse_grasse') current = last.masse_grasse;
+    if(current == null) return;
+    // Pour poids/mensurations: objectif = réduire → barre = progression vers cible
+    const pct = Math.min(100, Math.max(0, Math.round((current / g.target) * 100)));
+    setTimeout(()=>{ bar.style.width = pct+'%'; }, 100);
+  });
+}
+
+// ── EXPORT PDF ────────────────────────────────────────────
+async function exportPDF(){
+  const [dailyRes, weeklyRes] = await Promise.all([
+    fetch('/api/client/history',{headers:authHeaders()}),
+    fetch('/api/client/weekly',{headers:authHeaders()})
+  ]);
+  const daily = await dailyRes.json();
+  const weekly = await weeklyRes.json();
+  const name = NAME || 'Client';
+  const date = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  const last = weekly[0] || {};
+  const avg = (k) => { const vals = daily.filter(r=>r[k]!=null).map(r=>r[k]); return vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : '–'; };
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rapport ${name}</title>
+  <style>
+    body{font-family:sans-serif;background:#fff;color:#111;padding:32px;max-width:700px;margin:auto}
+    h1{font-size:24px;margin-bottom:4px}
+    h2{font-size:15px;color:#555;font-weight:500;margin-bottom:24px}
+    h3{font-size:13px;text-transform:uppercase;letter-spacing:2px;color:#00A896;margin:20px 0 10px}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+    .card{border:1px solid #eee;border-radius:10px;padding:12px;text-align:center}
+    .card-val{font-size:22px;font-weight:900;color:#00A896}
+    .card-lbl{font-size:11px;color:#888;margin-top:4px}
+    table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px}
+    th{text-align:left;padding:6px 8px;border-bottom:2px solid #eee;color:#888;font-size:10px;text-transform:uppercase}
+    td{padding:6px 8px;border-bottom:1px solid #f0f0f0}
+    .footer{font-size:11px;color:#aaa;text-align:center;margin-top:32px;border-top:1px solid #eee;padding-top:16px}
+    @media print{body{padding:16px}}
+  </style></head><body>
+  <h1>📊 Rapport de progression</h1>
+  <h2>${name} — Généré le ${date}</h2>
+  <h3>Moyennes (${daily.length} check-ins)</h3>
+  <div class="grid">
+    <div class="card"><div class="card-val">${avg('energie')}</div><div class="card-lbl">Énergie /10</div></div>
+    <div class="card"><div class="card-val">${avg('stress')}</div><div class="card-lbl">Stress /10</div></div>
+    <div class="card"><div class="card-val">${avg('sommeil_qualite')}</div><div class="card-lbl">Sommeil /10</div></div>
+    <div class="card"><div class="card-val">${avg('motivation')}</div><div class="card-lbl">Motivation /10</div></div>
+  </div>
+  ${last.poids ? `<h3>Dernières mensurations (${last.week})</h3>
+  <div class="grid">
+    ${last.poids?`<div class="card"><div class="card-val">${last.poids} kg</div><div class="card-lbl">Poids</div></div>`:''}
+    ${last.tour_taille?`<div class="card"><div class="card-val">${last.tour_taille} cm</div><div class="card-lbl">Taille</div></div>`:''}
+    ${last.tour_hanches?`<div class="card"><div class="card-val">${last.tour_hanches} cm</div><div class="card-lbl">Hanches</div></div>`:''}
+    ${last.masse_grasse?`<div class="card"><div class="card-val">${last.masse_grasse} %</div><div class="card-lbl">Masse grasse</div></div>`:''}
+  </div>` : ''}
+  <h3>Historique check-ins (${Math.min(30,daily.length)} derniers jours)</h3>
+  <table>
+    <thead><tr><th>Date</th><th>Énergie</th><th>Stress</th><th>Sommeil</th><th>Motiv.</th><th>Séance</th></tr></thead>
+    <tbody>${daily.slice(0,30).map(r=>`<tr>
+      <td>${new Date(r.date+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}</td>
+      <td>${r.energie||'–'}/10</td><td>${r.stress||'–'}/10</td>
+      <td>${r.sommeil_qualite||'–'}/10</td><td>${r.motivation||'–'}/10</td>
+      <td>${r.training_done?'✓':''}</td>
+    </tr>`).join('')}</tbody>
+  </table>
+  <div class="footer">GREGVONG COACHING — Méthode REBORN</div>
+  </body></html>`;
+
+  const win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>win.print(), 500);
+}
+
+// ── PROFIL & PREMIUM ──────────────────────────────────────
+async function loadProfile() {
+  const r = await fetch('/api/client/profile', { headers: authHeaders() });
+  const p = await r.json();
+
+  // Splash
+  const splash = document.getElementById('splash');
+  document.getElementById('splashName').textContent = `Bonjour ${NAME?.split(' ')[0] || ''} 👋`;
+  setTimeout(() => { splash.style.display = 'none'; }, 2000);
+
+  // Avatar
+  if (p.avatar) {
+    const av = document.getElementById('avatarEl');
+    av.style.background = 'none';
+    av.style.padding = '0';
+    av.innerHTML = `<img src="/uploads/${p.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  }
+
+  // Streak
+  if (p.streak > 0) {
+    const badge = document.getElementById('streakBadge');
+    badge.style.display = 'inline-flex';
+    badge.innerHTML = `<span class="streak-badge">🔥 ${p.streak} jour${p.streak>1?'s':''} de streak</span>`;
+  }
+
+  // Score delta semaine
+  if (p.weekScore && p.prevScore) {
+    const delta = Math.round((p.weekScore - p.prevScore) * 10) / 10;
+    const el = document.getElementById('d-global');
+    if (el) {
+      el.className = 'score-delta ' + (delta > 0 ? 'delta-up' : delta < 0 ? 'delta-down' : 'delta-neu');
+      el.textContent = delta > 0 ? `↑ +${delta} vs sem. passée` : delta < 0 ? `↓ ${delta} vs sem. passée` : '= stable';
+    }
+  }
+
+  // Quote du coach
+  if (p.quote) {
+    const q = document.getElementById('coachQuote');
+    q.style.display = 'block';
+    q.textContent = p.quote;
+  }
+
+  // Objectifs atteints
+  if (p.achieved && p.achieved.length > 0) {
+    const b = document.getElementById('achievedBanner');
+    b.style.display = 'block';
+    document.getElementById('achievedText').textContent = `🏆 Objectif atteint : ${p.achieved.map(g => g.label).join(', ')} !`;
+    if(navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+  }
+}
+
+async function uploadAvatar(input) {
+  if (!input.files[0]) return;
+  const fd = new FormData();
+  fd.append('avatar', input.files[0]);
+  const r = await fetch('/api/client/avatar', { method: 'POST', headers: { 'Authorization': 'Bearer ' + TOKEN }, body: fd });
+  const data = await r.json();
+  if (data.success) {
+    const av = document.getElementById('avatarEl');
+    av.style.background = 'none'; av.style.padding = '0';
+    av.innerHTML = `<img src="/uploads/${data.filename}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    showToast('✅ Photo de profil mise à jour !');
+  }
+}
+
+loadToday();
+loadScores();
+checkUnread();
+loadProfile();
+registerPush('/client');
+</script>
+</body>
+</html>

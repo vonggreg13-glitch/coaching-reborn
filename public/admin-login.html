@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Accès Coach – GREGVONG COACHING</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#00D4B4;--gold-dark:#00A896;--bg:#0D0B16;--surface:#13111E;--surface2:#1C1A2A;--border:#252336;--text:#F0EFF8;--muted:#7B7A90;--red:#FF4D6D}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;visibility:hidden}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:380px}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,212,180,0.1);border:1px solid rgba(0,212,180,0.3);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.badge::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--gold)}
+h1{font-family:'Montserrat',sans-serif;font-size:26px;font-weight:900;margin-bottom:6px}
+.sub{font-size:13px;color:var(--muted);margin-bottom:32px}
+.field{margin-bottom:18px}
+label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-size:15px;font-family:'Inter',sans-serif;outline:none;transition:.2s}
+input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(0,212,180,.1)}
+.btn{width:100%;padding:15px;border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#0D0B16;letter-spacing:.5px;transition:.2s;margin-top:4px}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,180,.3)}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.error{background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:16px;display:none}
+.separator{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted);font-size:12px}
+.separator::before,.separator::after{content:'';flex:1;height:1px;background:var(--border)}
+.client-link{text-align:center;font-size:13px;color:var(--muted)}
+.client-link a{color:var(--gold);text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="badge">Accès Coach</div>
+  <h1>Dashboard Admin</h1>
+  <div class="sub">Espace réservé — Greg Vong</div>
+
+  <div id="errMsg" class="error"></div>
+
+  <div class="field">
+    <label>Email coach</label>
+    <input id="email" type="email" placeholder="gregvong.coaching@gmail.com" autocomplete="email"/>
+  </div>
+  <div class="field">
+    <label>Mot de passe</label>
+    <input id="password" type="password" placeholder="••••••••" autocomplete="current-password"/>
+  </div>
+  <button class="btn" id="loginBtn" onclick="doLogin()">Accéder au dashboard →</button>
+
+  <div class="separator">ou</div>
+  <div class="client-link">Tu es un client ? <a href="/login">Connexion client →</a></div>
+</div>
+
+<script>
+// Si déjà connecté en coach → redirect direct
+const token = localStorage.getItem('coaching_token');
+const role  = localStorage.getItem('coaching_role');
+if (token && role === 'coach') {
+  fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(r => {
+      if (r.ok) { window.location.href = '/coach'; }
+      else {
+        localStorage.removeItem('coaching_token');
+        localStorage.removeItem('coaching_role');
+        localStorage.removeItem('coaching_name');
+        document.body.style.visibility = 'visible';
+      }
+    }).catch(() => { document.body.style.visibility = 'visible'; });
+} else {
+  document.body.style.visibility = 'visible';
+}
+
+function showErr(msg) {
+  const el = document.getElementById('errMsg');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+async function doLogin() {
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  if (!email || !password) return showErr('Remplis tous les champs');
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Connexion...';
+  showErr('');
+
+  try {
+    const r = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.error || 'Erreur'); return; }
+    if (d.role !== 'coach') { showErr('Accès réservé au coach'); return; }
+
+    localStorage.setItem('coaching_token', d.token);
+    localStorage.setItem('coaching_role', d.role);
+    localStorage.setItem('coaching_name', d.name || '');
+    window.location.href = '/coach';
+  } catch { showErr('Erreur de connexion'); }
+  finally { btn.disabled = false; btn.textContent = 'Accéder au dashboard →'; }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+</script>
+</body>
+</html>
