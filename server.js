@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const webpush = require('web-push');
+const rateLimit = require('express-rate-limit');
 
 const VAPID_PUBLIC  = process.env.VAPID_PUBLIC  || 'BIC2Fd-7kb8zEo1neTNQ_M1KO24YNZMulzIEPpWgA6OoYMgI1nmAKHJ03bPzWloTHaCAP7Y60Ghqi12KGM2omUA';
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE || 'W8KRRmDON0kfNAR8xuAptm4vJ7AJ7O6X6vA480AIdy4';
@@ -395,7 +396,15 @@ app.post('/api/auth/logout', requireAuth, (req, res) => {
 
 app.get('/api/auth/me', requireAuth, (req, res) => res.json(req.user));
 
-app.post('/api/auth/forgot-password', async (req, res) => {
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,                    // 5 requests per IP per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Trop de tentatives. Réessayez dans 15 minutes.' }
+});
+
+app.post('/api/auth/forgot-password', forgotPasswordLimiter, async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email requis' });
   const user = db.prepare('SELECT id, name FROM users WHERE email = ?').get(email.toLowerCase().trim());
@@ -654,6 +663,27 @@ app.get('/api/client/meal-photos', requireAuth, (req, res) => {
 
 app.get('/api/coach/client/:id/meal-photos', requireCoach, (req, res) => {
   res.json(db.prepare('SELECT * FROM meal_photos WHERE client_id = ? ORDER BY created_at DESC LIMIT 30').all(req.params.id));
+});
+
+app.delete('/api/client/meal-photos/:id', requireAuth, (req, res) => {
+  const user = db.prepare('SELECT id FROM users WHERE email = ?').get(req.user.email);
+  const photo = db.prepare('SELECT * FROM meal_photos WHERE id = ? AND client_id = ?').get(req.params.id, user.id);
+  if (!photo) return res.status(404).json({ error: 'Photo introuvable' });
+  db.prepare('DELETE FROM meal_photos WHERE id = ?').run(req.params.id);
+  const filePath = path.join(uploadDir, photo.filename);
+  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  res.json({ success: true });
+});
+
+app.put('/api/client/meal-photos/:id', requireAuth, upload.single('photo'), (req, res) => {
+  const user = db.prepare('SELECT id FROM users WHERE email = ?').get(req.user.email);
+  const photo = db.prepare('SELECT * FROM meal_photos WHERE id = ? AND client_id = ?').get(req.params.id, user.id);
+  if (!photo) return res.status(404).json({ error: 'Photo introuvable' });
+  if (!req.file) return res.status(400).json({ error: 'Aucune photo' });
+  const oldPath = path.join(uploadDir, photo.filename);
+  if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+  db.prepare('UPDATE meal_photos SET filename = ? WHERE id = ?').run(req.file.filename, req.params.id);
+  res.json({ success: true, filename: req.file.filename });
 });
 
 // ════════════════════════════════════════════════════════════
