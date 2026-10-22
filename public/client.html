@@ -78,6 +78,14 @@ textarea.input-field{resize:none;height:70px}
 .photo-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:10px}
 .photo-slot-label{font-size:11px;color:var(--muted);margin-top:6px;font-weight:600}
 .photo-slot input{display:none}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:900;display:none;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));width:100%;max-width:480px;display:flex;flex-direction:column;gap:10px}
+.sheet button{padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--bg,#0D0B16);color:inherit;font-size:16px;font-weight:700;font-family:inherit}
+.cam{position:fixed;inset:0;background:#000;z-index:950;display:none;flex-direction:column}
+.cam video{flex:1;width:100%;object-fit:cover;background:#000}
+.cam-bar{display:flex;align-items:center;justify-content:space-around;padding:18px 16px calc(22px + env(safe-area-inset-bottom));background:#000}
+.cam-bar button{background:none;border:none;color:#fff;font-size:15px;font-weight:700;font-family:inherit;min-width:70px}
+.cam-shoot{width:72px;height:72px;border-radius:50%;border:5px solid #fff !important;background:rgba(255,255,255,.25) !important;min-width:0 !important}
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface);border:1px solid var(--gold);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--gold);z-index:999;transition:.3s;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}.toast.error{border-color:var(--red);color:var(--red)}
 /* SPLASH */
@@ -322,17 +330,17 @@ textarea.input-field{resize:none;height:70px}
   <div class="section-title">Photos progrès</div>
   <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Semaine <span id="currentWeek" style="color:var(--gold)"></span></p>
   <div class="photo-slots">
-    <div class="photo-slot" onclick="document.getElementById('ph-front').click()">
+    <div class="photo-slot" onclick="choosePhoto('ph-front')">
       <span style="font-size:24px">📸</span><span class="photo-slot-label">Face</span>
       <img id="prev-front" style="display:none"/>
       <input type="file" id="ph-front" accept="image/*" onchange="previewPhoto(this,'prev-front')"/>
     </div>
-    <div class="photo-slot" onclick="document.getElementById('ph-side').click()">
+    <div class="photo-slot" onclick="choosePhoto('ph-side')">
       <span style="font-size:24px">📸</span><span class="photo-slot-label">Côté</span>
       <img id="prev-side" style="display:none"/>
       <input type="file" id="ph-side" accept="image/*" onchange="previewPhoto(this,'prev-side')"/>
     </div>
-    <div class="photo-slot" onclick="document.getElementById('ph-back').click()">
+    <div class="photo-slot" onclick="choosePhoto('ph-back')">
       <span style="font-size:24px">📸</span><span class="photo-slot-label">Dos</span>
       <img id="prev-back" style="display:none"/>
       <input type="file" id="ph-back" accept="image/*" onchange="previewPhoto(this,'prev-back')"/>
@@ -352,7 +360,7 @@ textarea.input-field{resize:none;height:70px}
     <button class="mode-btn" id="meal-col" onclick="setMealType('collation',this)">🍎 Collation</button>
   </div>
 
-  <div class="photo-slot" style="width:100%;margin-bottom:12px" onclick="document.getElementById('ph-meal').click()">
+  <div class="photo-slot" style="width:100%;margin-bottom:12px" onclick="choosePhoto('ph-meal')">
     <span style="font-size:32px">🍽️</span>
     <span class="photo-slot-label">Appuie pour prendre une photo</span>
     <img id="prev-meal" style="display:none;width:100%;border-radius:10px;margin-top:8px"/>
@@ -681,6 +689,74 @@ function previewPhoto(input,previewId){
     img.src=URL.createObjectURL(input.files[0]);img.style.display='block';
     img.parentElement.querySelector('span:not(.photo-slot-label)').style.display='none';
   }
+}
+
+// ── APPAREIL PHOTO INTÉGRÉ ──────────────────────────────
+// Sur iPhone, depuis l'icône de l'écran d'accueil, « Prendre une photo » du sélecteur iOS
+// ouvre parfois un écran noir : on utilise la caméra directement dans l'app.
+let sheetTarget = null, camTarget = null, camStream = null, camFacing = 'environment';
+
+function choosePhoto(inputId) {
+  sheetTarget = inputId;
+  document.getElementById('photoSheet').style.display = 'flex';
+}
+function closeSheet() {
+  document.getElementById('photoSheet').style.display = 'none';
+}
+
+async function openCamera(inputId) {
+  camTarget = inputId;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    return document.getElementById(inputId).click();
+  }
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: camFacing, width: { ideal: 1920 }, height: { ideal: 1920 } },
+      audio: false
+    });
+    const video = document.getElementById('camVideo');
+    video.srcObject = camStream;
+    video.style.transform = camFacing === 'user' ? 'scaleX(-1)' : '';
+    document.getElementById('camView').style.display = 'flex';
+    await video.play().catch(() => {});
+  } catch (e) {
+    showToast('Accès à l\'appareil photo refusé : choisis une photo de ta photothèque', true);
+    document.getElementById(inputId).click();
+  }
+}
+
+function closeCamera() {
+  if (camStream) camStream.getTracks().forEach(t => t.stop());
+  camStream = null;
+  document.getElementById('camVideo').srcObject = null;
+  document.getElementById('camView').style.display = 'none';
+}
+
+async function flipCamera() {
+  camFacing = camFacing === 'environment' ? 'user' : 'environment';
+  const target = camTarget;
+  closeCamera();
+  await openCamera(target);
+}
+
+async function shootPhoto() {
+  const video = document.getElementById('camVideo');
+  if (!video.videoWidth) return;
+  const scale = Math.min(1, 1600 / Math.max(video.videoWidth, video.videoHeight));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(video.videoWidth * scale);
+  canvas.height = Math.round(video.videoHeight * scale);
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+  closeCamera();
+  if (!blob) return showToast('Photo impossible, réessaie', true);
+  const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
+  const input = document.getElementById(camTarget);
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change'));
+  if (navigator.vibrate) navigator.vibrate(40);
 }
 
 // ── ENVOI DE PHOTOS ─────────────────────────────────────
@@ -1350,5 +1426,20 @@ registerPush('/client');
 const _lastTab = localStorage.getItem('last_tab');
 if (_lastTab && document.getElementById('tab-' + _lastTab)) showTab(_lastTab);
 </script>
+<div class="sheet-bg" id="photoSheet" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet">
+    <button onclick="closeSheet();openCamera(sheetTarget)">📷 Prendre une photo</button>
+    <button onclick="closeSheet();document.getElementById(sheetTarget).click()">🖼️ Choisir dans la photothèque</button>
+    <button onclick="closeSheet()" style="color:var(--muted)">Annuler</button>
+  </div>
+</div>
+<div class="cam" id="camView">
+  <video id="camVideo" autoplay playsinline muted></video>
+  <div class="cam-bar">
+    <button onclick="closeCamera()">Annuler</button>
+    <button class="cam-shoot" onclick="shootPhoto()" aria-label="Prendre la photo"></button>
+    <button onclick="flipCamera()">🔄 Tourner</button>
+  </div>
+</div>
 </body>
 </html>
