@@ -652,7 +652,8 @@ function renderClientDetail(data){
     <div class="main-header">
       <div>
         <div class="main-name">${client.name}</div>
-        <div class="main-sub">${client.email} · Depuis ${new Date(client.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}</div>
+        <div class="main-sub">${client.email} · Depuis ${new Date(client.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})} · Semaine ${Math.floor((Date.now()-new Date(client.created_at.replace(' ','T')+'Z'))/604800000)+1}</div>
+        <div class="main-sub">Partage des résultats : ${({0:'🔒 refusé',1:'✅ anonyme uniquement',2:'🙌 avec prénom et photos'})[client.consent_partage] ?? '⏳ pas encore répondu'}</div>
       </div>
       <div class="header-actions">
         <button class="btn-sm btn-claude" onclick="analyserAvecClaude(${client.id})">✦ Claude</button>

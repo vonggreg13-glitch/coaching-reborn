@@ -200,6 +200,7 @@ const migrations = [
   'ALTER TABLE daily_checkins ADD COLUMN fringales INTEGER DEFAULT 0',
   'ALTER TABLE daily_checkins ADD COLUMN pas INTEGER DEFAULT 0',
   'ALTER TABLE weekly_checkins ADD COLUMN masse_grasse REAL',
+  'ALTER TABLE users ADD COLUMN consent_partage INTEGER',
   'ALTER TABLE weekly_checkins ADD COLUMN tour_hanches INTEGER',
   'ALTER TABLE weekly_checkins ADD COLUMN tour_bras_g INTEGER',
   'ALTER TABLE weekly_checkins ADD COLUMN tour_bras_d INTEGER',
@@ -283,6 +284,12 @@ function getWeekStr(d = new Date()) {
   return `${date.getFullYear()}-W${String(wn).padStart(2, '0')}`;
 }
 function getTodayStr() { return new Date().toISOString().slice(0, 10); }
+
+// Emails destinés au coach : adresse du compte Resend (seule autorisée sans domaine vérifié)
+const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || 'vonggreg13@gmail.com';
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
 function daysSince(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
   return Math.floor(diff / 86400000);
@@ -441,7 +448,7 @@ app.post('/api/auth/forgot-password', forgotPasswordLimiter, async (req, res) =>
   db.prepare('DELETE FROM password_resets WHERE user_id = ?').run(user.id);
   db.prepare('INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)').run(user.id, token, expires);
 
-  const baseUrl = process.env.BASE_URL || 'https://coaching-app-production-6040.up.railway.app';
+  const baseUrl = process.env.BASE_URL || 'https://gregvong-coaching.onrender.com';
   const resetLink = `${baseUrl}/reset-password?token=${token}`;
   const resendKey = process.env.RESEND_API_KEY;
 
@@ -546,6 +553,18 @@ app.get('/api/client/history', requireAuth, (req, res) => {
   res.json(rows);
 });
 
+// Accord du client pour le partage de ses résultats (null = pas encore répondu)
+app.get('/api/client/consent', requireAuth, (req, res) => {
+  const row = db.prepare('SELECT consent_partage FROM users WHERE email = ?').get(req.user.email);
+  res.json({ consent: row?.consent_partage ?? null });
+});
+app.post('/api/client/consent', requireAuth, (req, res) => {
+  const value = req.body.consent;
+  if (![0, 1, 2].includes(value)) return res.status(400).json({ error: 'Valeur invalide' });
+  db.prepare('UPDATE users SET consent_partage = ? WHERE email = ?').run(value, req.user.email);
+  res.json({ success: true });
+});
+
 app.get('/api/client/scores', requireAuth, (req, res) => {
   const user = db.prepare('SELECT id FROM users WHERE email = ?').get(req.user.email);
   const checkins = db.prepare('SELECT * FROM daily_checkins WHERE client_id = ? ORDER BY date DESC LIMIT 7').all(user.id);
@@ -554,20 +573,20 @@ app.get('/api/client/scores', requireAuth, (req, res) => {
 
 async function sendWeeklyBilanEmail(clientName, week, d) {
   const resendKey = process.env.RESEND_API_KEY;
-  const coachEmail = process.env.COACH_EMAIL || 'gregvong.coaching@gmail.com';
+  const coachEmail = NOTIFY_EMAIL;
   if (!resendKey) return;
 
   const row = (label, value) => value != null && value !== '' ? `
     <tr>
       <td style="padding:8px 12px;color:#7B7A90;font-size:13px;width:55%">${label}</td>
-      <td style="padding:8px 12px;color:#F0EFF8;font-size:13px;font-weight:700">${value}</td>
+      <td style="padding:8px 12px;color:#F0EFF8;font-size:13px;font-weight:700">${esc(value)}</td>
     </tr>` : '';
 
   const html = `
   <div style="font-family:sans-serif;background:#0D0B16;color:#F0EFF8;padding:32px;border-radius:12px;max-width:600px;margin:auto">
     <div style="color:#00D4B4;font-weight:800;font-size:16px;letter-spacing:2px;margin-bottom:4px">GREGVONG COACHING</div>
     <div style="font-size:22px;font-weight:900;margin-bottom:4px">📋 Bilan hebdo reçu</div>
-    <div style="color:#7B7A90;font-size:13px;margin-bottom:24px">Semaine ${week} — ${clientName}</div>
+    <div style="color:#7B7A90;font-size:13px;margin-bottom:24px">Semaine ${week} — ${esc(clientName)}</div>
 
     <div style="background:#13111E;border-radius:10px;padding:4px;margin-bottom:16px">
       <div style="color:#00D4B4;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:12px 12px 4px">Mesures corporelles</div>
@@ -733,7 +752,7 @@ app.get('/api/coach/clients', requireCoach, (req, res) => {
   const result = clients.map(c => {
     const checkins = db.prepare('SELECT * FROM daily_checkins WHERE client_id = ? ORDER BY date DESC LIMIT 7').all(c.id);
     const scores = computeScores(checkins);
-    const alerts = computeAlerts(checkins, c.last_checkin);
+    const alerts = [...computeAlerts(checkins, c.last_checkin), ...milestoneAlerts(c.created_at)];
     const unread = db.prepare('SELECT COUNT(*) as n FROM messages WHERE to_id = ? AND from_id = ? AND read_at IS NULL').get(coachUser.id, c.id).n;
     return { ...c, scores, alerts, unread_messages: unread };
   });
@@ -742,12 +761,12 @@ app.get('/api/coach/clients', requireCoach, (req, res) => {
 });
 
 app.get('/api/coach/alerts', requireCoach, (req, res) => {
-  const clients = db.prepare('SELECT id, name FROM users WHERE role = ?').all('client');
+  const clients = db.prepare('SELECT id, name, created_at FROM users WHERE role = ?').all('client');
   const allAlerts = [];
   for (const c of clients) {
     const checkins = db.prepare('SELECT * FROM daily_checkins WHERE client_id = ? ORDER BY date DESC LIMIT 7').all(c.id);
     const last = checkins[0];
-    const alerts = computeAlerts(checkins, last?.date);
+    const alerts = [...computeAlerts(checkins, last?.date), ...milestoneAlerts(c.created_at)];
     for (const a of alerts) allAlerts.push({ ...a, client_id: c.id, client_name: c.name });
   }
   allAlerts.sort((a, b) => (a.level === 'danger' ? -1 : b.level === 'danger' ? 1 : 0));
@@ -755,7 +774,7 @@ app.get('/api/coach/alerts', requireCoach, (req, res) => {
 });
 
 app.get('/api/coach/client/:id', requireCoach, (req, res) => {
-  const client = db.prepare('SELECT id, name, email, created_at, objectif FROM users WHERE id = ? AND role = ?').get(req.params.id, 'client');
+  const client = db.prepare('SELECT id, name, email, created_at, objectif, consent_partage FROM users WHERE id = ? AND role = ?').get(req.params.id, 'client');
   if (!client) return res.status(404).json({ error: 'Client introuvable' });
   const daily = db.prepare('SELECT * FROM daily_checkins WHERE client_id = ? ORDER BY date DESC LIMIT 60').all(client.id);
   const weekly = db.prepare('SELECT * FROM weekly_checkins WHERE client_id = ? ORDER BY week DESC LIMIT 12').all(client.id);
@@ -763,7 +782,7 @@ app.get('/api/coach/client/:id', requireCoach, (req, res) => {
   const mealPhotos = db.prepare('SELECT * FROM meal_photos WHERE client_id = ? ORDER BY created_at DESC LIMIT 30').all(client.id);
   const notes = db.prepare('SELECT * FROM coach_notes WHERE client_id = ? ORDER BY created_at DESC').all(client.id);
   const scores = computeScores(daily);
-  const alerts = computeAlerts(daily, daily[0]?.date);
+  const alerts = [...computeAlerts(daily, daily[0]?.date), ...milestoneAlerts(client.created_at)];
   res.json({ client, daily, weekly, photos, mealPhotos, notes, scores, alerts });
 });
 
@@ -798,7 +817,7 @@ app.post('/api/coach/create-client', requireCoach, async (req, res) => {
             <div style="margin-bottom:6px"><span style="color:#7B7A90;font-size:13px">Email :</span> <strong style="font-size:13px">${email}</strong></div>
             <div><span style="color:#7B7A90;font-size:13px">Mot de passe :</span> <strong style="font-size:13px">${password}</strong></div>
           </div>
-          <a href="https://coaching-app-production-6040.up.railway.app/login" style="display:block;background:#00D4B4;color:#050505;padding:16px;border-radius:12px;text-decoration:none;font-weight:800;font-size:15px;text-align:center;margin-bottom:16px">
+          <a href="${process.env.BASE_URL || 'https://gregvong-coaching.onrender.com'}/login" style="display:block;background:#00D4B4;color:#050505;padding:16px;border-radius:12px;text-decoration:none;font-weight:800;font-size:15px;text-align:center;margin-bottom:16px">
             Accéder à mon espace →
           </a>
           <p style="font-size:12px;color:#7B7A90;text-align:center">💡 Ajoute l'app sur ton écran d'accueil pour un accès rapide</p>
@@ -884,80 +903,163 @@ app.get('/api/coach/export', requireCoach, (req, res) => {
 });
 
 // ── Sauvegarde automatique quotidienne par email ──────────────
+// Copie complète de la base (comptes, check-ins, bilans, messages, objectifs…) en pièce jointe.
+// Les photos (fichiers) restent sur le disque de l'hébergeur.
 async function sendDailyBackup() {
   const resendKey = process.env.RESEND_API_KEY;
-  const coachEmail = process.env.COACH_EMAIL || 'gregvong.coaching@gmail.com';
   if (!resendKey) return;
 
-  const clients = db.prepare('SELECT id, name, email, created_at FROM users WHERE role = ?').all('client');
-  const date = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const clients = db.prepare('SELECT id, name FROM users WHERE role = ?').all('client');
+  const dateFr = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric', timeZone: 'Europe/Paris' });
+  const dateIso = new Date().toISOString().slice(0, 10);
 
-  let html = `
+  const snapshot = path.join(dataDir, `backup-${dateIso}.db`);
+  if (fs.existsSync(snapshot)) fs.unlinkSync(snapshot);
+  db.exec(`VACUUM INTO '${snapshot.replace(/'/g, "''")}'`);
+  const content = fs.readFileSync(snapshot).toString('base64');
+  fs.unlinkSync(snapshot);
+
+  let rows = '';
+  for (const c of clients) {
+    const checkinCount = db.prepare('SELECT COUNT(*) as n FROM daily_checkins WHERE client_id = ?').get(c.id).n;
+    const lastCheckin  = db.prepare('SELECT date FROM daily_checkins WHERE client_id = ? ORDER BY date DESC LIMIT 1').get(c.id);
+    const since        = lastCheckin ? daysSince(lastCheckin.date) : null;
+    const color        = since !== null && since >= 3 ? '#FF4D6D' : '#F0EFF8';
+    rows += `
+      <tr style="border-bottom:1px solid #1C1A2A">
+        <td style="padding:8px 0;font-weight:700">${esc(c.name)}</td>
+        <td style="text-align:center;padding:8px 0;color:#00D4B4">${checkinCount}</td>
+        <td style="text-align:center;padding:8px 0;color:${color}">${since !== null ? `il y a ${since}j` : 'Jamais'}</td>
+      </tr>`;
+  }
+
+  const html = `
     <div style="font-family:sans-serif;background:#0D0B16;color:#F0EFF8;padding:32px;border-radius:12px;max-width:600px;margin:auto">
       <div style="color:#00D4B4;font-weight:800;font-size:18px;margin-bottom:4px">GREGVONG COACHING</div>
       <div style="font-size:22px;font-weight:900;margin-bottom:4px">💾 Sauvegarde quotidienne</div>
-      <div style="color:#7B7A90;font-size:13px;margin-bottom:24px">${date}</div>
-      <div style="background:#13111E;border-radius:10px;padding:16px;margin-bottom:20px">
-        <div style="font-size:13px;color:#7B7A90;margin-bottom:8px">Résumé</div>
-        <div style="font-size:20px;font-weight:900;color:#00D4B4">${clients.length} clients actifs</div>
-      </div>
+      <div style="color:#7B7A90;font-size:13px;margin-bottom:24px">${dateFr} · ${clients.length} clients</div>
       <table style="width:100%;border-collapse:collapse;font-size:13px">
         <tr style="color:#7B7A90;border-bottom:1px solid #252336">
           <th style="text-align:left;padding:8px 0">Client</th>
           <th style="text-align:center;padding:8px 0">Check-ins</th>
-          <th style="text-align:center;padding:8px 0">Bilans</th>
           <th style="text-align:center;padding:8px 0">Dernier check-in</th>
-        </tr>
-  `;
-
-  for (const c of clients) {
-    const checkinCount = db.prepare('SELECT COUNT(*) as n FROM daily_checkins WHERE client_id = ?').get(c.id).n;
-    const weeklyCount  = db.prepare('SELECT COUNT(*) as n FROM weekly_checkins WHERE client_id = ?').get(c.id).n;
-    const lastCheckin  = db.prepare('SELECT date FROM daily_checkins WHERE client_id = ? ORDER BY date DESC LIMIT 1').get(c.id);
-    const daysSince    = lastCheckin ? Math.floor((Date.now() - new Date(lastCheckin.date).getTime()) / 86400000) : '–';
-    const color        = typeof daysSince === 'number' && daysSince >= 3 ? '#FF4D6D' : '#F0EFF8';
-    html += `
-      <tr style="border-bottom:1px solid #1C1A2A">
-        <td style="padding:8px 0;font-weight:700">${c.name}</td>
-        <td style="text-align:center;padding:8px 0;color:#00D4B4">${checkinCount}</td>
-        <td style="text-align:center;padding:8px 0;color:#00D4B4">${weeklyCount}</td>
-        <td style="text-align:center;padding:8px 0;color:${color}">${lastCheckin ? `il y a ${daysSince}j` : 'Jamais'}</td>
-      </tr>`;
-  }
-
-  html += `
+        </tr>${rows}
       </table>
       <div style="margin-top:24px;padding:16px;background:#13111E;border-radius:10px;font-size:12px;color:#7B7A90">
-        💾 Toutes les données sont sauvegardées sur le volume Railway sécurisé.<br/>
-        Pour télécharger une sauvegarde complète : connecte-toi sur ton dashboard coach.
+        📎 La pièce jointe contient toute la base de données (comptes, check-ins, bilans, messages, objectifs).
+        Garde au moins les sauvegardes de la dernière semaine : elles permettent de tout restaurer en cas de problème chez l'hébergeur.
       </div>
     </div>`;
 
-  await fetch('https://api.resend.com/emails', {
+  const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from: 'onboarding@resend.dev',
-      to: coachEmail,
-      subject: `💾 Sauvegarde GV Coaching – ${clients.length} clients – ${new Date().toLocaleDateString('fr-FR')}`,
-      html
+      to: NOTIFY_EMAIL,
+      subject: `💾 Sauvegarde GV Coaching – ${clients.length} clients – ${new Date().toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' })}`,
+      html,
+      attachments: [{ filename: `sauvegarde-coaching-${dateIso}.db`, content }]
     })
-  }).catch(console.error);
-
-  console.log(`[BACKUP] Email de sauvegarde envoyé à ${coachEmail}`);
+  });
+  if (res.ok) console.log(`[BACKUP] Sauvegarde envoyée à ${NOTIFY_EMAIL}`);
+  else console.error('[BACKUP] Erreur Resend :', await res.text());
 }
 
-// Lance la sauvegarde quotidienne à minuit
-function scheduleDailyBackup() {
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(24, 0, 0, 0);
-  const msUntilMidnight = midnight - now;
-  setTimeout(() => {
-    sendDailyBackup();
-    setInterval(sendDailyBackup, 24 * 60 * 60 * 1000);
-  }, msUntilMidnight);
-  console.log(`[BACKUP] Prochaine sauvegarde dans ${Math.round(msUntilMidnight/3600000)}h`);
+// ── Tâches automatiques (heure de Paris) ──────────────────────
+// Chaque tâche ne s'exécute qu'une fois par jour, même après un redémarrage.
+db.exec('CREATE TABLE IF NOT EXISTS task_runs (task TEXT NOT NULL, day TEXT NOT NULL, PRIMARY KEY (task, day))');
+
+function parisNow() {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', weekday: 'short', hour12: false
+  }).formatToParts(new Date()).map(p => [p.type, p.value]));
+  return { day: `${parts.year}-${parts.month}-${parts.day}`, hour: Number(parts.hour) % 24, weekday: parts.weekday };
+}
+
+function runOncePerDay(task, day, fn) {
+  const done = db.prepare('INSERT OR IGNORE INTO task_runs (task, day) VALUES (?, ?)').run(task, day);
+  if (done.changes === 0) return;
+  Promise.resolve().then(fn).catch(err => console.error(`[TÂCHE ${task}]`, err.message));
+}
+
+function coachId() {
+  return db.prepare('SELECT id FROM users WHERE role = ?').get('coach')?.id;
+}
+
+function clientDay(createdAt) {
+  return daysSince(String(createdAt).replace(' ', 'T') + 'Z');
+}
+
+// Dimanche 18h : récap de la semaine pour chaque client
+function sendWeeklyRecaps() {
+  const clients = db.prepare('SELECT id FROM users WHERE role = ?').all('client');
+  for (const c of clients) {
+    const week = db.prepare(`SELECT energie, sommeil_qualite, training_done FROM daily_checkins
+      WHERE client_id = ? AND date >= date('now', '-6 days')`).all(c.id);
+    if (!week.length) continue;
+    const avg = k => (week.reduce((t, r) => t + (r[k] || 0), 0) / week.length).toFixed(1);
+    const seances = week.filter(r => r.training_done).length;
+    const poids = db.prepare('SELECT poids FROM weekly_checkins WHERE client_id = ? AND poids IS NOT NULL ORDER BY week DESC LIMIT 2').all(c.id);
+    const delta = poids.length === 2 ? ` · poids ${(poids[0].poids - poids[1].poids >= 0 ? '+' : '')}${(poids[0].poids - poids[1].poids).toFixed(1)} kg` : '';
+    sendPush(c.id, {
+      title: '📊 Ta semaine en un coup d\'œil',
+      body: `${week.length}/7 check-ins · énergie ${avg('energie')}/10 · sommeil ${avg('sommeil_qualite')}/10 · ${seances} séance${seances > 1 ? 's' : ''}${delta}`,
+      url: '/client'
+    });
+  }
+  console.log('[RÉCAP] Récaps hebdo envoyés');
+}
+
+// Jalons du suivi : bilans à 4, 8 et 12 semaines, fin de suivi à prévoir
+const JALONS = [
+  { day: 28, client: 'Semaine 4 ! Aujourd\'hui : photos + mesures dans l\'onglet Bilan 📸', coach: 'Bilan semaine 4 (photos, mesures, vidéo)' },
+  { day: 56, client: 'Semaine 8 ! Aujourd\'hui : photos + mesures dans l\'onglet Bilan 📸', coach: 'Bilan semaine 8 (photos, mesures, vidéo)' },
+  { day: 77, client: null,                                                                 coach: 'Fin du suivi dans 1 semaine : proposer la suite' },
+  { day: 84, client: '12 semaines ! Dernier bilan photos + mesures : on mesure tout le chemin parcouru 🏆', coach: 'Bilan final 12 semaines + offre de suite' },
+];
+
+function milestoneAlerts(createdAt) {
+  const d = clientDay(createdAt);
+  return JALONS.filter(j => d >= j.day && d < j.day + 7).map(j => ({
+    type: 'jalon', level: j.day === 77 ? 'warning' : 'info', icon: j.day === 77 ? '🔁' : '📸', message: j.coach
+  }));
+}
+
+function sendMilestones() {
+  const clients = db.prepare('SELECT id, name, created_at FROM users WHERE role = ?').all('client');
+  const coach = coachId();
+  for (const c of clients) {
+    const j = JALONS.find(j => clientDay(c.created_at) === j.day);
+    if (!j) continue;
+    if (j.client) sendPush(c.id, { title: '🎯 Étape clé de ton suivi', body: j.client, url: '/client' });
+    if (coach) sendPush(coach, { title: `🎯 ${c.name}`, body: j.coach, url: '/coach' });
+  }
+}
+
+// Lundi 8h : rappel au coach pour les messages vocaux de la semaine
+function sendMondayCoachReminder() {
+  const coach = coachId();
+  if (!coach) return;
+  const actifs = db.prepare(`SELECT COUNT(DISTINCT client_id) AS n FROM daily_checkins WHERE date >= date('now', '-7 days')`).get().n;
+  if (!actifs) return;
+  sendPush(coach, { title: '🎙️ C\'est lundi', body: `${actifs} client${actifs > 1 ? 's' : ''} actif${actifs > 1 ? 's' : ''} cette semaine : envoie ton vocal personnalisé à chacun.`, url: '/coach' });
+}
+
+function tick() {
+  const { day, hour, weekday } = parisNow();
+  if (hour === 0) runOncePerDay('sauvegarde', day, sendDailyBackup);
+  if (hour === 9) runOncePerDay('rappel-checkin', day, sendCheckinReminders);
+  if (hour === 10) runOncePerDay('jalons', day, sendMilestones);
+  if (weekday === 'Mon' && hour === 8) runOncePerDay('vocal-lundi', day, sendMondayCoachReminder);
+  if (weekday === 'Sun' && hour === 18) runOncePerDay('recap-hebdo', day, sendWeeklyRecaps);
+}
+
+function scheduleTasks() {
+  tick();
+  setInterval(tick, 60 * 1000);
+  console.log('[TÂCHES] Sauvegarde 0h · rappel check-in 9h · jalons 10h · vocal lundi 8h · récap dimanche 18h (Paris)');
 }
 
 // ── Cycle helpers ─────────────────────────────────────────────
@@ -1100,7 +1202,7 @@ app.post('/api/messages', requireAuth, (req, res) => {
   sendPush(coachId, { title: `💬 ${user.name}`, body: body.trim().slice(0, 80), url: '/coach' });
   // Email coach
   const resendKey = process.env.RESEND_API_KEY;
-  const coachEmail = process.env.COACH_EMAIL || 'gregvong.coaching@gmail.com';
+  const coachEmail = NOTIFY_EMAIL;
   if (resendKey) {
     fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -1109,8 +1211,8 @@ app.post('/api/messages', requireAuth, (req, res) => {
         from: 'onboarding@resend.dev', to: coachEmail,
         subject: `💬 Nouveau message de ${user.name}`,
         html: `<div style="font-family:sans-serif;padding:24px;background:#0D0B16;color:#F0EFF8;border-radius:12px;max-width:500px">
-          <div style="color:#00D4B4;font-weight:800;font-size:16px;margin-bottom:12px">💬 Message de ${user.name}</div>
-          <div style="background:#13111E;border-radius:10px;padding:16px;font-size:15px;line-height:1.6">${body.trim()}</div>
+          <div style="color:#00D4B4;font-weight:800;font-size:16px;margin-bottom:12px">💬 Message de ${esc(user.name)}</div>
+          <div style="background:#13111E;border-radius:10px;padding:16px;font-size:15px;line-height:1.6">${esc(body.trim())}</div>
           <div style="margin-top:16px;font-size:12px;color:#7B7A90">Réponds depuis ton dashboard coach.</div>
         </div>`
       })
@@ -1174,7 +1276,7 @@ app.post('/api/coach/messages/:clientId', requireCoach, (req, res) => {
         html: `<div style="font-family:sans-serif;padding:24px;background:#0D0B16;color:#F0EFF8;border-radius:12px;max-width:500px">
           <div style="color:#00D4B4;font-weight:800;font-size:16px;margin-bottom:12px">💬 Message de Greg Vong</div>
           <div style="background:#13111E;border-radius:10px;padding:16px;font-size:15px;line-height:1.6">${body.trim()}</div>
-          <div style="margin-top:16px"><a href="https://coaching-app-production-6040.up.railway.app/client" style="background:#00D4B4;color:#050505;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px">Répondre dans l'app</a></div>
+          <div style="margin-top:16px"><a href="${process.env.BASE_URL || 'https://gregvong-coaching.onrender.com'}/client" style="background:#00D4B4;color:#050505;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px">Répondre dans l'app</a></div>
         </div>`
       })
     }).catch(console.error);
@@ -1234,11 +1336,9 @@ app.get('/api/client/goals', requireAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════
 
 async function sendCheckinReminders() {
-  const resendKey = process.env.RESEND_API_KEY;
-  if (!resendKey) return;
   const today = getTodayStr();
   const clients = db.prepare(`
-    SELECT u.id, u.name, u.email FROM users u
+    SELECT u.id, u.name FROM users u
     WHERE u.role = 'client'
     AND NOT EXISTS (SELECT 1 FROM daily_checkins d WHERE d.client_id = u.id AND d.date = ?)
   `).all(today);
@@ -1248,38 +1348,8 @@ async function sendCheckinReminders() {
       body: `${c.name}, tu n'as pas encore fait ton check-in ! 2 minutes suffisent.`,
       url: '/client'
     });
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: 'onboarding@resend.dev', to: c.email,
-        subject: `⏰ ${c.name}, tu n'as pas encore fait ton check-in !`,
-        html: `<div style="font-family:sans-serif;padding:24px;background:#0D0B16;color:#F0EFF8;border-radius:12px;max-width:500px">
-          <div style="color:#00D4B4;font-weight:800;font-size:18px;margin-bottom:8px">GREGVONG COACHING</div>
-          <div style="font-size:22px;font-weight:900;margin-bottom:16px">⏰ Check-in du jour</div>
-          <p style="color:#ccc;font-size:14px;line-height:1.6;margin-bottom:20px">
-            Bonjour ${c.name} 👋<br/><br/>
-            Tu n'as pas encore fait ton check-in quotidien aujourd'hui. Ça prend 2 minutes et ça aide Greg à suivre ta progression !
-          </p>
-          <a href="https://coaching-app-production-6040.up.railway.app/client" style="display:inline-block;background:#00D4B4;color:#050505;padding:14px 28px;border-radius:10px;text-decoration:none;font-weight:800;font-size:14px">Faire mon check-in →</a>
-        </div>`
-      })
-    }).catch(console.error);
   }
   if (clients.length > 0) console.log(`[RAPPELS] ${clients.length} rappels envoyés`);
-}
-
-function scheduleReminders() {
-  const now = new Date();
-  const next9h = new Date(now);
-  next9h.setHours(9, 0, 0, 0);
-  if (next9h <= now) next9h.setDate(next9h.getDate() + 1);
-  const ms = next9h - now;
-  setTimeout(() => {
-    sendCheckinReminders();
-    setInterval(sendCheckinReminders, 24 * 60 * 60 * 1000);
-  }, ms);
-  console.log(`[RAPPELS] Prochain rappel dans ${Math.round(ms/3600000)}h`);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1397,7 +1467,7 @@ async function sendMonthlyReports() {
         <div style="font-size:13px;color:#7B7A90;margin-bottom:6px">Dernier poids enregistré</div>
         <div style="font-size:28px;font-weight:900;color:#00D4B4">${last.poids} kg</div>
       </div>` : ''}
-      <a href="https://coaching-app-production-6040.up.railway.app/client" style="display:block;background:#00D4B4;color:#050505;padding:14px;border-radius:10px;text-decoration:none;font-weight:800;font-size:14px;text-align:center">Voir mon espace coaching →</a>
+      <a href="${process.env.BASE_URL || 'https://gregvong-coaching.onrender.com'}/client" style="display:block;background:#00D4B4;color:#050505;padding:14px;border-radius:10px;text-decoration:none;font-weight:800;font-size:14px;text-align:center">Voir mon espace coaching →</a>
     </div>`;
 
     await fetch('https://api.resend.com/emails', {
@@ -1464,8 +1534,7 @@ app.get('/', (req, res) => res.redirect('/login'));
 
 // ── Start ─────────────────────────────────────────────────────
 ensureCoach();
-scheduleDailyBackup();
-scheduleReminders();
+scheduleTasks();
 scheduleMonthlyReports();
 app.listen(PORT, () => {
   console.log(`GREGVONG COACHING App → http://localhost:${PORT}`);

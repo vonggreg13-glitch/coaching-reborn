@@ -138,6 +138,16 @@ textarea.input-field{resize:none;height:70px}
   </div>
 
 
+  <div id="consentCard" style="display:none;background:var(--surface);border:1px solid rgba(0,212,180,0.4);border-radius:14px;padding:16px;margin-bottom:16px">
+    <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;margin-bottom:6px">🤝 Une petite question</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:12px">Quand tu auras de beaux résultats, j'aimerais parfois les partager pour inspirer d'autres personnes. Tu es d'accord ? Tu peux changer d'avis à tout moment en me le disant.</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="mode-btn" onclick="setConsent(1)">✅ Oui, mais de façon anonyme</button>
+      <button class="mode-btn" onclick="setConsent(2)">🙌 Oui, avec mon prénom et mes photos</button>
+      <button class="mode-btn" onclick="setConsent(0)">🔒 Non, je préfère rester privé(e)</button>
+    </div>
+  </div>
+
   <div id="doneBanner" class="done-banner" style="display:none">
     <div class="icon">✅</div>
     <h3>Check-in validé aujourd'hui !</h3>
@@ -564,6 +574,18 @@ async function loadToday(){
     document.getElementById('checkinForm').style.display='none';
     document.getElementById('doneTime').textContent=`⚡ ${c.energie}/10 · 😤 Stress ${c.stress||5}/10 · 🌙 Sommeil ${c.sommeil_qualite||5}/10`;
   }
+}
+
+async function loadConsent(){
+  try{
+    const r=await fetch('/api/client/consent',{headers:authHeaders()});
+    const {consent}=await r.json();
+    document.getElementById('consentCard').style.display=consent===null?'block':'none';
+  }catch(_){}
+}
+async function setConsent(value){
+  const r=await fetch('/api/client/consent',{method:'POST',headers:authHeaders(),body:JSON.stringify({consent:value})});
+  if(r.ok){document.getElementById('consentCard').style.display='none';showToast('Merci, c\'est noté 🙏');}
 }
 
 async function submitDaily(e){
@@ -1270,6 +1292,7 @@ async function loadStatsOverview() {
 }
 
 loadToday();
+loadConsent();
 loadScores();
 checkUnread();
 loadProfile();
