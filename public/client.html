@@ -720,9 +720,27 @@ async function openCamera(inputId) {
     document.getElementById('camView').style.display = 'flex';
     await video.play().catch(() => {});
   } catch (e) {
-    showToast('Accès à l\'appareil photo refusé : choisis une photo de ta photothèque', true);
-    document.getElementById(inputId).click();
+    showCameraHelp(e && e.name);
   }
+}
+
+// Explique pourquoi la caméra est bloquée et comment la débloquer
+function showCameraHelp(errName) {
+  const ua = navigator.userAgent;
+  const inApp = /Instagram|FBAN|FBAV|FB_IAB|WhatsApp|Messenger|Snapchat|TikTok|Line\//i.test(ua);
+  let msg;
+  if (inApp) {
+    msg = "Tu as ouvert l'app depuis WhatsApp ou Instagram, qui bloquent l'appareil photo.\n\nOuvre plutôt l'app dans Safari (bouton ⋯ ou ↗ puis « Ouvrir dans Safari »), ou depuis son icône sur ton écran d'accueil.";
+  } else if (errName === 'NotAllowedError' || errName === 'SecurityError') {
+    msg = "L'accès à l'appareil photo est refusé sur ton iPhone.\n\nPour le réactiver : Réglages → Apps → Safari → Appareil photo → « Demander » ou « Autoriser ». Puis ferme et rouvre l'app.\n\nEn attendant, tu peux prendre la photo avec l'appareil photo de l'iPhone puis la choisir dans ta photothèque.";
+  } else if (errName === 'NotFoundError' || errName === 'OverconstrainedError') {
+    msg = "Aucun appareil photo disponible. Choisis plutôt une photo de ta photothèque.";
+  } else if (errName === 'NotReadableError') {
+    msg = "L'appareil photo est déjà utilisé par une autre app. Ferme-la (FaceTime, appareil photo…) et réessaie.";
+  } else {
+    msg = "Impossible d'ouvrir l'appareil photo (" + (errName || 'erreur inconnue') + "). Prends la photo avec l'appareil photo de l'iPhone puis choisis-la dans ta photothèque.";
+  }
+  alert(msg);
 }
 
 function closeCamera() {
