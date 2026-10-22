@@ -686,6 +686,13 @@ function previewPhoto(input,previewId){
 // ── ENVOI DE PHOTOS ─────────────────────────────────────
 // Réduit la photo (max 1600 px, JPEG) avant l'envoi : plus rapide en 4G et jamais trop lourde
 async function compressImage(file, maxSize = 1600, quality = 0.82) {
+  // Sur iPhone, une photo prise à l'instant (24-48 Mpx) peut bloquer le décodage sans erreur :
+  // au-delà de 8 s on envoie la photo d'origine plutôt que de rester bloqué
+  const timeout = new Promise(resolve => setTimeout(() => resolve(file), 8000));
+  return Promise.race([shrinkImage(file, maxSize, quality), timeout]);
+}
+
+async function shrinkImage(file, maxSize, quality) {
   try {
     const url = URL.createObjectURL(file);
     const img = await new Promise((resolve, reject) => {
@@ -726,6 +733,7 @@ async function sendPhotos(url, fd, method = 'POST') {
 
 async function uploadPhotos(){
   const fd=new FormData();
+  showToast('⏳ Préparation des photos…');
   for(const s of [{id:'ph-front',type:'front'},{id:'ph-side',type:'side'},{id:'ph-back',type:'back'}]){
     const f=document.getElementById(s.id).files[0];
     if(f){fd.append('photos',await compressImage(f));fd.append('types',s.type);}
@@ -788,9 +796,10 @@ async function uploadMealPhoto() {
   const file = document.getElementById('ph-meal').files[0];
   if (!file) return showToast('Prends une photo d\'abord', true);
   const btn = document.getElementById('btnMeal');
-  btn.disabled = true; btn.textContent = 'Envoi…';
+  btn.disabled = true; btn.textContent = 'Préparation de la photo…';
   const fd = new FormData();
   fd.append('photo', await compressImage(file));
+  btn.textContent = 'Envoi…';
   fd.append('meal_type', currentMealType);
   const data = await sendPhotos('/api/client/meal-photos', fd);
   btn.disabled = false; btn.textContent = 'ENVOYER LA PHOTO 🍽️';
