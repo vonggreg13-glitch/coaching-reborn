@@ -287,6 +287,9 @@ function getTodayStr() { return new Date().toISOString().slice(0, 10); }
 
 // Emails destinés au coach : adresse du compte Resend (seule autorisée sans domaine vérifié)
 const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || 'vonggreg13@gmail.com';
+// Expéditeur : adresse de test Resend tant que le domaine n'est pas vérifié
+// (une fois vérifié : EMAIL_FROM = "GREGVONG COACHING <coaching@gregvongcoaching.com>")
+const EMAIL_FROM = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 function esc(v) {
   return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
@@ -457,7 +460,7 @@ app.post('/api/auth/forgot-password', forgotPasswordLimiter, async (req, res) =>
       method: 'POST',
       headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'onboarding@resend.dev',
+        from: EMAIL_FROM,
         to: email.toLowerCase().trim(),
         subject: '🔐 Réinitialisation de ton mot de passe – GREGVONG COACHING',
         html: `
@@ -629,7 +632,7 @@ async function sendWeeklyBilanEmail(clientName, week, d) {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from: 'onboarding@resend.dev',
+      from: EMAIL_FROM,
       to: coachEmail,
       subject: `📋 Bilan hebdo ${week} — ${clientName}`,
       html
@@ -804,7 +807,7 @@ app.post('/api/coach/create-client', requireCoach, async (req, res) => {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'onboarding@resend.dev', to: email,
+        from: EMAIL_FROM, to: email,
         subject: `🎉 Bienvenue dans ton espace coaching REBORN, ${name} !`,
         html: `<div style="font-family:sans-serif;background:#0D0B16;color:#F0EFF8;padding:32px;border-radius:12px;max-width:560px;margin:auto">
           <div style="color:#00D4B4;font-weight:800;font-size:18px;margin-bottom:4px">GREGVONG COACHING</div>
@@ -955,7 +958,7 @@ async function sendDailyBackup() {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from: 'onboarding@resend.dev',
+      from: EMAIL_FROM,
       to: NOTIFY_EMAIL,
       subject: `💾 Sauvegarde GV Coaching – ${clients.length} clients – ${new Date().toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' })}`,
       html,
@@ -1208,7 +1211,7 @@ app.post('/api/messages', requireAuth, (req, res) => {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'onboarding@resend.dev', to: coachEmail,
+        from: EMAIL_FROM, to: coachEmail,
         subject: `💬 Nouveau message de ${user.name}`,
         html: `<div style="font-family:sans-serif;padding:24px;background:#0D0B16;color:#F0EFF8;border-radius:12px;max-width:500px">
           <div style="color:#00D4B4;font-weight:800;font-size:16px;margin-bottom:12px">💬 Message de ${esc(user.name)}</div>
@@ -1271,7 +1274,7 @@ app.post('/api/coach/messages/:clientId', requireCoach, (req, res) => {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'onboarding@resend.dev', to: client.email,
+        from: EMAIL_FROM, to: client.email,
         subject: `💬 Nouveau message de ton coach Greg`,
         html: `<div style="font-family:sans-serif;padding:24px;background:#0D0B16;color:#F0EFF8;border-radius:12px;max-width:500px">
           <div style="color:#00D4B4;font-weight:800;font-size:16px;margin-bottom:12px">💬 Message de Greg Vong</div>
@@ -1473,7 +1476,7 @@ async function sendMonthlyReports() {
     await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: 'onboarding@resend.dev', to: c.email, subject: `📊 Ton bilan de ${monthName} — GREGVONG COACHING`, html })
+      body: JSON.stringify({ from: EMAIL_FROM, to: c.email, subject: `📊 Ton bilan de ${monthName} — GREGVONG COACHING`, html })
     }).catch(console.error);
   }
   console.log(`[MENSUEL] Bilans envoyés à ${clients.length} clients`);
