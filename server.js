@@ -266,7 +266,7 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}_${crypto.randomBytes(6).toString('hex')}${ext}`);
   }
 });
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer({ storage, limits: { fileSize: 25 * 1024 * 1024 } });
 
 // ── SSE ───────────────────────────────────────────────────────
 const sseClients = new Set();
@@ -1537,6 +1537,16 @@ app.get('/', (req, res) => res.redirect('/login'));
 
 // ── Start ─────────────────────────────────────────────────────
 ensureCoach();
+// Erreurs (photo trop lourde, envoi coupé…) : toujours une réponse JSON lisible par l'app
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    const msg = err.code === 'LIMIT_FILE_SIZE' ? 'Photo trop lourde (25 Mo max)' : 'Envoi de la photo impossible';
+    return res.status(err.code === 'LIMIT_FILE_SIZE' ? 413 : 400).json({ error: msg });
+  }
+  console.error('[ERREUR]', err.message);
+  res.status(500).json({ error: 'Erreur serveur, réessaie' });
+});
+
 scheduleTasks();
 scheduleMonthlyReports();
 app.listen(PORT, () => {

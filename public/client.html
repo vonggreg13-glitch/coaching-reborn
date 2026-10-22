@@ -683,17 +683,58 @@ function previewPhoto(input,previewId){
   }
 }
 
+// ── ENVOI DE PHOTOS ─────────────────────────────────────
+// Réduit la photo (max 1600 px, JPEG) avant l'envoi : plus rapide en 4G et jamais trop lourde
+async function compressImage(file, maxSize = 1600, quality = 0.82) {
+  try {
+    const url = URL.createObjectURL(file);
+    const img = await new Promise((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = url;
+    });
+    const scale = Math.min(1, maxSize / Math.max(img.naturalWidth, img.naturalHeight));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(img.naturalWidth * scale);
+    canvas.height = Math.round(img.naturalHeight * scale);
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(url);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+    if (!blob) return file;
+    return new File([blob], (file.name || 'photo').replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+  } catch (_) {
+    return file; // format non lisible par le navigateur : on envoie l'original
+  }
+}
+
+// Envoie un formulaire avec photos ; renvoie toujours un objet (jamais de blocage)
+async function sendPhotos(url, fd, method = 'POST') {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 60000);
+  try {
+    const r = await fetch(url, { method, headers: { 'Authorization': 'Bearer ' + TOKEN }, body: fd, signal: ctrl.signal });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || !data.success) return { error: data.error || (r.status === 413 ? 'Photo trop lourde' : 'Envoi impossible, réessaie') };
+    return data;
+  } catch (e) {
+    return { error: e.name === 'AbortError' ? 'Connexion trop lente, réessaie avec du Wi-Fi' : 'Pas de connexion, réessaie' };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function uploadPhotos(){
   const fd=new FormData();
-  [{id:'ph-front',type:'front'},{id:'ph-side',type:'side'},{id:'ph-back',type:'back'}].forEach(s=>{
+  for(const s of [{id:'ph-front',type:'front'},{id:'ph-side',type:'side'},{id:'ph-back',type:'back'}]){
     const f=document.getElementById(s.id).files[0];
-    if(f){fd.append('photos',f);fd.append('types',s.type);}
-  });
+    if(f){fd.append('photos',await compressImage(f));fd.append('types',s.type);}
+  }
   if(!fd.has('photos'))return showToast('Sélectionne au moins une photo',true);
-  const r=await fetch('/api/client/photos',{method:'POST',headers:{'Authorization':'Bearer '+TOKEN},body:fd});
-  const data=await r.json();
+  showToast('⏳ Envoi des photos…');
+  const data=await sendPhotos('/api/client/photos',fd);
   if(data.success){showToast(`✅ ${data.count} photo(s) envoyée(s) !`);loadPhotoHistory();}
-  else showToast(data.error||'Erreur',true);
+  else showToast(data.error,true);
 }
 
 async function loadPhotoHistory(){
@@ -746,20 +787,19 @@ function previewMeal(input) {
 async function uploadMealPhoto() {
   const file = document.getElementById('ph-meal').files[0];
   if (!file) return showToast('Prends une photo d\'abord', true);
-  const fd = new FormData();
-  fd.append('photo', file);
-  fd.append('meal_type', currentMealType);
   const btn = document.getElementById('btnMeal');
   btn.disabled = true; btn.textContent = 'Envoi…';
-  const r = await fetch('/api/client/meal-photos', { method:'POST', headers:{'Authorization':'Bearer '+TOKEN}, body:fd });
-  const data = await r.json();
+  const fd = new FormData();
+  fd.append('photo', await compressImage(file));
+  fd.append('meal_type', currentMealType);
+  const data = await sendPhotos('/api/client/meal-photos', fd);
   btn.disabled = false; btn.textContent = 'ENVOYER LA PHOTO 🍽️';
   if (data.success) {
     showToast('✅ Photo repas envoyée !');
     document.getElementById('ph-meal').value = '';
     document.getElementById('prev-meal').style.display = 'none';
     loadMealHistory();
-  } else showToast(data.error || 'Erreur', true);
+  } else showToast(data.error, true);
 }
 async function loadMealHistory() {
   const r = await fetch('/api/client/meal-photos', { headers: authHeaders() });
@@ -795,11 +835,10 @@ function replaceMealPhoto(id) {
   input.onchange = async () => {
     if (!input.files[0]) return;
     const fd = new FormData();
-    fd.append('photo', input.files[0]);
-    const r = await fetch('/api/client/meal-photos/'+id, { method:'PUT', headers:{'Authorization':'Bearer '+TOKEN}, body:fd });
-    const data = await r.json();
+    fd.append('photo', await compressImage(input.files[0]));
+    const data = await sendPhotos('/api/client/meal-photos/'+id, fd, 'PUT');
     if (data.success) { showToast('Photo remplacée ✅'); loadMealHistory(); }
-    else showToast(data.error || 'Erreur', true);
+    else showToast(data.error, true);
   };
   input.click();
 }
@@ -1169,9 +1208,9 @@ async function loadProfile() {
 async function uploadAvatar(input) {
   if (!input.files[0]) return;
   const fd = new FormData();
-  fd.append('avatar', input.files[0]);
-  const r = await fetch('/api/client/avatar', { method: 'POST', headers: { 'Authorization': 'Bearer ' + TOKEN }, body: fd });
-  const data = await r.json();
+  fd.append('avatar', await compressImage(input.files[0], 600));
+  const data = await sendPhotos('/api/client/avatar', fd);
+  if (!data.success) return showToast(data.error, true);
   if (data.success) {
     const av = document.getElementById('avatarEl');
     av.style.background = 'none'; av.style.padding = '0';
