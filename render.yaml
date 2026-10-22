@@ -1,0 +1,30 @@
+# Déploiement sur Render (Blueprint) — application de coaching
+services:
+  - type: web
+    name: gregvong-coaching
+    runtime: node
+    plan: starter
+    region: frankfurt
+    buildCommand: npm install --omit=dev
+    startCommand: node server.js
+    healthCheckPath: /login.html
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "24"
+      - key: DATA_DIR
+        value: /var/data
+      - key: COACH_EMAIL
+        value: gregvong.coaching@gmail.com
+      # Valeurs demandées dans Render lors de la création
+      - key: COACH_PASSWORD
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: BASE_URL
+        sync: false
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1

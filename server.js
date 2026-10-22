@@ -7,19 +7,32 @@ const multer = require('multer');
 const webpush = require('web-push');
 const rateLimit = require('express-rate-limit');
 
-const VAPID_PUBLIC  = process.env.VAPID_PUBLIC  || 'BIC2Fd-7kb8zEo1neTNQ_M1KO24YNZMulzIEPpWgA6OoYMgI1nmAKHJ03bPzWloTHaCAP7Y60Ghqi12KGM2omUA';
-const VAPID_PRIVATE = process.env.VAPID_PRIVATE || 'W8KRRmDON0kfNAR8xuAptm4vJ7AJ7O6X6vA480AIdy4';
-webpush.setVapidDetails('mailto:gregvong.coaching@gmail.com', VAPID_PUBLIC, VAPID_PRIVATE);
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ── Paths ─────────────────────────────────────────────────────
 const isProd = process.env.NODE_ENV === 'production';
-const dataDir = isProd ? '/app/data' : path.join(__dirname, 'data');
-const uploadDir = isProd ? '/app/data/uploads' : path.join(__dirname, 'public', 'uploads');
+// DATA_DIR : disque persistant de l'hébergeur (Render : /var/data)
+const dataDir = process.env.DATA_DIR || (isProd ? '/app/data' : path.join(__dirname, 'data'));
+const uploadDir = isProd ? path.join(dataDir, 'uploads') : path.join(__dirname, 'public', 'uploads');
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+// ── Clés VAPID (notifications push) ───────────────────────────
+// Variables d'environnement si fournies, sinon générées une fois et gardées sur le disque
+function loadVapidKeys() {
+  if (process.env.VAPID_PUBLIC && process.env.VAPID_PRIVATE) {
+    return { publicKey: process.env.VAPID_PUBLIC, privateKey: process.env.VAPID_PRIVATE };
+  }
+  const file = path.join(dataDir, 'vapid.json');
+  if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, 'utf8'));
+  const keys = webpush.generateVAPIDKeys();
+  fs.writeFileSync(file, JSON.stringify(keys), { mode: 0o600 });
+  console.log('Nouvelles clés VAPID générées');
+  return keys;
+}
+const { publicKey: VAPID_PUBLIC, privateKey: VAPID_PRIVATE } = loadVapidKeys();
+webpush.setVapidDetails('mailto:gregvong.coaching@gmail.com', VAPID_PUBLIC, VAPID_PRIVATE);
 
 // ── Database ──────────────────────────────────────────────────
 const db = new DatabaseSync(path.join(dataDir, 'coaching.db'));
@@ -342,7 +355,11 @@ function computeAlerts(checkins, lastCheckinDate) {
 function ensureCoach() {
   const existing = db.prepare('SELECT id FROM users WHERE role = ?').get('coach');
   if (!existing) {
-    const { hash, salt } = hashPassword(process.env.COACH_PASSWORD || 'GregCoach2026');
+    if (!process.env.COACH_PASSWORD) {
+      console.error('COACH_PASSWORD manquant : compte coach non créé');
+      return;
+    }
+    const { hash, salt } = hashPassword(process.env.COACH_PASSWORD);
     const email = process.env.COACH_EMAIL || 'gregvong.coaching@gmail.com';
     db.prepare('INSERT INTO users (email, password_hash, salt, name, role) VALUES (?, ?, ?, ?, ?)').run(email, hash, salt, 'Greg Vong', 'coach');
     console.log(`Coach créé : ${email}`);
@@ -842,12 +859,6 @@ app.get('/uploads/:filename', (req, res) => {
   else res.status(404).send('Not found');
 });
 
-app.get('/api/debug/photos', (req, res) => {
-  const mealPhotos = db.prepare('SELECT m.*, u.name FROM meal_photos m JOIN users u ON u.id = m.client_id ORDER BY m.created_at DESC LIMIT 20').all();
-  const uploads = fs.existsSync(uploadDir) ? fs.readdirSync(uploadDir) : [];
-  res.json({ isProd, uploadDir, mealPhotosCount: mealPhotos.length, mealPhotos, uploadsFiles: uploads.length });
-});
-
 // ── Export complet données (JSON téléchargeable) ──────────────
 app.get('/api/coach/export', requireCoach, (req, res) => {
   const clients = db.prepare('SELECT id, name, email, created_at, objectif FROM users WHERE role = ?').all('client');
@@ -1015,7 +1026,10 @@ app.get('/api/coach/client/:id/cycle', requireCoach, (req, res) => {
 });
 
 // ── SSE ───────────────────────────────────────────────────────
+// Réservé au coach : EventSource ne peut pas envoyer d'en-tête, le jeton passe dans l'URL
 app.get('/api/stream', (req, res) => {
+  const session = getSession(req.query.token);
+  if (!session || session.role !== 'coach') return res.status(403).json({ error: 'Accès coach requis' });
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');

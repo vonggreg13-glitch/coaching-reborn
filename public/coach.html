@@ -1379,7 +1379,7 @@ function analyserAvecClaude(clientId){
 
 // ── SSE ────────────────────────────────────────────────────
 function connectSSE(){
-  const es = new EventSource('/api/stream');
+  const es = new EventSource('/api/stream?token=' + encodeURIComponent(TOKEN));
   es.onmessage = e => {
     const d = JSON.parse(e.data);
     if (d.type === 'daily_checkin' || d.type === 'new_client' || d.type === 'weekly_checkin') {
