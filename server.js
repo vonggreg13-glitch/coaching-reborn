@@ -353,7 +353,15 @@ function computeAlerts(checkins, lastCheckinDate) {
 
 // ── Coach default ─────────────────────────────────────────────
 function ensureCoach() {
-  const existing = db.prepare('SELECT id FROM users WHERE role = ?').get('coach');
+  const existing = db.prepare('SELECT id, password_hash, salt FROM users WHERE role = ?').get('coach');
+  // Le mot de passe défini dans COACH_PASSWORD est appliqué à chaque démarrage :
+  // le changer chez l'hébergeur suffit pour réinitialiser l'accès coach
+  if (existing && process.env.COACH_PASSWORD && !verifyPassword(process.env.COACH_PASSWORD, existing.password_hash, existing.salt)) {
+    const { hash, salt } = hashPassword(process.env.COACH_PASSWORD);
+    db.prepare('UPDATE users SET password_hash = ?, salt = ? WHERE id = ?').run(hash, salt, existing.id);
+    db.prepare('DELETE FROM sessions WHERE user_id = ?').run(existing.id);
+    console.log('Mot de passe coach mis à jour depuis COACH_PASSWORD');
+  }
   if (!existing) {
     if (!process.env.COACH_PASSWORD) {
       console.error('COACH_PASSWORD manquant : compte coach non créé');
