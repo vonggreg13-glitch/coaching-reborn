@@ -387,6 +387,8 @@ function ensureCoach() {
 // ── Middleware ────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+// Page Tarifs & Services (à envoyer aux prospects)
+app.get('/tarifs', (req, res) => res.sendFile(path.join(__dirname, 'public', 'tarifs.html')));
 if (isProd) app.use('/uploads', express.static(uploadDir));
 
 // ════════════════════════════════════════════════════════════

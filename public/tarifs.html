@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Méthode REBORN — Coaching privé</title>
+  <meta name="description" content="Méthode REBORN — coaching privé, plans sport et nutrition personnalisés, suivi premium 90 jours." />
+
+  <style>
+    :root {
+      --accent: #2ED6C8;
+      --accent-strong: #22F1E3;
+      --bg: #050505;
+      --bg-soft: #0B0B0B;
+      --text: #F7F7F7;
+      --muted: #B8B8B8;
+      --line: rgba(46, 214, 200, .28);
+      --card: #121212;
+      --border: #242424;
+      --shadow: 0 24px 70px rgba(0,0,0,.45);
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; background: var(--bg); }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    .container { width: min(100% - 32px, var(--max)); margin-inline: auto; }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 60px;
+      padding: 16px 28px;
+      border-radius: 7px;
+      font-size: .95rem;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+    .button:hover { transform: translateY(-2px); }
+    .button-primary {
+      color: #050505;
+      background: linear-gradient(180deg, #38F2E5 0%, var(--accent) 100%);
+      box-shadow: 0 18px 38px rgba(46,214,200,.22);
+    }
+    .button-secondary {
+      color: var(--text);
+      border: 1px solid rgba(46,214,200,.62);
+      background: rgba(0,0,0,.28);
+    }
+
+    /* =========================
+       HEADER — même logique que le modèle
+       ========================= */
+    .site-header {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      background: transparent;
+    }
+    .nav {
+      width: min(100% - 64px, 1540px);
+      min-height: 92px;
+      margin-inline: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      font-weight: 950;
+      font-style: italic;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      line-height: .9;
+    }
+    .logo .small { font-size: .88rem; color: var(--text); }
+    .logo .brand { font-size: clamp(1.45rem, 2.4vw, 2.45rem); color: var(--accent); text-shadow: 0 0 22px rgba(46,214,200,.25); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: clamp(20px, 3vw, 44px);
+      color: var(--text);
+      font-size: clamp(.78rem, .92vw, .96rem);
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+    .nav-links a {
+      position: relative;
+      opacity: .94;
+    }
+    .nav-links a.active::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: -12px;
+      height: 3px;
+      background: var(--accent);
+      box-shadow: 0 0 14px rgba(46,214,200,.70);
+    }
+
+    .nav-social { display: flex; align-items: center; gap: 14px; }
+    .nav-social-link { color: var(--muted); transition: color .18s, transform .18s; display: flex; }
+    .nav-social-link:hover { color: var(--accent); transform: translateY(-2px); }
+
+    .nav-cta {
+      min-height: 50px;
+      padding-inline: 28px;
+      border: 1px solid rgba(46,214,200,.62);
+      border-radius: 6px;
+      color: var(--accent);
+      background: rgba(0,0,0,.18);
+      box-shadow: none;
+      font-size: .86rem;
+    }
+
+    /* =========================
+       HERO — vraie mise en page web, pas une image mockup
+       ========================= */
+    .hero {
+      position: relative;
+      min-height: 100svh;
+      overflow: hidden;
+      isolation: isolate;
+      background:
+        linear-gradient(90deg, rgba(5,5,5,1) 0%, rgba(5,5,5,.98) 20%, rgba(5,5,5,.88) 42%, rgba(5,5,5,.42) 68%, rgba(5,5,5,.52) 100%),
+        radial-gradient(circle at 75% 52%, rgba(46,214,200,.30), transparent 30%),
+        radial-gradient(circle at 78% 76%, rgba(46,214,200,.16), transparent 24%),
+        #050505;
+      border-bottom: 1px solid rgba(46,214,200,.28);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 70px 70px;
+      opacity: .35;
+      pointer-events: none;
+      -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 96%);
+      mask-image: linear-gradient(180deg, #000 0%, transparent 96%);
+    }
+
+    /* fond — même image que la figure, très estompée, comme dans le modèle */
+    .hero-ghost {
+      position: absolute;
+      z-index: 1;
+      right: 28%;
+      top: 2%;
+      width: 42%;
+      height: 112%;
+      background: url("/hero-figure-rings.png") center / contain no-repeat;
+      opacity: .16;
+      filter: grayscale(1) blur(1px);
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+    .hero-ghost::after { content: none; }
+
+    /* 3ème colonne du grid — espaceur, la figure est en position absolue sur le hero */
+    .hero-visual {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* figure absolue sur le hero section — pleine hauteur, droite
+       IMPORTANT: ces règles doivent prendre le dessus sur les blocs hérités */
+    .hero-figure {
+      position: absolute !important;
+      z-index: 3 !important;
+      right: 0 !important;
+      bottom: 48px !important;
+      width: min(42vw, 560px) !important;
+      height: auto !important;
+      transform: none !important;
+      pointer-events: none !important;
+      display: block !important;
+      align-items: unset !important;
+      justify-content: unset !important;
+    }
+    .hero-figure::before {
+      content: "" !important;
+      position: absolute !important;
+      inset: 4% -4% 0 -10% !important;
+      background: radial-gradient(circle at 55% 50%, rgba(46,214,200,.18), transparent 46%) !important;
+      filter: blur(6px) !important;
+      z-index: 0 !important;
+    }
+    .hero-figure::after { content: none !important; }
+    .hero-figure img {
+      position: relative !important;
+      z-index: 2 !important;
+      width: 100% !important;
+      height: auto !important;
+      display: block !important;
+      object-fit: unset !important;
+      filter: drop-shadow(0 32px 64px rgba(0,0,0,.65)) !important;
+    }
+
+    /* cartes latérales gauche */
+    .hero-side-cards {
+      display: grid;
+      gap: 20px;
+      align-self: center;
+    }
+    .side-card {
+      width: 152px;
+      padding: 20px 16px 18px;
+      border-radius: 16px;
+      background: rgba(10,10,10,.78);
+      border: 1px solid rgba(46,214,200,.28);
+      box-shadow: 0 16px 48px rgba(0,0,0,.36), inset 0 0 20px rgba(46,214,200,.03);
+      backdrop-filter: blur(14px);
+    }
+    .side-card-icon {
+      width: 28px; height: 28px;
+      margin-bottom: 18px;
+      color: var(--accent);
+    }
+    .side-card strong {
+      display: block;
+      font-size: 1.45rem;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .side-card p {
+      font-size: .78rem;
+      color: var(--muted);
+      line-height: 1.35;
+      margin: 0;
+    }
+    .side-card-line {
+      margin-top: 16px;
+      height: 2px;
+      width: 36px;
+      background: var(--accent);
+      border-radius: 2px;
+      opacity: .7;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 4;
+      width: min(100% - 64px, 1540px);
+      min-height: 100svh;
+      margin-inline: auto;
+      display: grid;
+      grid-template-columns: 160px 1fr min(42vw, 560px);
+      gap: 42px;
+      align-items: center;
+      padding: 80px 0 88px;
+    }
+    .hero-copy {
+      max-width: 560px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      max-width: 100%;
+      padding: 12px 18px;
+      border-radius: 9px;
+      border: 1px solid rgba(46,214,200,.76);
+      background: rgba(0,0,0,.28);
+      color: var(--accent);
+      font-size: clamp(.84rem, 1.05vw, 1.05rem);
+      font-weight: 900;
+      line-height: 1.15;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .hero-badge svg {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 auto;
+    }
+
+    h1, h2, h3 { line-height: 1.03; letter-spacing: -.05em; }
+    .hero h1 {
+      max-width: 540px;
+      margin-top: 20px;
+      color: var(--text);
+      font-size: clamp(2.8rem, 3.8vw, 4.8rem);
+      line-height: .92;
+      letter-spacing: -.06em;
+      text-shadow: 0 10px 34px rgba(0,0,0,.42);
+    }
+    .hero h1 span {
+      color: var(--accent);
+      text-shadow: 0 0 28px rgba(46,214,200,.34);
+    }
+    .hero-text {
+      max-width: 635px;
+      margin-top: 26px;
+      color: #E2E2E2;
+      font-size: clamp(1rem, 1.32vw, 1.2rem);
+      line-height: 1.45;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 24px;
+      margin-top: 32px;
+    }
+    .hero-buttons .button {
+      min-width: 260px;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      max-width: 640px;
+      margin-top: 44px;
+    }
+    .hero-stat {
+      padding-right: 30px;
+      border-right: 1px solid rgba(255,255,255,.26);
+    }
+    .hero-stat:nth-child(2), .hero-stat:last-child { padding-left: 34px; }
+    .hero-stat:last-child { border-right: 0; }
+    .hero-stat svg {
+      width: 24px;
+      height: 24px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .hero-stat strong {
+      display: block;
+      color: var(--accent);
+      font-size: clamp(2.25rem, 3.7vw, 3.2rem);
+      line-height: 1;
+      letter-spacing: -.04em;
+    }
+    .hero-stat span {
+      display: block;
+      margin-top: 6px;
+      color: #D3D3D3;
+      font-size: .96rem;
+    }
+
+    .hero-ticker {
+      position: absolute;
+      z-index: 7;
+      left: 0; right: 0; bottom: 0;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      overflow: hidden;
+      background: rgba(46,214,200,.12);
+      border-top: 1px solid rgba(46,214,200,.55);
+      border-bottom: 1px solid rgba(46,214,200,.35);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      white-space: nowrap;
+    }
+    .pulse-line {
+      flex: 0 0 150px;
+      height: 42px;
+      margin-left: 34px;
+      position: relative;
+    }
+    .pulse-line::before {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; top: 50%;
+      height: 1px;
+      background: rgba(46,214,200,.42);
+    }
+    .pulse-line::after {
+      content: "";
+      position: absolute;
+      left: 12px; top: 4px;
+      width: 110px; height: 34px;
+      background: linear-gradient(90deg, transparent 0 10%, var(--accent) 10% 11%, transparent 11% 18%, var(--accent) 18% 20%, transparent 20% 28%, var(--accent) 28% 30%, transparent 30% 43%, var(--accent) 43% 44%, transparent 44% 100%);
+      filter: drop-shadow(0 0 10px rgba(46,214,200,.75));
+    }
+    .ticker-track {
+      display: flex;
+      align-items: center;
+      gap: 38px;
+      min-width: max-content;
+      animation: tickerMove 25s linear infinite;
+      will-change: transform;
+    }
+    .ticker-track span {
+      color: var(--accent);
+      text-shadow: 0 0 12px rgba(46,214,200,.55);
+      font-size: .88rem;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .ticker-track .dot {
+      color: var(--accent);
+      text-shadow: 0 0 14px rgba(46,214,200,.85);
+    }
+    @keyframes tickerMove {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* SECTIONS BELOW */
+    .section { padding: 86px 0; }
+    .section-soft {
+      background: linear-gradient(180deg, #080808 0%, #0C0C0C 100%);
+      border-block: 1px solid rgba(255,255,255,.04);
+    }
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      padding: 8px 13px;
+      border: 1px solid rgba(46,214,200,.24);
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(46,214,200,.06);
+      font-size: .78rem;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+    h2 { font-size: clamp(2.2rem, 6vw, 4.4rem); max-width: 880px; }
+    h3 { font-size: 1.25rem; }
+    p { color: var(--muted); font-size: 1rem; }
+    .lead { max-width: 760px; margin-top: 18px; color: #BDBDBD; font-size: clamp(1.05rem, 2vw, 1.25rem); }
+    .grid { display: grid; gap: 18px; }
+    .split { display: grid; gap: 42px; align-items: start; }
+    .card {
+      background: linear-gradient(180deg, #151515 0%, #111 100%);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+    .card:hover,
+    .blocker-item:hover,
+    .pillar-show:hover,
+    .cost-row:hover,
+    .faq-item:hover,
+    .pricing-card:hover,
+    .testimonial:hover,
+    .authority-item:hover,
+    .muted-box:hover,
+    .symptom:hover {
+      transform: translateY(-4px);
+      border-color: rgba(46,214,200,.55);
+      box-shadow: 0 0 0 1px rgba(46,214,200,.18), 0 8px 32px rgba(46,214,200,.15), 0 24px 60px rgba(0,0,0,.4);
+    }
+    .card-accent {
+      border-color: rgba(46,214,200,.52);
+      background: radial-gradient(circle at 20% 0%, rgba(46,214,200,.13), transparent 34%), linear-gradient(180deg, #151515 0%, #101010 100%);
+    }
+    .pillars-grid { grid-template-columns: 1fr; margin-top: 44px; }
+    .pillar-tag { display: block; margin-bottom: 14px; color: var(--accent); font-size: .78rem; font-weight: 950; text-transform: uppercase; letter-spacing: .18em; }
+    .pricing-grid { grid-template-columns: 1fr; margin-top: 34px; }
+    .price { margin-top: 14px; color: var(--text); font-size: 2.4rem; font-weight: 950; letter-spacing: -.05em; line-height: 1; }
+    .price small { color: var(--muted); font-size: .92rem; font-weight: 800; letter-spacing: 0; }
+    .list, .list-x { display: grid; gap: 12px; margin-top: 22px; list-style: none; }
+    .list li, .list-x li { display: grid; grid-template-columns: 24px 1fr; gap: 10px; color: var(--text); font-weight: 650; }
+    .list-x li { color: var(--muted); }
+    .list li::before { content: "✓"; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: rgba(46,214,200,.12); color: var(--accent); font-weight: 950; font-size: .8rem; }
+    .list-x li::before { content: "×"; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,.05); color: #777; font-weight: 950; }
+    .not-included { margin-top: 18px; color: var(--muted); font-size: .78rem; font-weight: 950; text-transform: uppercase; letter-spacing: .08em; }
+    .badge { display: inline-flex; width: fit-content; padding: 7px 11px; border-radius: 999px; color: #050505; background: var(--accent); font-size: .78rem; font-weight: 950; text-transform: uppercase; letter-spacing: .03em; }
+    /* Cost of inaction */
+    .cost-table { display: grid; gap: 12px; margin-top: 28px; }
+    .cost-row { display: grid; gap: 8px; padding: 18px; border: 1px solid var(--border); border-radius: 18px; background: var(--card); transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease; }
+    .authority-item, .faq-item, .muted-box { transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease; }
+    .cost-row b { color: var(--text); }
+    .cost-row span { color: var(--muted); }
+
+    /* Why it works */
+    .muted-box { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 18px; padding: 22px; }
+
+    /* Testimonials */
+    .testimonial { display: grid; gap: 14px; }
+    .testimonial .result { font-size: 1.35rem; font-weight: 950; letter-spacing: -.04em; color: var(--text); }
+    .testimonial .role { font-size: .9rem; color: var(--muted); font-weight: 750; }
+    .testimonial blockquote { color: var(--text); font-weight: 850; line-height: 1.3; }
+
+    /* Authority */
+    .authority { margin-top: 26px; display: grid; gap: 14px; }
+    .authority-item { display: grid; grid-template-columns: 60px 1fr; gap: 14px; align-items: center; padding: 18px; border-radius: 18px; background: var(--card); border: 1px solid var(--border); }
+    .authority-item b:first-child { color: var(--accent); font-size: 1.5rem; letter-spacing: -.04em; display: block; }
+    @media (min-width: 760px) { .authority { grid-template-columns: repeat(3, 1fr); } }
+
+    /* FAQ accordion */
+    .faq-list { margin-top: 30px; display: grid; gap: 12px; }
+    .faq-item { border: 1px solid var(--border); border-radius: 18px; background: var(--card); overflow: hidden; }
+    .faq-question { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px; border: 0; background: transparent; color: var(--text); font: inherit; font-weight: 900; text-align: left; cursor: pointer; }
+    .faq-question .faq-icon { color: var(--accent); font-size: 1.25rem; transition: transform 180ms ease; flex-shrink: 0; }
+    .faq-answer { max-height: 0; overflow: hidden; transition: max-height 280ms ease; }
+    .faq-answer p { padding: 0 20px 20px; }
+    .faq-item.active .faq-answer { max-height: 260px; }
+    .faq-item.active .faq-icon { transform: rotate(45deg); }
+
+    /* Risk note */
+    .risk { margin-top: -4px; color: var(--muted); font-size: .88rem; }
+
+    /* Decision section pricing */
+    .pricing-card { position: relative; display: grid; gap: 18px; }
+    .pricing-card.featured { border: 2px solid var(--accent); }
+
+    details { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 18px 20px; }
+    summary { cursor: pointer; color: var(--text); font-weight: 950; }
+    details p { margin-top: 14px; }
+    .final-line { padding: 36px 0 44px; text-align: center; background: #030303; border-top: 1px solid rgba(46,214,200,.18); }
+    .final-line p { max-width: 860px; margin-inline: auto; color: var(--text); font-size: clamp(1.3rem, 4vw, 2.2rem); font-weight: 950; letter-spacing: -.05em; line-height: 1.1; }
+    footer { padding: 34px 0; color: var(--muted); border-top: 1px solid var(--border); }
+
+    @media (min-width: 760px) {
+      .split { grid-template-columns: .95fr 1.05fr; }
+      .pillars-grid { grid-template-columns: repeat(3, 1fr); }
+      .pricing-grid { grid-template-columns: repeat(3, 1fr); }
+      .proof-grid { grid-template-columns: repeat(3, 1fr); }
+      .split { grid-template-columns: .95fr 1.05fr; }
+    }
+
+    @media (max-width: 1180px) {
+      .nav { width: min(100% - 28px, 100%); min-height: 74px; }
+      .nav-links { display: none; }
+      .nav-cta { min-height: 42px; padding-inline: 16px; font-size: .76rem; }
+      .logo .small { font-size: .74rem; }
+      .logo .brand { font-size: 1.45rem; }
+
+      .hero {
+        min-height: 100svh;
+        background:
+          linear-gradient(180deg, rgba(5,5,5,.96) 0%, rgba(5,5,5,.92) 28%, rgba(5,5,5,.72) 56%, rgba(5,5,5,.92) 85%, rgba(5,5,5,.99) 100%),
+          radial-gradient(circle at 72% 68%, rgba(46,214,200,.24), transparent 34%),
+          #050505;
+      }
+      .hero-inner {
+        width: min(100% - 28px, 100%);
+        min-height: 100svh;
+        display: grid;
+        grid-template-columns: 1fr;
+        align-content: start;
+        padding: 92px 0 82px;
+      }
+      .hero-side-cards { display: none; }
+      .hero-visual { display: none; }
+      .hero-copy { max-width: 100%; }
+      .hero-badge { font-size: .74rem; padding: 10px 13px; }
+      .hero h1 { max-width: 98%; margin-top: 18px; font-size: clamp(3rem, 13vw, 5.1rem); line-height: .88; }
+      .hero-text { max-width: 94%; margin-top: 18px; font-size: .98rem; line-height: 1.45; }
+      .hero-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
+      .hero-buttons .button { min-width: 0; width: 100%; min-height: 52px; padding: 12px 14px; font-size: .78rem; }
+
+      .hero-stats { grid-template-columns: repeat(3, 1fr); max-width: 100%; gap: 0; margin-top: 24px; }
+      .hero-stat, .hero-stat:nth-child(2), .hero-stat:last-child {
+        padding: 0 12px;
+        border-right: 1px solid rgba(255,255,255,.20);
+      }
+      .hero-stat:first-child { padding-left: 0; }
+      .hero-stat:last-child { border-right: 0; padding-right: 0; }
+      .hero-stat strong { font-size: clamp(1.7rem, 8vw, 2.4rem); }
+      .hero-stat span { font-size: .72rem; line-height: 1.15; }
+
+      .hero-ghost {
+        left: 52%;
+        top: 50%;
+        width: 96vw;
+        height: 72%;
+        opacity: .28;
+        filter: grayscale(1) brightness(.55) contrast(1.08) saturate(.5);
+      }
+      .hero-figure {
+        right: 50%;
+        transform: translateX(50%);
+        bottom: 58px;
+        width: min(58vw, 320px);
+        height: 42%;
+        opacity: .94;
+      }
+
+      .hero-ticker { height: 54px; }
+      .pulse-line { display: none; }
+      .ticker-track { gap: 24px; animation-duration: 22s; }
+      .ticker-track span { font-size: .72rem; }
+    }
+
+    @media (max-width: 520px) {
+      .hero-figure { width: min(62vw, 280px); height: 38%; bottom: 70px; }
+      .hero-ghost { width: 108vw; height: 66%; opacity: .22; }
+      .hero-buttons { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 380px) {
+      .hero-stats { grid-template-columns: 1fr; gap: 10px; }
+      .hero-stat, .hero-stat:nth-child(2), .hero-stat:last-child {
+        padding: 10px 0;
+        border-right: 0;
+        border-bottom: 1px solid rgba(255,255,255,.14);
+      }
+      .hero-stat:last-child { border-bottom: 0; }
+    }
+  
+    /* =========================================================
+       SECTION GREG + RENDEZ-VOUS EN BAS DE PAGE
+       Placée en fin de page, pas au milieu.
+       ========================================================= */
+    .bottom-founder-area {
+      background:
+        radial-gradient(circle at 50% 0%, rgba(46,214,200,.08), transparent 28%),
+        linear-gradient(180deg, #050505 0%, #080808 100%);
+      border-top: 1px solid rgba(46,214,200,.14);
+    }
+
+    .founder-section {
+      padding: 92px 0 74px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .founder-wrap {
+      display: grid;
+      gap: 46px;
+      align-items: center;
+      width: min(100% - 32px, 980px);
+      margin-inline: auto;
+    }
+
+    .founder-visual {
+      display: flex;
+      justify-content: center;
+    }
+
+    .founder-photo {
+      position: relative;
+      width: min(76vw, 290px);
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      background: radial-gradient(circle at 50% 35%, #f3ede4 0%, #e6ddd2 58%, #cec4b8 100%);
+      box-shadow:
+        0 0 0 1px rgba(46,214,200,.18),
+        0 0 42px rgba(46,214,200,.12);
+      overflow: hidden;
+    }
+
+    .founder-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center 12%;
+      transform: scale(1.08);
+      filter: saturate(1.05) contrast(1.03) brightness(1.03);
+    }
+
+    .founder-copy .eyebrow,
+    .cta-talk-box .eyebrow {
+      background: transparent;
+      border: 0;
+      padding: 0;
+      color: var(--accent);
+      font-size: .86rem;
+      letter-spacing: .24em;
+    }
+
+    .founder-copy h2 {
+      margin-top: 12px;
+      font-size: clamp(2.7rem, 5.2vw, 4.4rem);
+      line-height: .95;
+    }
+
+    .founder-role {
+      margin-top: 10px;
+      color: var(--accent);
+      font-weight: 850;
+      font-size: clamp(.96rem, 1.35vw, 1.15rem);
+    }
+
+    .founder-copy p {
+      margin-top: 20px;
+      color: #AFAFAF;
+      font-size: 1.02rem;
+      line-height: 1.8;
+    }
+
+    .cta-talk-section {
+      padding: 74px 0 92px;
+      text-align: center;
+    }
+
+    .cta-talk-box {
+      width: min(100% - 32px, 920px);
+      margin-inline: auto;
+    }
+
+    .cta-talk-box h2 {
+      margin-top: 14px;
+      font-size: clamp(2.5rem, 5.4vw, 4.8rem);
+      line-height: .96;
+    }
+
+    .cta-talk-box h2 span {
+      color: var(--accent);
+    }
+
+    .cta-talk-box p {
+      margin-top: 14px;
+      color: #AFAFAF;
+      font-size: 1.08rem;
+    }
+
+    .cta-talk-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 34px;
+    }
+
+    .cta-talk-buttons .button {
+      min-width: 290px;
+      min-height: 58px;
+      border-radius: 10px;
+      font-size: 1rem;
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 900;
+    }
+
+    .cta-talk-buttons .button-secondary {
+      color: var(--accent);
+      border-color: rgba(46,214,200,.82);
+      background: rgba(0,0,0,.18);
+    }
+
+    @media (min-width: 880px) {
+      .founder-wrap {
+        grid-template-columns: 310px 1fr;
+      }
+    }
+
+    @media (max-width: 879px) {
+      .founder-section {
+        padding: 68px 0 54px;
+      }
+
+      .founder-copy {
+        text-align: center;
+      }
+
+      .founder-copy p {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .cta-talk-section {
+        padding: 58px 0 72px;
+      }
+
+      .cta-talk-buttons .button {
+        min-width: 0;
+        width: 100%;
+      }
+    }
+
+
+    /* =========================================================
+       SECTION — Pourquoi tu n'as pas encore de résultats
+       Ajout cohérent après le hero.
+       ========================================================= */
+    .blockers-section {
+      position: relative;
+      overflow: hidden;
+      padding: 96px 0 92px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(46,214,200,.07), transparent 30%),
+        linear-gradient(180deg, #070707 0%, #0A0A0A 100%);
+      border-top: 1px solid rgba(46,214,200,.14);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .blockers-section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(255,255,255,.016) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.016) 1px, transparent 1px);
+      background-size: 70px 70px;
+      opacity: .28;
+      pointer-events: none;
+    }
+
+    .blockers-inner {
+      position: relative;
+      z-index: 2;
+      width: min(100% - 32px, 1120px);
+      margin-inline: auto;
+      text-align: center;
+    }
+
+    .blockers-inner h2 {
+      margin-inline: auto;
+      font-size: clamp(2.3rem, 5vw, 4.4rem);
+      line-height: .98;
+      letter-spacing: -.055em;
+    }
+
+    .blockers-inner h2 span {
+      color: var(--accent);
+    }
+
+    .blockers-subtitle {
+      margin-top: 14px;
+      color: #9A9A9A;
+      font-size: 1.02rem;
+    }
+
+    .blockers-grid {
+      display: grid;
+      gap: 26px;
+      margin-top: 58px;
+    }
+
+    .blocker-item {
+      padding: 0 10px;
+    }
+
+    .blocker-icon {
+      display: grid;
+      place-items: center;
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      background: rgba(46,214,200,.06);
+      border: 1px solid rgba(46,214,200,.18);
+      font-size: 2rem;
+      line-height: 1;
+      box-shadow: 0 0 28px rgba(46,214,200,.08);
+    }
+
+    .blocker-item h3 {
+      margin-bottom: 10px;
+      color: var(--text);
+      font-size: 1.05rem;
+      line-height: 1.12;
+      letter-spacing: -.02em;
+    }
+
+    .blocker-item p {
+      max-width: 260px;
+      margin: 0 auto;
+      color: #8F8F8F;
+      font-size: .95rem;
+      line-height: 1.55;
+    }
+
+    .blockers-quote {
+      margin-top: 96px;
+      padding-top: 74px;
+      border-top: 1px solid rgba(255,255,255,.07);
+      text-align: center;
+    }
+
+    .blockers-quote blockquote {
+      max-width: 820px;
+      margin: 0 auto;
+      color: var(--text);
+      font-size: clamp(1.55rem, 3.6vw, 2.65rem);
+      line-height: 1.22;
+      font-weight: 950;
+      letter-spacing: -.035em;
+    }
+
+    .blockers-quote blockquote span {
+      color: var(--accent);
+    }
+
+    .blockers-quote cite {
+      display: block;
+      margin-top: 28px;
+      color: #777;
+      font-style: normal;
+      font-size: .92rem;
+    }
+
+    @media (min-width: 820px) {
+      .blockers-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (max-width: 819px) {
+      .blockers-section {
+        padding: 72px 0 70px;
+      }
+
+      .blockers-grid {
+        grid-template-columns: 1fr 1fr;
+        margin-top: 42px;
+      }
+
+      .blockers-quote {
+        margin-top: 64px;
+        padding-top: 50px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .blockers-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .blocker-item p {
+        max-width: 310px;
+      }
+    }
+
+
+
+    /* =========================
+       HERO REMIS EN PAGE COMME DEMANDÉ
+       ========================= */
+    .site-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 60;
+      background: transparent;
+    }
+
+    .nav {
+      width: min(100% - 72px, 1180px);
+      min-height: 84px;
+      margin-inline: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+    }
+
+    .logo {
+      gap: 10px;
+      font-style: italic;
+    }
+
+    .logo .small {
+      font-size: 1rem;
+      font-weight: 950;
+      letter-spacing: .02em;
+    }
+
+    .logo .brand {
+      font-size: clamp(1.9rem, 2.4vw, 2.55rem);
+      color: var(--accent);
+      font-weight: 950;
+      text-shadow: 0 0 22px rgba(46,214,200,.18);
+    }
+
+    .nav-links {
+      gap: 34px;
+      font-size: .92rem;
+      font-weight: 900;
+    }
+
+    .nav-links a.active::after {
+      bottom: -11px;
+      height: 3px;
+      box-shadow: 0 0 14px rgba(46,214,200,.58);
+    }
+
+    .nav-cta {
+      min-height: 48px;
+      padding-inline: 26px;
+      border-radius: 9px;
+      color: var(--accent);
+      border-color: rgba(46,214,200,.68);
+      background: rgba(0,0,0,.22);
+      font-size: .88rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .hero {
+      min-height: 100svh;
+      background:
+        linear-gradient(90deg, rgba(5,5,5,1) 0%, rgba(5,5,5,.98) 18%, rgba(5,5,5,.90) 42%, rgba(5,5,5,.50) 66%, rgba(5,5,5,.52) 100%),
+        radial-gradient(circle at 74% 50%, rgba(46,214,200,.30), transparent 28%),
+        radial-gradient(circle at 78% 76%, rgba(46,214,200,.14), transparent 22%),
+        #050505;
+      border-bottom: 1px solid rgba(46,214,200,.24);
+    }
+
+    .hero-inner {
+      width: min(100% - 72px, 1180px);
+      min-height: 100svh;
+      margin-inline: auto;
+      display: grid;
+      grid-template-columns: minmax(0, 670px) 1fr;
+      align-items: center;
+      padding: 118px 0 88px;
+    }
+
+    .hero-copy {
+      max-width: 670px;
+    }
+
+    .hero-badge {
+      padding: 13px 18px;
+      border-radius: 10px;
+      border: 1px solid rgba(46,214,200,.74);
+      background: rgba(0,0,0,.20);
+      color: var(--accent);
+      font-size: .98rem;
+      font-weight: 850;
+      line-height: 1.35;
+      max-width: 100%;
+      box-shadow: inset 0 0 0 1px rgba(46,214,200,.06);
+    }
+
+    .hero h1 {
+      max-width: 540px;
+      margin-top: 20px;
+      font-size: clamp(2.8rem, 3.8vw, 4.8rem);
+      line-height: .92;
+      letter-spacing: -.06em;
+      text-shadow: 0 10px 30px rgba(0,0,0,.40);
+    }
+
+    .hero-text {
+      max-width: 610px;
+      margin-top: 26px;
+      font-size: clamp(1rem, 1.18vw, 1.18rem);
+      color: #E4E4E4;
+      line-height: 1.52;
+    }
+
+    .hero-buttons {
+      gap: 18px;
+      margin-top: 30px;
+    }
+
+    .hero-buttons .button {
+      min-width: 228px;
+      min-height: 56px;
+      border-radius: 9px;
+    }
+
+    .hero-ghost {
+      left: 41%;
+      top: 53%;
+      width: min(48vw, 680px);
+      height: 104%;
+      opacity: .58;
+      filter: grayscale(1) brightness(.56) contrast(1.10) saturate(.55);
+      mix-blend-mode: screen;
+    }
+
+    .hero-figure {
+      right: 3.4%;
+      bottom: -4px;
+      width: min(36vw, 470px);
+      height: calc(100% - 108px);
+    }
+
+    .hero-figure::before {
+      inset: 7% -10% 0% -16%;
+      background:
+        radial-gradient(circle at 62% 38%, rgba(46,214,200,.18), transparent 31%),
+        radial-gradient(circle at 56% 78%, rgba(46,214,200,.28), transparent 22%);
+      filter: blur(26px);
+    }
+
+    .hero-figure::after {
+      left: 12%;
+      right: 8%;
+      bottom: 1%;
+      height: 86px;
+      background: radial-gradient(ellipse at center, rgba(46,214,200,.22) 0%, rgba(0,0,0,.28) 44%, transparent 76%);
+      filter: blur(10px);
+    }
+
+    .hero-figure img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: bottom center;
+      filter:
+        saturate(1.22)
+        contrast(1.08)
+        brightness(1.08)
+        drop-shadow(0 24px 40px rgba(0,0,0,.26))
+        drop-shadow(0 0 24px rgba(46,214,200,.12));
+    }
+
+    .hero-stats {
+      max-width: 530px;
+      margin-top: 38px;
+    }
+
+    .hero-stat {
+      padding-right: 26px;
+    }
+
+    .hero-stat:nth-child(2), .hero-stat:last-child {
+      padding-left: 26px;
+    }
+
+    .hero-stat strong {
+      font-size: clamp(2rem, 3.1vw, 3rem);
+    }
+
+    .hero-stat span {
+      font-size: .95rem;
+    }
+
+    @media (max-width: 1180px) {
+      .nav,
+      .hero-inner {
+        width: min(100% - 30px, 100%);
+      }
+    }
+
+    @media (max-width: 980px) {
+      .hero-inner {
+        grid-template-columns: 1fr;
+        align-content: start;
+        padding: 98px 0 84px;
+      }
+
+      .hero-copy {
+        max-width: 100%;
+      }
+
+      .hero-ghost {
+        left: 54%;
+        top: 48%;
+        width: 96vw;
+        height: 70%;
+        opacity: .26;
+      }
+
+      .hero-figure {
+        right: 50%;
+        transform: translateX(50%);
+        bottom: 68px;
+        width: min(55vw, 320px);
+        height: 42%;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .nav {
+        min-height: 72px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .nav-cta {
+        min-height: 42px;
+        padding-inline: 18px;
+        font-size: .78rem;
+      }
+
+      .logo .small {
+        font-size: .88rem;
+      }
+
+      .logo .brand {
+        font-size: 1.8rem;
+      }
+
+      .hero-inner {
+        width: min(100% - 24px, 100%);
+        padding: 86px 0 80px;
+      }
+
+      .hero-badge {
+        font-size: .78rem;
+        padding: 10px 12px;
+      }
+
+      .hero h1 {
+        font-size: clamp(3rem, 12.8vw, 5rem);
+      }
+
+      .hero-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .hero-buttons .button {
+        min-width: 0;
+        width: 100%;
+        min-height: 52px;
+        font-size: .82rem;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .hero-buttons {
+        grid-template-columns: 1fr;
+      }
+      .hero-figure {
+        width: min(60vw, 280px);
+        height: 38%;
+        bottom: 74px;
+      }
+      .hero-ghost {
+        width: 110vw;
+        height: 64%;
+      }
+    }
+
+
+
+    /* =========================================================
+       CORRECTION DEMANDÉE — uniquement le rendu des photos du hero
+       - image fantôme plus visible derrière le texte
+       - photo principale plus lumineuse
+       - aucun effet cadre
+       - couleurs REBORN conservées
+       ========================================================= */
+    .hero {
+      background:
+        linear-gradient(90deg, rgba(5,5,5,1) 0%, rgba(5,5,5,.985) 19%, rgba(5,5,5,.90) 40%, rgba(5,5,5,.46) 66%, rgba(5,5,5,.52) 100%),
+        radial-gradient(circle at 74% 50%, rgba(46,214,200,.26), transparent 28%),
+        radial-gradient(circle at 78% 76%, rgba(46,214,200,.14), transparent 24%),
+        #050505 !important;
+    }
+
+    .hero-ghost {
+      left: 47% !important;
+      top: 51% !important;
+      transform: translate(-50%, -50%) scale(1.04) !important;
+      width: min(54vw, 860px) !important;
+      height: 110% !important;
+      opacity: .78 !important;
+      filter: grayscale(1) brightness(.68) contrast(1.12) saturate(.48) !important;
+      mix-blend-mode: screen !important;
+      -webkit-mask-image:
+        radial-gradient(ellipse 78% 86% at 51% 48%,
+          rgba(0,0,0,0) 0%,
+          rgba(0,0,0,.18) 10%,
+          rgba(0,0,0,.74) 24%,
+          rgba(0,0,0,1) 44%,
+          rgba(0,0,0,.94) 60%,
+          rgba(0,0,0,.56) 76%,
+          rgba(0,0,0,.16) 88%,
+          rgba(0,0,0,0) 100%) !important;
+      mask-image:
+        radial-gradient(ellipse 78% 86% at 51% 48%,
+          rgba(0,0,0,0) 0%,
+          rgba(0,0,0,.18) 10%,
+          rgba(0,0,0,.74) 24%,
+          rgba(0,0,0,1) 44%,
+          rgba(0,0,0,.94) 60%,
+          rgba(0,0,0,.56) 76%,
+          rgba(0,0,0,.16) 88%,
+          rgba(0,0,0,0) 100%) !important;
+    }
+
+    .hero-ghost::after {
+      background:
+        linear-gradient(90deg,
+          rgba(5,5,5,.88) 0%,
+          rgba(5,5,5,.42) 16%,
+          rgba(5,5,5,.02) 38%,
+          rgba(5,5,5,.08) 60%,
+          rgba(5,5,5,.56) 80%,
+          rgba(5,5,5,.82) 100%),
+        linear-gradient(180deg,
+          rgba(5,5,5,.16) 0%,
+          rgba(5,5,5,0) 22%,
+          rgba(5,5,5,0) 74%,
+          rgba(5,5,5,.68) 100%) !important;
+      border-radius: 999px !important;
+    }
+
+    .hero-figure {
+      right: 2.8% !important;
+      bottom: -10px !important;
+      width: min(37vw, 540px) !important;
+      height: calc(100% - 102px) !important;
+    }
+
+    .hero-figure::before {
+      inset: 6% -12% 0% -14% !important;
+      background:
+        radial-gradient(circle at 62% 36%, rgba(46,214,200,.18), transparent 30%),
+        radial-gradient(circle at 56% 78%, rgba(46,214,200,.28), transparent 23%) !important;
+      filter: blur(24px) !important;
+    }
+
+    .hero-figure::after {
+      left: 14% !important;
+      right: 8% !important;
+      bottom: 1% !important;
+      height: 88px !important;
+      background: radial-gradient(ellipse at center, rgba(46,214,200,.22) 0%, rgba(0,0,0,.30) 44%, transparent 76%) !important;
+      filter: blur(10px) !important;
+    }
+
+    .hero-figure img {
+      object-fit: contain !important;
+      object-position: bottom center !important;
+      filter:
+        saturate(1.28)
+        contrast(1.10)
+        brightness(1.10)
+        drop-shadow(0 22px 34px rgba(0,0,0,.24))
+        drop-shadow(0 0 18px rgba(46,214,200,.12)) !important;
+    }
+
+    @media (max-width: 1180px) {
+      .hero-ghost {
+        left: 49% !important;
+        width: min(60vw, 760px) !important;
+        opacity: .68 !important;
+      }
+      .hero-figure {
+        width: min(40vw, 470px) !important;
+        right: 2% !important;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .hero-ghost {
+        left: 54% !important;
+        top: 49% !important;
+        transform: translate(-50%, -50%) scale(1.02) !important;
+        width: 100vw !important;
+        height: 72% !important;
+        opacity: .32 !important;
+      }
+      .hero-figure {
+        right: 50% !important;
+        transform: translateX(50%) !important;
+        bottom: 68px !important;
+        width: min(56vw, 330px) !important;
+        height: 42% !important;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .hero-ghost {
+        width: 112vw !important;
+        height: 66% !important;
+        opacity: .26 !important;
+      }
+      .hero-figure {
+        width: min(62vw, 286px) !important;
+        height: 39% !important;
+        bottom: 72px !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       AJUSTEMENT DEMANDÉ
+       - halo derrière la photo plus propre
+       - couleur du halo corrigée
+       - image de fond fantôme plus visible
+       ========================================================= */
+    .hero {
+      background:
+        linear-gradient(90deg, rgba(5,5,5,1) 0%, rgba(5,5,5,.98) 16%, rgba(5,5,5,.86) 36%, rgba(5,5,5,.38) 62%, rgba(5,5,5,.46) 100%),
+        radial-gradient(circle at 74% 50%, rgba(46,214,200,.18), transparent 26%),
+        radial-gradient(circle at 78% 76%, rgba(46,214,200,.10), transparent 22%),
+        #050505 !important;
+    }
+
+    .hero-ghost {
+      left: 48% !important;
+      top: 51% !important;
+      transform: translate(-50%, -50%) scale(1.05) !important;
+      width: min(56vw, 900px) !important;
+      height: 112% !important;
+      opacity: .92 !important;
+      filter: grayscale(1) brightness(.82) contrast(1.10) saturate(.40) !important;
+    }
+
+    .hero-ghost::after {
+      background:
+        linear-gradient(90deg,
+          rgba(5,5,5,.80) 0%,
+          rgba(5,5,5,.26) 15%,
+          rgba(5,5,5,0) 35%,
+          rgba(5,5,5,.04) 58%,
+          rgba(5,5,5,.42) 78%,
+          rgba(5,5,5,.74) 100%),
+        linear-gradient(180deg,
+          rgba(5,5,5,.10) 0%,
+          rgba(5,5,5,0) 20%,
+          rgba(5,5,5,0) 72%,
+          rgba(5,5,5,.54) 100%) !important;
+    }
+
+    .hero-figure::before {
+      inset: 7% -10% 2% -12% !important;
+      background:
+        radial-gradient(circle at 60% 38%, rgba(140, 245, 236, .12), transparent 26%),
+        radial-gradient(circle at 54% 76%, rgba(46,214,200,.16), transparent 24%),
+        radial-gradient(circle at 50% 52%, rgba(255,255,255,.06), transparent 30%) !important;
+      filter: blur(26px) !important;
+    }
+
+    .hero-figure::after {
+      left: 16% !important;
+      right: 10% !important;
+      bottom: 1% !important;
+      height: 86px !important;
+      background: radial-gradient(ellipse at center, rgba(125, 232, 224, .14) 0%, rgba(0,0,0,.20) 44%, transparent 76%) !important;
+      filter: blur(10px) !important;
+    }
+
+    .hero-figure img {
+      filter:
+        saturate(1.24)
+        contrast(1.08)
+        brightness(1.08)
+        drop-shadow(0 24px 38px rgba(0,0,0,.24))
+        drop-shadow(0 0 14px rgba(125,232,224,.08)) !important;
+    }
+
+    @media (max-width: 1180px) {
+      .hero-ghost {
+        width: min(62vw, 800px) !important;
+        opacity: .84 !important;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .hero-ghost {
+        left: 54% !important;
+        top: 49% !important;
+        width: 104vw !important;
+        height: 74% !important;
+        opacity: .42 !important;
+        filter: grayscale(1) brightness(.76) contrast(1.08) saturate(.34) !important;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .hero-ghost {
+        width: 116vw !important;
+        height: 68% !important;
+        opacity: .34 !important;
+      }
+    }
+
+    /* =========================================================
+       HERO SANS PHOTO — layout 2 colonnes centré
+       ========================================================= */
+    .hero {
+      background:
+        radial-gradient(circle at 50% 52%, rgba(46,214,200,.22), transparent 38%),
+        radial-gradient(circle at 80% 20%, rgba(46,214,200,.10), transparent 28%),
+        #050505 !important;
+    }
+    @media (min-width: 981px) {
+      .hero-inner { grid-template-columns: 160px 1fr !important; }
+    }
+    .hero-visual { display: none !important; }
+    .hero-copy { max-width: 780px !important; }
+    .hero h1 { max-width: 720px !important; font-size: clamp(2.4rem, 4.6vw, 5.4rem) !important; }
+    .hero-buttons { gap: 18px !important; }
+
+    /* =========================================================
+       RESPONSIVE MOBILE — mise en page proportionnelle
+       ========================================================= */
+    @media (max-width: 760px) {
+      /* Sections */
+      .section { padding: 52px 0; }
+      .section-soft { padding: 52px 0; }
+      .difference-strip { padding: 48px 0 56px; }
+
+      /* Typographie proportionnelle */
+      h2 { font-size: clamp(1.8rem, 7.5vw, 2.8rem) !important; line-height: 1.08; }
+      h3 { font-size: clamp(1rem, 4.5vw, 1.25rem); }
+      p { font-size: clamp(.9rem, 3.8vw, 1rem); }
+      .lead { font-size: clamp(.95rem, 4vw, 1.15rem) !important; }
+      .eyebrow { font-size: .72rem; }
+
+      /* Split → 1 colonne */
+      .split { grid-template-columns: 1fr !important; gap: 24px; }
+
+      /* Grilles */
+      .pricing-grid { grid-template-columns: 1fr; }
+      .pillars-showcase { grid-template-columns: 1fr; gap: 12px; }
+      .pillars { grid-template-columns: 1fr; }
+      .symptoms { grid-template-columns: 1fr; }
+      .authority { grid-template-columns: 1fr; }
+      .proof-grid { grid-template-columns: 1fr; }
+      .offer-box { grid-template-columns: 1fr; }
+
+      /* Cards */
+      .card, .card-flat, .muted-box { padding: 18px; }
+      .card { border-radius: 16px; }
+      .price { font-size: 1.9rem; }
+      .price small { font-size: .82rem; }
+
+      /* Piliers */
+      .pillar-show { min-height: auto; padding: 20px; }
+      .pillar-show h3 { font-size: 1rem; }
+
+      /* Boutons */
+      .button { min-height: 52px; font-size: .85rem; padding: 14px 20px; }
+      .hero-buttons { grid-template-columns: 1fr !important; gap: 10px !important; }
+      .cta-talk-buttons { flex-direction: column; }
+      .cta-talk-buttons .button { width: 100%; min-width: 0; }
+      .button-row { flex-direction: column; }
+
+      /* Offre price callout */
+      .price-callout strong { font-size: clamp(1.8rem, 7vw, 2.6rem); }
+
+      /* Founder */
+      .founder-section { padding: 56px 0 40px; }
+      .founder-copy h2 { font-size: clamp(2rem, 8vw, 3rem) !important; }
+      .cta-talk-section { padding: 40px 0 56px; }
+      .cta-talk-box h2 { font-size: clamp(1.8rem, 7.5vw, 2.8rem) !important; }
+
+      /* Final line */
+      .final-line p { font-size: clamp(1.1rem, 5vw, 1.6rem) !important; }
+
+      /* Footer */
+      footer { text-align: center; font-size: .82rem; padding: 24px 0; }
+      .footer-grid { grid-template-columns: 1fr; gap: 8px; }
+
+      /* FAQ */
+      .faq-question { font-size: .92rem; padding: 16px; }
+      .faq-answer p { font-size: .9rem; }
+
+      /* Hero side cards cachés */
+      .hero-side-cards { display: none !important; }
+    }
+
+    @media (max-width: 480px) {
+      .section { padding: 38px 0; }
+      .difference-strip { padding: 36px 0 44px; }
+      h2 { font-size: clamp(1.6rem, 7vw, 2.2rem) !important; }
+      .hero h1 { font-size: clamp(2.2rem, 9.5vw, 3.4rem) !important; }
+      .hero-badge { font-size: .68rem !important; padding: 9px 11px !important; white-space: normal; line-height: 1.3; }
+      .hero-stats { grid-template-columns: repeat(3, 1fr); gap: 0; }
+      .hero-stat strong { font-size: clamp(1.4rem, 6vw, 2rem); }
+      .hero-stat span { font-size: .66rem; }
+      .card, .card-flat { padding: 16px; border-radius: 14px; }
+      .price { font-size: 1.7rem; }
+    }
+
+    /* =========================================================
+       SECTIONS — RÉFÉRENCE REBORN
+       ========================================================= */
+    .highlight { color: var(--accent); }
+
+    .difference-strip {
+      padding: 76px 0 86px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      background:
+        radial-gradient(circle at 50% 20%, rgba(46, 214, 200, 0.10), transparent 34%),
+        linear-gradient(180deg, #080808 0%, #0A0A0A 100%);
+    }
+    .difference-strip h2 {
+      max-width: 1040px;
+      margin-inline: auto;
+      font-size: clamp(2rem, 5vw, 3.8rem);
+    }
+    .difference-strip .container > p {
+      margin-top: 16px;
+      max-width: 760px;
+      margin-inline: auto;
+    }
+    .pillars-showcase {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      margin-top: 46px;
+      text-align: left;
+    }
+    .pillar-show {
+      position: relative;
+      overflow: hidden;
+      min-height: 178px;
+      padding: 24px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #151515 0%, #101010 100%);
+      border: 1px solid #252525;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+    .pillar-show:hover {
+      transform: translateY(-4px);
+      border-color: rgba(46, 214, 200, 0.42);
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.36);
+    }
+    .pillar-show::after {
+      content: "";
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      right: -28px;
+      top: -28px;
+      border-radius: 50%;
+      background: rgba(46, 214, 200, 0.08);
+    }
+    .pillar-show-tag {
+      display: inline-block;
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 950;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .pillar-show h3 { font-size: 1.18rem; margin-bottom: 10px; }
+    .pillar-show p { font-size: 0.96rem; line-height: 1.6; color: #8C8C8C; }
+
+    .symptoms { grid-template-columns: 1fr; }
+    .symptom {
+      display: grid;
+      gap: 8px;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+    .symptom:hover {
+      transform: translateY(-4px);
+      border-color: rgba(46,214,200,.55);
+      box-shadow: 0 0 0 1px rgba(46,214,200,.18), 0 8px 32px rgba(46,214,200,.15), 0 24px 60px rgba(0,0,0,.4);
+    }
+    .symptom b { font-size: 1.02rem; }
+
+    .pillars { grid-template-columns: 1fr; margin-top: 30px; }
+    .pillar-number {
+      display: inline-grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      margin-bottom: 16px;
+      border-radius: 50%;
+      background: rgba(46, 214, 200, 0.12);
+      color: var(--accent);
+      font-weight: 950;
+    }
+    .card-flat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 22px;
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+    .card-flat:hover {
+      transform: translateY(-4px);
+      border-color: rgba(46,214,200,.55);
+      box-shadow: 0 0 0 1px rgba(46,214,200,.18), 0 8px 32px rgba(46,214,200,.15), 0 24px 60px rgba(0,0,0,.4);
+    }
+
+    .offer-box { margin-top: 30px; display: grid; gap: 18px; }
+    .offer-line { display: grid; gap: 6px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+    .offer-line:last-child { padding-bottom: 0; border-bottom: 0; }
+    .price-callout {
+      display: grid;
+      gap: 10px;
+      padding: 22px;
+      border-radius: 22px;
+      background: linear-gradient(145deg, #080808 0%, #101010 100%);
+      border: 1px solid rgba(46, 214, 200, 0.20);
+    }
+    .price-callout p { color: rgba(247, 247, 247, 0.72); }
+    .price-callout strong {
+      color: var(--accent);
+      font-size: clamp(2rem, 8vw, 3.5rem);
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+
+    @media (min-width: 760px) {
+      .pillars-showcase { grid-template-columns: repeat(3, 1fr); }
+      .symptoms { grid-template-columns: repeat(2, 1fr); }
+      .pillars { grid-template-columns: repeat(3, 1fr); }
+      .offer-box { grid-template-columns: 1fr 0.78fr; align-items: start; }
+    }
+
+</style>
+</head>
+
+<body>
+  <script>
+    const CTA_URL = "https://calendly.com/gregvong-coaching/bilan-integratif";
+  </script>
+
+  <header class="site-header">
+    <nav class="nav" aria-label="Navigation principale">
+      <a class="logo" href="#top"><span class="small">METHODE</span><span class="brand">REBORN</span></a>
+      <div class="nav-links">
+        <a href="#top" class="active">Accueil</a>
+        <a href="#apropos">À propos</a>
+        <a href="#methode">Méthode</a>
+        <a href="#plans">Coaching</a>
+        <a href="#faq">FAQ</a>
+      </div>
+
+      <div class="nav-social">
+        <a href="https://www.instagram.com/gregvong_coaching/" target="_blank" aria-label="Instagram" class="nav-social-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
+        <a href="https://www.facebook.com/Gregkarla/" target="_blank" aria-label="Facebook" class="nav-social-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        </a>
+      </div>
+      <a class="button button-secondary nav-cta js-cta" href="https://gregvong-questionnaire.netlify.app/sport">Commencer</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-label="Méthode REBORN">
+      <div class="hero-inner">
+        <aside class="hero-side-cards" aria-label="Points forts REBORN">
+          <div class="side-card">
+            <svg class="side-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <strong>90 jours</strong>
+            <p>Cadre, suivi, ajustements</p>
+            <div class="side-card-line"></div>
+          </div>
+          <div class="side-card">
+            <svg class="side-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 16 9 5 9-5"/></svg>
+            <strong>6 piliers</strong>
+            <p>Analyse avant programme</p>
+            <div class="side-card-line"></div>
+          </div>
+        </aside>
+
+        <div class="hero-copy">
+          <span class="hero-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-5"/></svg>
+            Méthode créée par Greg Vong · Coach expert en Physiologie, Nutrition, Micronutrition &amp; Mindset
+          </span>
+
+          <h1>Un programme générique ne peut pas lire <span>ton corps.</span></h1>
+          <p class="hero-text">Moi, je commence par analyser tes données biologiques, ton alimentation, ton stress, ton sommeil et ton métabolisme avant de te donner la moindre recommandation.</p>
+
+          <div class="hero-buttons">
+            <a class="button button-primary js-cta" href="https://gregvong-questionnaire.netlify.app/sport">Commencer →</a>
+            <a class="button button-secondary" href="#plans">Voir les offres</a>
+          </div>
+
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-8 0v2"/><circle cx="12" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M2 21v-2a4 4 0 0 1 3-3.87"/></svg>
+              <strong>18K+</strong><span>Abonnés</span>
+            </div>
+            <div class="hero-stat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2Z"/></svg>
+              <strong>200+</strong><span>Clients transformés</span>
+            </div>
+            <div class="hero-stat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8l-9-5-9 5v8l9 5 9-5Z"/></svg>
+              <strong>6</strong><span>Piliers analysés</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true"></div>
+      </div>
+
+      <div class="hero-ticker" aria-hidden="true">
+        <div class="pulse-line"></div>
+        <div class="ticker-track">
+          <span>Sport personnalisé</span><span class="dot">•</span><span>Nutrition anti-inflammatoire</span><span class="dot">•</span><span>Stress</span><span class="dot">•</span><span>Sommeil</span><span class="dot">•</span><span>Micronutrition</span><span class="dot">•</span><span>Mindset</span>
+          <span>Sport personnalisé</span><span class="dot">•</span><span>Nutrition anti-inflammatoire</span><span class="dot">•</span><span>Stress</span><span class="dot">•</span><span>Sommeil</span><span class="dot">•</span><span>Micronutrition</span><span class="dot">•</span><span>Mindset</span>
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="difference-strip">
+      <div class="container">
+        <h2>Ce qui fait la <span class="highlight">différence</span> : une méthode basée sur tes données</h2>
+        <p>Avant de démarrer, j’analyse 6 piliers biologiques et comportementaux pour identifier ce qui bloque vraiment tes résultats.</p>
+
+        <div class="pillars-showcase">
+          <article class="pillar-show">
+            <div class="pillar-show-tag">PILIER 01</div>
+            <h3>Profil biométrique & santé globale</h3>
+            <p>Taille, poids, IMC, statut hormonal, traitements en cours, antécédents médicaux. Je sais exactement avec quel corps je travaille.</p>
+          </article>
+          <article class="pillar-show">
+            <div class="pillar-show-tag">PILIER 02</div>
+            <h3>Alimentation & hydratation</h3>
+            <p>Fréquence de consommation, catégories d’aliments, boissons, régularité. Je mesure tes habitudes réelles, pas tes intentions.</p>
+          </article>
+          <article class="pillar-show">
+            <div class="pillar-show-tag">PILIER 03</div>
+            <h3>Neurotransmetteurs</h3>
+            <p>Sérotonine, dopamine, noradrénaline. Je cible sommeil, motivation, compulsions, libido et fatigue mentale.</p>
+          </article>
+          <article class="pillar-show">
+            <div class="pillar-show-tag">PILIER 04</div>
+            <h3>Dysbiose intestinale & digestion</h3>
+            <p>Ballonnements, transit, mycoses, côlon irritable, peau. Ton microbiote influence tes résultats physiques et mentaux.</p>
+          </article>
+          <article class="pillar-show">
+            <div class="pillar-show-tag">PILIER 05</div>
+            <h3>Foie & fonction hépatique</h3>
+            <p>Difficultés à digérer les graisses, brûlures, antécédents hépatiques. Un foie surchargé bloque les résultats.</p>
+          </article>
+          <article class="pillar-show">
+            <div class="pillar-show-tag">PILIER 06</div>
+            <h3>Équilibre hormonal & métabolique</h3>
+            <p>Cortisol, insuline, thyroïde, DHEA, hypersensibilités alimentaires, résistance à l’insuline et dysfonctions métaboliques.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="probleme" class="section">
+      <div class="container split">
+        <div>
+          <span class="eyebrow">Le vrai problème</span>
+          <h2>Tu ne manques pas forcément de volonté.</h2>
+          <p class="lead">Tu manques peut-être d’un cadre qui respecte ton corps, ton rythme et tes vrais blocages.</p>
+          <div style="margin-top:28px;"><a class="button button-primary js-cta" href="#">Faire le point gratuitement</a></div>
+        </div>
+        <div class="grid">
+          <div class="card"><h3>Tu te lèves fatigué.</h3><p>Même avec une nuit correcte, ton énergie ne suit pas.</p></div>
+          <div class="card"><h3>Tu fais du sport, mais tu stagnes.</h3><p>Tes résultats ne correspondent pas à tes efforts.</p></div>
+          <div class="card"><h3>Tu craques le soir.</h3><p>Tu avais prévu d’être carré, puis tu repars en vrille.</p></div>
+          <div class="card"><h3>Tu appelles ça l’âge.</h3><p>Alors que ton corps te montre surtout tes habitudes répétées.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container split">
+        <div>
+          <span class="eyebrow">Ce que ça te coûte</span>
+          <h2>Le problème, ce n’est pas seulement ton poids.</h2>
+          <p class="lead">C’est ce que tu tolères chaque semaine en pensant que ça va passer tout seul.</p>
+          <div class="button-row">
+            <a class="button button-primary js-cta" href="#">Faire le point gratuitement</a>
+          </div>
+        </div>
+        <div class="cost-table">
+          <div class="cost-row"><b>Dormir mal</b><span>Énergie basse, irritabilité, fringales, récupération médiocre.</span></div>
+          <div class="cost-row"><b>Manger au hasard</b><span>Stagnation, culpabilité, perte de contrôle le week-end.</span></div>
+          <div class="cost-row"><b>T’entraîner sans structure</b><span>Douleurs, fatigue, progression faible, motivation qui chute.</span></div>
+          <div class="cost-row"><b>Gérer ton stress à la volonté</b><span>Compulsions, baisse de drive, corps qui reste en alerte.</span></div>
+          <div class="cost-row"><b>Attendre le bon moment</b><span>Encore 6 mois perdus à refaire les mêmes efforts.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="methode" class="section section-soft">
+      <div class="container">
+        <span class="eyebrow">La méthode</span>
+        <h2>La plupart des programmes attaquent le symptôme.</h2>
+        <p class="lead">REBORN regarde le système complet : entraînement, nutrition, sommeil, stress, habitudes et mindset.</p>
+
+        <div class="grid pillars">
+          <div class="card-flat"><span class="pillar-number">1</span><h3>Entraînement</h3><p>Volume, fréquence, récupération, progression et exercices adaptés à ton niveau.</p></div>
+          <div class="card-flat"><span class="pillar-number">2</span><h3>Nutrition</h3><p>Apports, digestion, inflammation, régularité et rapport concret à la nourriture.</p></div>
+          <div class="card-flat"><span class="pillar-number">3</span><h3>Sommeil</h3><p>Qualité, réveils, fatigue matinale et récupération réelle.</p></div>
+          <div class="card-flat"><span class="pillar-number">4</span><h3>Stress</h3><p>Charge mentale, anxiété, compulsions et corps en mode alerte.</p></div>
+          <div class="card-flat"><span class="pillar-number">5</span><h3>Habitudes</h3><p>Organisation, week-ends, rythme de vie et constance.</p></div>
+          <div class="card-flat"><span class="pillar-number">6</span><h3>Mindset</h3><p>Responsabilité, passage à l’action, excuses et discipline.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="offre" class="section">
+      <div class="container">
+        <span class="eyebrow">L’offre</span>
+        <h2>Suivi Premium REBORN — 3 mois pour te cadrer.</h2>
+        <p class="lead">Tu ne reçois pas juste un PDF. Tu avances avec un cadre, des ajustements et un suivi humain.</p>
+
+        <div class="offer-box">
+          <div class="card">
+            <div class="offer-line"><h3>Programme sportif personnalisé</h3><p>Adapté à ton niveau, ton matériel, ton emploi du temps et ton objectif.</p></div>
+            <div class="offer-line"><h3>Plan alimentaire anti-inflammatoire</h3><p>Simple, structuré, adapté à ton métabolisme, ta digestion et ton rythme.</p></div>
+            <div class="offer-line"><h3>Check-up mensuel</h3><p>Photos, mesures, poids, ressenti, analyse et réajustements.</p></div>
+            <div class="offer-line"><h3>Suivi WhatsApp</h3><p>Questions, recadrages, ajustements et responsabilité quand tu dévies.</p></div>
+            <div class="offer-line"><h3>Calls de suivi</h3><p>Pour garder le cap, corriger vite et éviter les abandons.</p></div>
+          </div>
+
+          <div class="price-callout">
+            <p>Suivi Premium</p>
+            <strong>333 €<small>/mois</small></strong>
+            <p>Engagement 3 mois. Ou 900 € en une fois.</p>
+            <a class="button button-primary js-cta" href="#">Réserver mon bilan</a>
+            <p>Le bilan gratuit valide d’abord si le suivi est adapté à toi.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="plans" class="section section-soft">
+      <div class="container">
+        <span class="eyebrow">Programmes personnalisés</span>
+        <h2>Choisis le niveau de cadre dont tu as besoin.</h2>
+        <p class="lead">Un plan seul te donne une direction. Le suivi premium te donne l’analyse complète, les ajustements, le suivi humain et la responsabilité sur 90 jours.</p>
+
+        <div class="grid pricing-grid">
+          <article class="card pricing-card">
+            <div>
+              <h3>Plan Sport Personnalisé</h3>
+              <p>Pas un programme générique. Un plan conçu sur la base de ton profil biométrique, ton niveau réel et ton objectif précis.</p>
+              <div class="price">80 € <small>/mois · sans engagement</small></div>
+            </div>
+            <ul class="list">
+              <li>Questionnaire bilan complet avant tout.</li>
+              <li>Adapté à ton lieu : salle, maison ou extérieur.</li>
+              <li>Calibré à ton niveau et ton matériel disponible.</li>
+              <li>Orienté vers ton objectif précis.</li>
+              <li>Séances structurées et progressives.</li>
+              <li>Ajustements mensuels du programme sportif.</li>
+            </ul>
+            <p class="not-included-title">Non inclus dans ce plan</p>
+            <ul class="list-x">
+              <li>Plan métabolique anti-inflammatoire.</li>
+              <li>Analyse digestion, microbiote, hormones et neurotransmetteurs.</li>
+              <li>Protocole micronutrition individualisé.</li>
+              <li>Suivi WhatsApp direct avec Greg.</li>
+              <li>Check-up complet photos, poids, mesures.</li>
+              <li>Travail stress, respiration et mindset.</li>
+            </ul>
+            <a class="button button-primary" href="https://buy.stripe.com/3cI4gycDlceV63N2ytbQY06" target="_blank" rel="noopener noreferrer">Commencer le plan sport</a>
+            <p class="risk">Pour toi si tu veux surtout arrêter les séances au hasard.</p>
+          </article>
+
+          <article class="card pricing-card">
+            <div>
+              <h3>Plan Nutrition / Métabolique Personnalisé</h3>
+              <p>Ce plan inclut bien ton plan métabolique anti-inflammatoire personnalisé, construit après analyse de ton alimentation, ta digestion, ton microbiote et tes blocages métaboliques.</p>
+              <div class="price">80 € <small>/mois · sans engagement</small></div>
+            </div>
+            <ul class="list">
+              <li>Plan métabolique anti-inflammatoire personnalisé inclus.</li>
+              <li>Analyse de ta digestion et dysbiose intestinale.</li>
+              <li>Optimisation du métabolisme sur mesure.</li>
+              <li>Adapté à tes intolérances et hypersensibilités.</li>
+              <li>Optimisé selon ta résistance à l’insuline.</li>
+              <li>Repas simples, concrets, applicables au quotidien.</li>
+              <li>Ajustements si plateau ou baisse d’énergie.</li>
+            </ul>
+            <p class="not-included-title">Non inclus dans ce plan</p>
+            <ul class="list-x">
+              <li>Programme sportif personnalisé et évolutif.</li>
+              <li>Nutrition calée précisément sur tes séances.</li>
+              <li>Analyse complète des 6 piliers biologiques.</li>
+              <li>Protocole micronutrition individualisé.</li>
+              <li>Suivi WhatsApp direct avec Greg.</li>
+              <li>Check-up complet photos, poids, mesures.</li>
+            </ul>
+            <a class="button button-primary" href="https://buy.stripe.com/00w8wObzhfr7gIr7SNbQY07" target="_blank" rel="noopener noreferrer">Commencer le plan nutrition</a>
+            <p class="risk">Pour toi si ton alimentation, ta digestion ou ton énergie bloquent tes résultats.</p>
+          </article>
+
+          <article class="card pricing-card featured">
+            <span class="badge">Le plus cohérent</span>
+            <div>
+              <h3>Pack Sport + Métabolique</h3>
+              <p>Les deux programmes synchronisés pour une synergie maximale. Ce que tu manges et comment tu t’entraînes sont enfin alignés.</p>
+              <div class="price">150 € <small>/mois · sans engagement</small></div>
+              <p style="color: var(--accent); font-weight: 900; margin-top: 8px;">Économie de 10 €/mois vs les offres séparées.</p>
+            </div>
+            <ul class="list">
+              <li>Plan sport 100 % personnalisé et évolutif.</li>
+              <li>Plan nutrition / métabolique anti-inflammatoire.</li>
+              <li>Les deux programmes construits ensemble.</li>
+              <li>Nutrition calée sur tes séances : timing et récupération.</li>
+              <li>Objectif : relancer tes résultats plus vite et plus proprement.</li>
+              <li>Ajustements mensuels selon ton évolution.</li>
+            </ul>
+            <p class="not-included-title">Non inclus dans ce pack</p>
+            <ul class="list-x">
+              <li>Accès direct WhatsApp avec Greg.</li>
+              <li>Check-up complet mensuel photos, poids, mesures.</li>
+              <li>Protocole micronutrition individualisé.</li>
+              <li>Travail poussé hormones, intestin et neurotransmetteurs.</li>
+              <li>Suivi mindset, respiration et gestion du stress.</li>
+              <li>Recadrages continus entre deux ajustements.</li>
+            </ul>
+            <a class="button button-primary" href="https://buy.stripe.com/28E4gy8n5baR4ZJ3CxbQY08" target="_blank" rel="noopener noreferrer">Commencer le pack complet</a>
+            <p class="risk">Meilleur choix si tu veux un cadre complet sans suivi quotidien.</p>
+          </article>
+        </div>
+
+        <div class="card" style="margin-top: 30px; border-color: var(--accent); background: linear-gradient(145deg, rgba(46, 214, 200, 0.10), rgba(20, 20, 20, 1));">
+          <div class="grid" style="gap: 20px;">
+            <div>
+              <span class="badge">Accompagnement complet</span>
+              <h3 style="margin-top: 16px; font-size: clamp(1.6rem, 5vw, 2.6rem);">Suivi Premium — Méthode REBORN</h3>
+              <p>L’accompagnement total sur 3 mois. Je travaille sur tous tes freins : corps, intestin, hormones, mental. Rien n’est laissé de côté.</p>
+              <div class="price" style="margin-top: 18px; color: var(--accent);">333 € <small>/mois · engagement 3 mois</small></div>
+              <p style="margin-top: 6px;">Ou 900 € en une fois.</p>
+            </div>
+            <ul class="list">
+              <li>Bilan complet des 6 piliers biologiques.</li>
+              <li>Plan sportif 100 % personnalisé et évolutif.</li>
+              <li>Plan nutrition / métabolique anti-inflammatoire complet.</li>
+              <li>Protocole micronutrition individualisé.</li>
+              <li>Travail sur hormones, intestin et neurotransmetteurs.</li>
+              <li>Check-up mensuel : photos, poids, mesures.</li>
+              <li>Accès direct WhatsApp avec Greg.</li>
+              <li>Mindset, respiration et gestion du stress.</li>
+              <li>Recadrages et ajustements continus pendant 90 jours.</li>
+            </ul>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+              <a class="button button-primary" href="https://methode-reborn-coaching.netlify.app/#plan-premium" target="_blank" rel="noopener noreferrer">333 € / mois — Paiement en 3x</a>
+              <a class="button button-secondary" href="https://buy.stripe.com/9B600i7j17YF0Jt2ytbQY04" target="_blank" rel="noopener noreferrer">900 € — Payer en 1 fois</a>
+            </div>
+            <p class="risk">Pour toi si tu veux un vrai accompagnement, pas juste un programme à suivre seul.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-soft">
+      <div class="container split">
+        <div>
+          <span class="eyebrow">Pourquoi ça marche</span>
+          <h2>La constance ne vient pas d’un déclic.</h2>
+          <p class="lead">Elle vient d’un système qui t’empêche de repartir en vrille dès que la vie te met une claque.</p>
+        </div>
+        <div class="grid">
+          <div class="muted-box"><h3>Avant</h3><p>Tu suis un plan, tu rates un week-end, tu culpabilises, tu abandonnes, puis tu recommences ailleurs.</p></div>
+          <div class="card"><h3>Avec REBORN</h3><p>On analyse ton départ, on construit un plan réaliste, on suit tes données, on ajuste et tu apprends à tenir ton cadre.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="section section-soft">
+      <div class="container">
+        <span class="eyebrow">Questions franches</span>
+        <h2>Les vraies questions avant de commencer.</h2>
+
+        <div class="faq-list">
+          <div class="faq-item active">
+            <button class="faq-question" type="button"><span>Je n’ai pas beaucoup de temps, ça va être trop lourd ?</span><span class="faq-icon">+</span></button>
+            <div class="faq-answer"><p>Je comprends. Si ton plan demande 2 h par jour, tu vas lâcher. Le suivi part de ton vrai planning : boulot, fatigue, famille, déplacements. On construit un cadre que tu peux tenir.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" type="button"><span>Je mange déjà plutôt bien, pourquoi ça changerait ?</span><span class="faq-icon">+</span></button>
+            <div class="faq-answer"><p>Je te crois. Mais manger bien ne veut pas dire manger adapté. On regarde tes quantités, tes horaires, ta digestion, tes compulsions, ton énergie, ton stress et tes week-ends.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" type="button"><span>J’ai déjà essayé des coachings, ça n’a pas marché.</span><span class="faq-icon">+</span></button>
+            <div class="faq-answer"><p>Normal que tu doutes. Beaucoup de coachings donnent un plan et disparaissent. Ici, tu as un suivi sur 3 mois avec ajustements, check-up, WhatsApp et analyse complète.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" type="button"><span>J’ai peur de ne pas tenir.</span><span class="faq-icon">+</span></button>
+            <div class="faq-answer"><p>C’est justement pour ça que tu ne dois pas rester seul. Le suivi sert à te recadrer vite, adapter le plan, éviter les abandons et t’aider à reprendre la main.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" type="button"><span>Et si mon corps ne réagit pas ?</span><span class="faq-icon">+</span></button>
+            <div class="faq-answer"><p>C’est possible avec un plan générique. Ici, on analyse sport, alimentation, sommeil, stress, habitudes et récupération. Si ça bloque, on ajuste. On ne force pas bêtement.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" type="button"><span>333 €/mois, c’est cher.</span><span class="faq-icon">+</span></button>
+            <div class="faq-answer"><p>Oui, c’est un vrai budget. Mais continuer à perdre du temps, de l’énergie, de la confiance et recommencer tous les 3 mois coûte aussi cher.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" type="button"><span>Comment je sais que tu es le bon coach pour moi ?</span><span class="faq-icon">+</span></button>
+            <div class="faq-answer"><p>Bonne question. Le premier pas, c’est un bilan gratuit de 30 minutes. On regarde ta situation, tes blocages, ton historique et ton objectif. Si je peux t’aider, je te le dirai.</p></div>
+          </div>
+        </div>
+
+        <p class="lead" style="margin-top:28px;">Tu n’as pas besoin d’être prêt à 100 %. Tu as besoin d’arrêter de repousser pendant que ton corps continue de payer l’addition.</p>
+      </div>
+    </section>
+
+    <section id="reservation" class="section">
+      <div class="container">
+        <span class="eyebrow">Décision</span>
+        <h2>Tu peux continuer à subir. Ou cadrer les 90 prochains jours.</h2>
+
+        <div class="grid pricing-grid">
+          <article class="card pricing-card">
+            <div>
+              <h3>Bilan intégratif offert</h3>
+              <div class="price">0 € <small>30 minutes</small></div>
+            </div>
+            <ul class="list">
+              <li>Tu identifies ce qui bloque vraiment tes résultats.</li>
+              <li>Tu repars avec une lecture claire de ta situation.</li>
+              <li>Tu vois si ton problème vient du sport, de l’alimentation, du stress ou des habitudes.</li>
+              <li>Tu sais si REBORN est adapté à toi.</li>
+            </ul>
+            <a class="button button-primary js-cta" href="#">Faire mon bilan gratuit</a>
+            <p class="risk">Gratuit. Sans engagement. Tu ne paies rien pendant le bilan.</p>
+          </article>
+
+          <article class="card pricing-card featured">
+            <span class="badge">Le cadre complet</span>
+            <div>
+              <h3>Suivi Premium REBORN</h3>
+              <div class="price">333 € <small>/mois</small></div>
+            </div>
+            <ul class="list">
+              <li>Tu reprends un cadre clair sur ton corps, ton alimentation et ton énergie.</li>
+              <li>Tu arrêtes de repartir de zéro tous les lundis.</li>
+              <li>Tu ajustes ton plan quand ton corps bloque ou fatigue.</li>
+              <li>Tu construis une routine que tu peux tenir.</li>
+            </ul>
+            <a class="button button-primary" href="https://methode-reborn-coaching.netlify.app/#plan-premium" target="_blank" rel="noopener noreferrer">Démarrer mon suivi — 3x</a>
+            <p class="risk">On valide d’abord ensemble si le suivi est adapté pendant le bilan gratuit.</p>
+          </article>
+
+          <article class="card pricing-card">
+            <div>
+              <h3>Suivi Premium en une fois</h3>
+              <div class="price">900 € <small>3 mois</small></div>
+            </div>
+            <ul class="list">
+              <li>Tu t’engages pleinement sur 90 jours.</li>
+              <li>Tu retires la friction du paiement mensuel.</li>
+              <li>Tu restes concentré sur l’exécution.</li>
+              <li>Tu économises 99 € par rapport au paiement mensuel.</li>
+            </ul>
+            <a class="button button-primary" href="https://buy.stripe.com/9B600i7j17YF0Jt2ytbQY04" target="_blank" rel="noopener noreferrer">M’engager sur 90 jours</a>
+            <p class="risk">Tu ne t’engages qu’après le bilan, si le plan correspond à ta situation.</p>
+          </article>
+        </div>
+
+        <p class="lead" style="margin-top:34px;">Tu peux encore attendre le bon moment. Mais sois honnête : tu as déjà attendu. Les 90 prochains jours vont passer quoi qu’il arrive. La seule question, c’est ce que tu vas en faire.</p>
+      </div>
+    </section>
+
+
+    <section class="bottom-founder-area" id="apropos">
+      <div class="founder-section">
+        <div class="founder-wrap">
+          <div class="founder-visual">
+            <div class="founder-photo">
+              <img src="/greg-hero-nobg.png" alt="Greg Vong" loading="lazy" />
+            </div>
+          </div>
+
+          <div class="founder-copy">
+            <span class="eyebrow">Fondateur</span>
+            <h2>Greg Vong</h2>
+            <div class="founder-role">Expert en Physiologie · Nutrition · Micronutrition · Mindset</div>
+            <p>J'ai construit la Méthode REBORN après des années à me former en physiologie, nutrition fonctionnelle, micronutrition et équilibre hormonal. Mon approche ne ressemble à aucun coaching classique : elle part de tes données biologiques réelles pour construire un programme unique, précis, et durable.</p>
+            <p>Mon objectif : que tu comprennes ton corps, que tu deviennes autonome, et que tu obtiennes des résultats qui tiennent dans le temps.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-talk-section">
+        <div class="cta-talk-box">
+          <span class="eyebrow">Prendre rendez-vous</span>
+          <h2>Tu veux qu'on en parle <span>ensemble ?</span></h2>
+          <p>Choisis le format qui te convient. C'est sans engagement.</p>
+
+          <div class="cta-talk-buttons">
+            <a class="button button-primary js-cta" href="https://gregvong-questionnaire.netlify.app/sport">Bilan intégratif — Gratuit</a>
+            <a class="button button-secondary" href="https://calendly.com/gregvong-coaching/call-de-consultation" target="_blank" rel="noopener noreferrer">Call de consultation — 60€</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-line">
+      <div class="container">
+        <p>Fermer cette page, c’est choisir de refaire les mêmes efforts sans vrai cadre.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">© <span id="year"></span> REBORN — Coaching privé. Sport · Nutrition · Stress · Sommeil · Habitudes</div>
+  </footer>
+
+  <script>
+    document.querySelectorAll(".js-cta").forEach((button) => {
+      button.setAttribute("href", CTA_URL);
+      button.setAttribute("target", "_blank");
+      button.setAttribute("rel", "noopener noreferrer");
+    });
+
+    document.querySelectorAll(".faq-question").forEach((question) => {
+      question.addEventListener("click", () => {
+        const item = question.closest(".faq-item");
+        item.classList.toggle("active");
+      });
+    });
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
