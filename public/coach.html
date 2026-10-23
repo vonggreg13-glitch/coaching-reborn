@@ -384,7 +384,7 @@ if (window.innerWidth <= 768) {
 function authHeaders(){ return {'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'}; }
 
 function partagerLienApp() {
-  const lien = 'https://coaching-app-production-6040.up.railway.app';
+  const lien = 'https://gregvong-coaching.onrender.com';
   const message = `Bonjour ! Voici le lien pour accéder à ton espace coaching REBORN :\n\n${lien}\n\nConnecte-toi avec l'email et le mot de passe que je t'ai envoyés. Ajoute l'app sur ton écran d'accueil pour un accès rapide !`;
   if (navigator.share) {
     navigator.share({ title: 'App Coaching REBORN', text: message });
